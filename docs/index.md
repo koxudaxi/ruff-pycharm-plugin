@@ -14,11 +14,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ## Demo
 ![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/master/docs/action.png)
 
-
-<!-- Plugin description -->
 ##  Features
-
-<!-- Plugin description end -->
 
 ## Contribute
 We are waiting for your contributions to `ruff-pycharm-plugin`.

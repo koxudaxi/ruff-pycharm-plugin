@@ -1,0 +1,25 @@
+site_name: Ruff PyCharm Plugin
+site_description: A JetBrains PyCharm plugin for ruff.
+
+theme:
+    name: 'material'
+    palette:
+      primary: 'light blue'
+      accent: 'light blue'
+    analytics:
+      gtag: 275257853
+markdown_extensions:
+  - codehilite
+  - admonition
+  - toc:
+      permalink: 🔗
+
+repo_name: koxudaxi/ruff-pycharm-plugin
+repo_url: https://github.com/koxudaxi/ruff-pycharm-plugin
+site_url: https://koxudaxi.github.io/ruff-pycharm-plugin
+
+nav:
+    - Overview: index.md
+
+plugins:
+  - search
