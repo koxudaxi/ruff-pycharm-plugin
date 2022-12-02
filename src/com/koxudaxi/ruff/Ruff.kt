@@ -13,9 +13,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyExecutionException
-import com.jetbrains.python.packaging.PyPackageManager
 import com.jetbrains.python.sdk.*
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
@@ -69,6 +69,7 @@ fun runCommand(executable: File, projectPath: @SystemDependent String?, vararg a
         }
     }
 }
+
 fun runRuff(sdk: Sdk, vararg args: String): String {
     val projectPath = sdk.associatedModulePath
         ?: throw PyExecutionException(
@@ -92,9 +93,7 @@ fun runRuffInBackground(module: Module, args: List<String>, description: String)
             } catch (e: ExecutionException) {
                 showSdkExecutionException(sdk, e, "Error Running Ruff")
             } finally {
-                PythonSdkUtil.getSitePackagesDirectory(sdk)?.refresh(true, true)
-                sdk.associatedModuleDir?.refresh(true, false)
-                PyPackageManager.getInstance(sdk).refreshAndGetPackages(true)
+                VirtualFileManager.getInstance().refreshWithoutFileWatcher(true)
             }
         }
     }
