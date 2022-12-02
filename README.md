@@ -12,11 +12,19 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ## Quick Installation
 
 ## Demo
-![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/master/docs/action.png)
+![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/action.png)
 
 
 <!-- Plugin description -->
-##  Features
+## Features
+- [x] Run `ruff --fix` as an action
+- [ ] Integrate `Reformat Code`
+
+## Core
+- [x] detect global `ruff` and project `ruff`
+- [x] execute `ruff` command as a new process
+- [ ] call `ruff` via LSP
+- [ ] sync process when saving file
 
 <!-- Plugin description end -->
 
