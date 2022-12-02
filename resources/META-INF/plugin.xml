@@ -1,0 +1,16 @@
+<idea-plugin url="https://github.com/koxudaxi/ruff-pycharm-plugin">
+    <id>com.koxudaxi.ruff</id>
+    <name>Ruff</name>
+    <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
+
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.python</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+    <actions>
+        <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"
+                description="Run ruff with fix option">
+        </action>
+    </actions>
+</idea-plugin>

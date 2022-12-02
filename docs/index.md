@@ -14,8 +14,6 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ## Demo
 ![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/action.png)
 
-
-<!-- Plugin description -->
 ## Features
 - [x] Run `ruff --fix` as an action
 - [ ] Integrate `Reformat Code`
@@ -26,7 +24,6 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [ ] call `ruff` via LSP
 - [ ] sync process when saving file
 
-<!-- Plugin description end -->
 
 ## Contribute
 We are waiting for your contributions to `ruff-pycharm-plugin`.
