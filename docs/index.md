@@ -17,12 +17,12 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ## Features
 - [x] Run `ruff --fix` as an action
 - [ ] Integrate `Reformat Code`
+- [x] Run `ruff --fix` for a file when the file is saved
 
 ## Core
 - [x] detect global `ruff` and project `ruff`
 - [x] execute `ruff` command as a new process
 - [ ] call `ruff` via LSP
-- [ ] sync process when saving file
 
 
 ## Contribute
