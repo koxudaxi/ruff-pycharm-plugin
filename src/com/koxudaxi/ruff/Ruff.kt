@@ -5,8 +5,10 @@ import com.intellij.execution.RunCanceledByUserException
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -19,6 +21,8 @@ import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
 const val RUFF_COMMAND: String = "ruff"
@@ -82,7 +86,7 @@ fun runCommand(
                     stdout, stderr, exitCode, emptyList()
                 )
 
-            else -> stdout.trim()
+            else -> stdout
         }
     }
 }
@@ -105,7 +109,7 @@ fun runRuffInBackground(
     args: List<String>,
     description: String,
     callback: (String?) -> Unit?
-) {
+): ProgressIndicator? {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             val sdk = module.pythonSdk ?: return
@@ -121,5 +125,24 @@ fun runRuffInBackground(
             callback(result)
         }
     }
-    ProgressManager.getInstance().run(task)
+    ProgressManager.getInstance().let {
+        it.run(task)
+        return it.progressIndicator
+    }
+}
+
+inline fun <reified T> executeOnPooledThread(defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T): T {
+    return try {
+        ApplicationManager.getApplication().executeOnPooledThread<T> {
+            try {
+                 action.invoke()
+            } catch (e: PyExecutionException) {
+                defaultResult
+            } catch (e: ProcessNotCreatedException) {
+                defaultResult
+            }
+        }.get(timeoutSeconds, TimeUnit.SECONDS)
+    } catch (e: TimeoutException) {
+        defaultResult
+    }
 }

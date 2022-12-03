@@ -10,7 +10,8 @@
         <projectService
                 serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
-
+        <postFormatProcessor
+                implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"

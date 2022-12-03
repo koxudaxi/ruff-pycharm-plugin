@@ -11,12 +11,13 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 
 ## Quick Installation
 
-## Demo
+## ScreenShots
 ![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/action.png)
+![settings](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/settings.png)
 
 ## Features
 - [x] Run `ruff --fix` as an action
-- [ ] Integrate `Reformat Code`
+- [x] Integrate `Reformat Code`
 - [x] Run `ruff --fix` for a file when the file is saved
 
 ## Core
