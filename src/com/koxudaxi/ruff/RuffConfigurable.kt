@@ -24,11 +24,13 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
     override fun reset() {}
 
     override fun isModified(): Boolean {
-        return (ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave)
+        return (ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave) ||
+                (ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode)
     }
 
     override fun apply() {
         ruffConfigService.runRuffOnSave = configPanel.runRuffOnSave
+        ruffConfigService.runRuffOnReformatCode = configPanel.runRuffOnReformatCode
     }
 
     override fun disposeUIResources() {

@@ -8,7 +8,8 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 
 @State(name = "RuffConfigService", storages = [Storage("ruff.xml")])
 class RuffConfigService : PersistentStateComponent<RuffConfigService> {
-    var runRuffOnSave: Boolean = true
+    var runRuffOnSave: Boolean = false
+    var runRuffOnReformatCode: Boolean = true
     override fun getState(): RuffConfigService {
         return this
     }
