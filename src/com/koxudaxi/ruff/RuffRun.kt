@@ -5,8 +5,10 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.modules
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.jetbrains.python.sdk.isAssociatedWithModule
 import com.jetbrains.python.sdk.pythonSdk
+import java.io.FileInputStream
 
 
 class RuffRun : AnAction() {
@@ -15,7 +17,11 @@ class RuffRun : AnAction() {
         val pythonSdk = project.pythonSdk ?: return
         val targetFile = e.getData(Location.DATA_KEY)?.virtualFile?.path ?: project.basePath ?: return
         project.modules.firstOrNull { pythonSdk.isAssociatedWithModule(it) }
-            ?.let { runRuffInBackground(it, listOf("--fix", targetFile), "running ruff") }
+            ?.let {
+                runRuffInBackground(it, null, listOf("--fix", targetFile), "running ruff") {
+                    VirtualFileManager.getInstance().refreshWithoutFileWatcher(true)
+                }
+            }
     }
 
     init {

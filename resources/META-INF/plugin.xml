@@ -7,7 +7,15 @@
     <depends>com.intellij.modules.python</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <projectService
+                serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
+        <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
+
     </extensions>
+    <projectListeners>
+        <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"
+                  topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
+    </projectListeners>
     <actions>
         <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"
                 description="Run ruff with fix option">

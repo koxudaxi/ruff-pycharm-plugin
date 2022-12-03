@@ -13,7 +13,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
@@ -22,6 +22,11 @@ import java.io.File
 
 const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
 const val RUFF_COMMAND: String = "ruff"
+
+val PYTHON_FILE_EXTENSIONS = setOf("py", "pyi")
+
+val VirtualFile.isPyFile: Boolean get() = extension?.let { PYTHON_FILE_EXTENSIONS.contains(it) } ?: false
+
 var PropertiesComponent.ruffPath: @SystemDependent String?
     get() = getValue(RUFF_PATH_SETTING)
     set(value) {
@@ -38,12 +43,24 @@ fun detectRuffExecutable(): File? {
     return PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND)
 }
 
-fun runCommand(executable: File, projectPath: @SystemDependent String?, vararg args: String): String {
+fun runCommand(
+    executable: File,
+    projectPath: @SystemDependent String?,
+    stdin: ByteArray?,
+    vararg args: String
+): String {
     val command = listOf(executable.path) + args
     val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath)
     val handler = CapturingProcessHandler(commandLine)
     val indicator = ProgressManager.getInstance().progressIndicator
     val result = with(handler) {
+        if (stdin is ByteArray) {
+            with(processInput) {
+                write(stdin)
+                close()
+            }
+        }
+
         when {
             indicator != null -> {
                 addProcessListener(IndicatedProcessOutputListener(indicator))
@@ -70,7 +87,7 @@ fun runCommand(executable: File, projectPath: @SystemDependent String?, vararg a
     }
 }
 
-fun runRuff(sdk: Sdk, vararg args: String): String {
+fun runRuff(sdk: Sdk, stdin: ByteArray?, vararg args: String): String {
     val projectPath = sdk.associatedModulePath
         ?: throw PyExecutionException(
             "Cannot find the project associated with this Ruff environment",
@@ -79,22 +96,29 @@ fun runRuff(sdk: Sdk, vararg args: String): String {
     val executable = getRuffExecutableInSDK(sdk) ?: getRuffExecutable()
     ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
 
-    return runCommand(executable, projectPath, *args)
+    return runCommand(executable, projectPath, stdin, *args)
 }
 
-fun runRuffInBackground(module: Module, args: List<String>, description: String) {
+fun runRuffInBackground(
+    module: Module,
+    stdin: ByteArray?,
+    args: List<String>,
+    description: String,
+    callback: (String?) -> Unit?
+) {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             val sdk = module.pythonSdk ?: return
             indicator.text = "$description..."
-            try {
-                runRuff(sdk, *args.toTypedArray())
+            val result: String? = try {
+                runRuff(sdk, stdin, *args.toTypedArray())
             } catch (_: RunCanceledByUserException) {
+                null
             } catch (e: ExecutionException) {
                 showSdkExecutionException(sdk, e, "Error Running Ruff")
-            } finally {
-                VirtualFileManager.getInstance().refreshWithoutFileWatcher(true)
+                null
             }
+            callback(result)
         }
     }
     ProgressManager.getInstance().run(task)
