@@ -20,6 +20,8 @@ site_url: https://koxudaxi.github.io/ruff-pycharm-plugin
 
 nav:
     - Overview: index.md
-
+    - Install: install.md
+    - Development: development.md
+    - Changelog: CHANGELOG.md
 plugins:
   - search
