@@ -17,7 +17,7 @@ class RuffFileDocumentManagerListener(private val project: Project) : FileDocume
         if (!virtualFile.isPyFile) return
         val fileName = virtualFile.name
         val module = ModuleUtil.findModuleForFile(virtualFile, project) ?: return
-        val args = listOf("--fix", "--stdin-filename", fileName, "-")
+        val args = listOf("--exit-zero", "--fix", "--stdin-filename", fileName, "-")
         val stdin = document.text.toByteArray(virtualFile.charset)
         runRuffInBackground(module, stdin, args, "running ruff $fileName") {
             if (it is String) {
