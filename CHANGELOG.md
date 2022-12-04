@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Fix undo problem [[#16](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/16)]
+- Improve python file detection [[#17](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/17)]
 
 ## 0.0.1 - 2022-12-04
 - Add fix action [[#1](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/1)]
