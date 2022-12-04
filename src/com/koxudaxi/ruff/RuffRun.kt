@@ -8,7 +8,6 @@ import com.intellij.openapi.project.modules
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.jetbrains.python.sdk.isAssociatedWithModule
 import com.jetbrains.python.sdk.pythonSdk
-import java.io.FileInputStream
 
 
 class RuffRun : AnAction() {
