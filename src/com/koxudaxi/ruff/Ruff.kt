@@ -8,6 +8,7 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
@@ -15,7 +16,8 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.text.StringUtil
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiFile
+import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
@@ -26,10 +28,6 @@ import java.util.concurrent.TimeoutException
 
 const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
 const val RUFF_COMMAND: String = "ruff"
-
-val PYTHON_FILE_EXTENSIONS = setOf("py", "pyi")
-
-val VirtualFile.isPyFile: Boolean get() = extension?.let { PYTHON_FILE_EXTENSIONS.contains(it) } ?: false
 
 var PropertiesComponent.ruffPath: @SystemDependent String?
     get() = getValue(RUFF_PATH_SETTING)
@@ -46,6 +44,14 @@ fun getRuffExecutableInSDK(sdk: Sdk): File? =
 fun detectRuffExecutable(): File? {
     return PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND)
 }
+
+val PsiFile.isApplicableTo: Boolean
+    get() =
+        when {
+            InjectedLanguageManager.getInstance(project).isInjectedFragment(this) -> false
+            else -> language.isKindOf(PythonLanguage.getInstance())
+        }
+
 
 fun runCommand(
     executable: File,
