@@ -10,4 +10,14 @@
          <lastmod>2022-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>https://koxudaxi.github.io/ruff-pycharm-plugin/development/</loc>
+         <lastmod>2022-12-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://koxudaxi.github.io/ruff-pycharm-plugin/install/</loc>
+         <lastmod>2022-12-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>
