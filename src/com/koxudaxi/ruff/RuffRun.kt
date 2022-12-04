@@ -18,7 +18,7 @@ class RuffRun : AnAction() {
         val targetFile = e.getData(Location.DATA_KEY)?.virtualFile?.path ?: project.basePath ?: return
         project.modules.firstOrNull { pythonSdk.isAssociatedWithModule(it) }
             ?.let {
-                runRuffInBackground(it, null, listOf("--fix", targetFile), "running ruff") {
+                runRuffInBackground(it, null, listOf("--exit-zero", "--fix", targetFile), "running ruff") {
                     VirtualFileManager.getInstance().refreshWithoutFileWatcher(true)
                 }
             }

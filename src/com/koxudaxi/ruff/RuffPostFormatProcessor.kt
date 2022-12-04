@@ -33,7 +33,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val fileName = pyFile.name
         val module = ModuleUtil.findModuleForPsiElement(source) ?: return TextRange.EMPTY_RANGE
         val sdk = module.pythonSdk ?: return TextRange.EMPTY_RANGE
-        val args = listOf("--fix", "--stdin-filename", fileName, "-")
+        val args = listOf("--exit-zero", "--fix", "--stdin-filename", fileName, "-")
         val stdin = source.textToCharArray().toByteArrayAndClear()
 
         val formatted = executeOnPooledThread(null) {
