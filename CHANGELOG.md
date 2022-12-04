@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## Unreleased
+
+## 0.0.1 - 2022-12-04
 - Add fix action [[#1](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/1)]
 - Refresh virtual file after run ruff [[#7](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/7)]
 - Run `ruff --fix` for a file when the file is saved [[#8](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/8)]
@@ -9,5 +11,3 @@
 - Add build local step [[#11](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/11)]
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
-
-## [0.0.0]
