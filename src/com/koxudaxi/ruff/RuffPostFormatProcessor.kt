@@ -1,7 +1,6 @@
 package com.koxudaxi.ruff
 
 import com.intellij.credentialStore.toByteArrayAndClear
-import com.intellij.lang.injection.InjectedLanguageManager
 
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.module.ModuleUtil
@@ -10,26 +9,18 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.impl.source.codeStyle.PostFormatProcessor
-import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.psi.PyUtil
 import com.jetbrains.python.sdk.pythonSdk
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
-    private fun isApplicableTo(source: PsiFile): Boolean {
-        return when {
-            InjectedLanguageManager.getInstance(source.project).isInjectedFragment(source) -> false
-            else -> source.language.isKindOf(PythonLanguage.getInstance())
-        }
-    }
-
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
         if (!RuffConfigService.getInstance(source.project).runRuffOnReformatCode) return TextRange.EMPTY_RANGE
         val pyFile = source.containingFile
-        if (!isApplicableTo(pyFile)) return TextRange.EMPTY_RANGE
+        if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
         val fileName = pyFile.name
         val module = ModuleUtil.findModuleForPsiElement(source) ?: return TextRange.EMPTY_RANGE
         val sdk = module.pythonSdk ?: return TextRange.EMPTY_RANGE
