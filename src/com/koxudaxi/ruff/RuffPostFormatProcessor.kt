@@ -59,7 +59,8 @@ class RuffPostFormatProcessor : PostFormatProcessor {
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null
         val start = s1.zip(s2).indexOfFirst { pair -> pair.first != pair.second }
-        val relativeEnd = s1.reversed().zip(s2.reversed()).indexOfFirst { pair -> pair.first != pair.second }
+        val relativeEnd = (1..minOf(s1.length, s2.length))
+            .indexOfFirst { s1[s1.length - it] != s2[s2.length - it] }
         val end = s1.length - relativeEnd + 2
         return TextRange(start, end)
     }
