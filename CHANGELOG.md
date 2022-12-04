@@ -11,5 +11,3 @@
 - Add build local step [[#11](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/11)]
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
-
-## 0.0.0
