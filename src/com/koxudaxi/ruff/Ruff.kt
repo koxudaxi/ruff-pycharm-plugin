@@ -103,12 +103,12 @@ fun runRuff(sdk: Sdk, stdin: ByteArray?, vararg args: String): String {
     return runCommand(executable, projectPath, stdin, *args)
 }
 
-fun runRuffInBackground(
+inline fun <reified T> runRuffInBackground(
     module: Module,
     stdin: ByteArray?,
     args: List<String>,
     description: String,
-    callback: (String?) -> Unit?
+    crossinline callback: (String?) -> T
 ): ProgressIndicator? {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
@@ -131,11 +131,15 @@ fun runRuffInBackground(
     }
 }
 
-inline fun <reified T> executeOnPooledThread(defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T): T {
+inline fun <reified T> executeOnPooledThread(
+    defaultResult: T,
+    timeoutSeconds: Long = 30,
+    crossinline action: () -> T
+): T {
     return try {
         ApplicationManager.getApplication().executeOnPooledThread<T> {
             try {
-                 action.invoke()
+                action.invoke()
             } catch (e: PyExecutionException) {
                 defaultResult
             } catch (e: ProcessNotCreatedException) {
