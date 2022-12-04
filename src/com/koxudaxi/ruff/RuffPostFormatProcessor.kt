@@ -39,7 +39,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val formatted = executeOnPooledThread(null) {
             runRuff(sdk, stdin, *args.toTypedArray())
         } ?: return TextRange.EMPTY_RANGE
-        val diffRange = diffRange(source.text, formatted) ?: TextRange.EMPTY_RANGE
+        val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
         val newPartEnd = formatted.length - (source.text.length - diffRange.endOffset)
         val newPart = formatted.substring(diffRange.startOffset, newPartEnd)
@@ -57,10 +57,10 @@ class RuffPostFormatProcessor : PostFormatProcessor {
     }
 
     private fun diffRange(s1: String, s2: String): TextRange? {
+        if (s1 == s2) return null
         val start = s1.zip(s2).indexOfFirst { pair -> pair.first != pair.second }
-        if (start == -1) return null
         val relativeEnd = s1.reversed().zip(s2.reversed()).indexOfFirst { pair -> pair.first != pair.second }
-        val end = s1.length - relativeEnd + 1
+        val end = s1.length - relativeEnd + 2
         return TextRange(start, end)
     }
 }
