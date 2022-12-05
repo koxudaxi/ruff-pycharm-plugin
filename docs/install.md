@@ -2,11 +2,11 @@
 ## MarketPlace
 I'm waiting for approval from Jetbrains.
 
-~~The plugin is in Jetbrains repository ([Ruff Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff))~~
+The plugin is in Jetbrains repository ([Ruff Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff))
 
-~~You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Documentation](https://www.jetbrains.com/help/idea/managing-plugins.html)~~
+You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Documentation](https://www.jetbrains.com/help/idea/managing-plugins.html)
 
-[//]: # (![search plugin]&#40;search_plugin.png&#41;)
+![search plugin](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/search_plugin.png)
 
 ## Complied binary
 The ['Releases'](https://github.com/koxudaxi/ruff-pycharm-plugin/releases/) section of this repository contains a compiled version of the plugin: [Ruff-${version}.zip](https://github.com/koxudaxi/ruff-pycharm-plugin/releases/latest/)
