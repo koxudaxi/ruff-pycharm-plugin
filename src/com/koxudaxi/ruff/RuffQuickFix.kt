@@ -9,7 +9,7 @@ import com.jetbrains.python.psi.PyUtil
 
 class RuffQuickFix(private val content: String, private val range: TextRange) :
     LocalQuickFix {
-    override fun getFamilyName(): String = "Quick Fix"
+    override fun getFamilyName(): String = "Quick fix"
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         PyUtil.updateDocumentUnblockedAndCommitted(
