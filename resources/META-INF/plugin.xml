@@ -12,6 +12,10 @@
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
         <postFormatProcessor
                 implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
+        <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
+                         displayName="Ruff inspeciton"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.koxudaxi.ruff.RuffInspection"/>
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"

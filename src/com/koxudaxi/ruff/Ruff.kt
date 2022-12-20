@@ -21,6 +21,8 @@ import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -156,3 +158,8 @@ inline fun <reified T> executeOnPooledThread(
         defaultResult
     }
 }
+
+
+fun parseJsonResponse(response: String): List<Result> = Json.decodeFromString(response)
+//        val args = listOf("--exit-zero","--no-cache", "--no-fix", "--format", "json", "-")
+//
