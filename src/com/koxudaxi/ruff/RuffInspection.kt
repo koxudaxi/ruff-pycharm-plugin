@@ -1,9 +1,9 @@
 package com.koxudaxi.ruff
 
 import com.intellij.codeInspection.LocalInspectionToolSession
-import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.credentialStore.toByteArrayAndClear
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElementVisitor
@@ -42,16 +42,21 @@ class RuffInspection : PyInspection() {
                 runRuff(sdk, stdin, *args.toTypedArray())
             } ?: return
             parseJsonResponse(response).forEach {
-                val start = document.getLineStartOffset(it.location.row - 1) + it.location.column - 1
-                val end = document.getLineStartOffset(it.endLocation.row - 1) + it.endLocation.column - 1
-                val pyElement =
-                    PsiTreeUtil.findElementOfClassAtRange(pyFile, start, end, PyElement::class.java) ?: return@forEach
+                val pyElement = getPyElement(it, pyFile, document) ?: return@forEach
                 registerProblem(
                     pyElement,
                     it.message,
-                )
+                    it.fix?.let { fix ->
+                        RuffQuickFix.create(fix, document)
+                    })
             }
 
+        }
+
+        private fun getPyElement(result: Result, pyFile: PyFile, document: Document): PyElement? {
+            val start = document.getLineStartOffset(result.location.row - 1) + result.location.column - 1
+            val end = document.getLineStartOffset(result.endLocation.row - 1) + result.endLocation.column - 1
+            return PsiTreeUtil.findElementOfClassAtRange(pyFile, start, end, PyElement::class.java)
         }
     }
 
