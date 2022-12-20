@@ -14,6 +14,7 @@ plugins {
     id("org.jetbrains.qodana") version "0.1.13"
     // Gradle Kover Plugin
     id("org.jetbrains.kotlinx.kover") version "0.6.1"
+    kotlin("plugin.serialization") version "1.7.22"
 }
 
 group = properties("pluginGroup")
@@ -124,6 +125,7 @@ tasks {
 dependencies {
     compileOnly("org.apache.tuweni:tuweni-toml:2.3.1")
     compileOnly(group = "org.ini4j", name = "ini4j", version = "0.5.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     testImplementation(kotlin("test"))
 }
 
