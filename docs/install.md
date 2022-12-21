@@ -1,7 +1,5 @@
 # Installation
 ## MarketPlace
-I'm waiting for approval from Jetbrains.
-
 The plugin is in Jetbrains repository ([Ruff Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff))
 
 You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Documentation](https://www.jetbrains.com/help/idea/managing-plugins.html)

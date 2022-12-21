@@ -19,14 +19,15 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ![settings](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/settings.png)
 
 ## Features
+- [x] Inspection and highlight
+- [x] Quick Fix(from mouse-over, `⌥⏎` or `Alt+Enter`)
 - [x] Run `ruff --fix` as an action
-- [x] Integrate `Reformat Code`
+- [x] Integrate `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
 - [x] Run `ruff --fix` for a file when the file is saved
 
 ## Core
 - [x] detect global `ruff` and project `ruff`
 - [x] execute `ruff` command as a new process
-- [ ] call `ruff` via LSP
 
 
 ## Contribute

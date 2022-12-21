@@ -18,22 +18,22 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 
 <!-- Plugin description -->
 ## Features
+- [x] Inspection and highlight
+- [x] Quick Fix(from mouse-over, `⌥⏎` or `Alt+Enter`)
 - [x] Run `ruff --fix` as an action
-- [x] Integrate `Reformat Code`
+- [x] Integrate `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
 - [x] Run `ruff --fix` for a file when the file is saved
 
 ## Core
 - [x] detect global `ruff` and project `ruff`
 - [x] execute `ruff` command as a new process
-- [ ] call `ruff` via LSP
+
 
 
 <!-- Plugin description end -->
 
 ## Quick Installation
 ### MarketPlace
-I'm waiting for approval from Jetbrains.
-
 The plugin is in Jetbrains repository ([Ruff Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff))
 
 You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Documentation](https://www.jetbrains.com/help/idea/managing-plugins.html)
