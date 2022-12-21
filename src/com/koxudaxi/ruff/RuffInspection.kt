@@ -23,6 +23,8 @@ class RuffInspection : PyInspection() {
 
     inner class Visitor(holder: ProblemsHolder, context: TypeEvalContext) :
         PyInspectionVisitor(holder, context) {
+        private val args =
+            listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json", "-")
         override fun visitPyFile(node: PyFile) {
             super.visitPyFile(node)
 
@@ -31,11 +33,8 @@ class RuffInspection : PyInspection() {
 
         private fun inspectFile(pyFile: PyFile) {
             val document = PsiDocumentManager.getInstance(pyFile.project).getDocument(pyFile) ?: return
-            val fileName = pyFile.name
             val module = ModuleUtil.findModuleForPsiElement(pyFile) ?: return
             val sdk = module.pythonSdk ?: return
-            val args =
-                listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json", "--stdin-filename", fileName, "-")
             val stdin = pyFile.textToCharArray().toByteArrayAndClear()
 
             val response = executeOnPooledThread(null) {
