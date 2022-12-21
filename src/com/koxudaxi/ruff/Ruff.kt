@@ -31,6 +31,8 @@ import java.util.concurrent.TimeoutException
 const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
 const val RUFF_COMMAND: String = "ruff"
 
+val json = Json { ignoreUnknownKeys = true }
+
 var PropertiesComponent.ruffPath: @SystemDependent String?
     get() = getValue(RUFF_PATH_SETTING)
     set(value) {
@@ -159,7 +161,4 @@ inline fun <reified T> executeOnPooledThread(
     }
 }
 
-
-fun parseJsonResponse(response: String): List<Result> = Json.decodeFromString(response)
-//        val args = listOf("--exit-zero","--no-cache", "--no-fix", "--format", "json", "-")
-//
+fun parseJsonResponse(response: String): List<Result> = json.decodeFromString(response)

@@ -11,6 +11,8 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 [![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=200&v=4)](https://github.com/JetBrainsOfficial)
 
 ## ScreenShots
+![inspection](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/inspection.png)
+![quickfix](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/quickfix.png)
 ![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/action.png)
 ![settings](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/settings.png)
 

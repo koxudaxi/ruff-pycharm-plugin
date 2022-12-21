@@ -13,13 +13,14 @@ import com.intellij.psi.PsiDocumentManager
 
 class RuffFileDocumentManagerListener(private val project: Project) : FileDocumentManagerListener {
     private val undoManager = UndoManager.getInstance(project)
+    private val args = listOf("--exit-zero", "--no-cache", "--fix",  "-")
     override fun beforeDocumentSaving(document: Document) {
         if (!RuffConfigService.getInstance(project).runRuffOnSave) return
         val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document) ?: return
         if (!psiFile.isApplicableTo) return
         val fileName = psiFile.name
         val module = ModuleUtil.findModuleForFile(psiFile) ?: return
-        val args = listOf("--exit-zero", "--fix", "--stdin-filename", fileName, "-")
+
         val stdin = document.text.toByteArray(psiFile.virtualFile.charset)
         runRuffInBackground(module, stdin, args, "running ruff $fileName") {
             if (it !is String) return@runRuffInBackground
