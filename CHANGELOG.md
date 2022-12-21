@@ -1,8 +1,10 @@
 # Changelog
 
 ## Unreleased
-* Add ruff inspection [[#28](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/28)]
-* Improve ruff operation [[#29](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/29)]
+
+## 0.0.3 - 2022-12-21
+- Add ruff inspection [[#28](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/28)]
+- Improve ruff operation [[#29](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/29)]
 
 ## 0.0.2 - 2022-12-04
 - Fix undo problem [[#16](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/16)]
