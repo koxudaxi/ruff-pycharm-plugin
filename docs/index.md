@@ -21,6 +21,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 ## Features
 - [x] Inspection and highlight
 - [x] Quick Fix(from mouse-over, `⌥⏎` or `Alt+Enter`)
+    - [x] Show fix message
 - [x] Run `ruff --fix` as an action
 - [x] Integrate `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
 - [x] Run `ruff --fix` for a file when the file is saved
