@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Support fix message [[#43](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/43)]
+- Fix element detection [[#44](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/44)]
 
 ## 0.0.3 - 2022-12-21
 - Add ruff inspection [[#28](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/28)]
