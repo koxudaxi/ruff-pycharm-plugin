@@ -14,7 +14,8 @@ data class Location(
 data class Fix(
     val content: String,
     val location: Location,
-    @SerialName("end_location") val endLocation: Location
+    @SerialName("end_location") val endLocation: Location,
+    val message: String? = null
 )
 @Serializable
 data class Result(
