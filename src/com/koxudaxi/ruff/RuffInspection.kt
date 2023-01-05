@@ -6,6 +6,7 @@ import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.module.ModuleUtil
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.inspections.PyInspection
@@ -41,9 +42,9 @@ class RuffInspection : PyInspection() {
                 runRuff(sdk, stdin, *args.toTypedArray())
             } ?: return
             parseJsonResponse(response).forEach {
-                val pyElement = getPyElement(it, pyFile, document) ?: return@forEach
+                val psiElement = getPyElement(it, pyFile, document) ?: return@forEach
                 registerProblem(
-                    pyElement,
+                    psiElement,
                     it.message,
                     it.fix?.let { fix ->
                         RuffQuickFix.create(fix, document)
@@ -52,10 +53,10 @@ class RuffInspection : PyInspection() {
 
         }
 
-        private fun getPyElement(result: Result, pyFile: PyFile, document: Document): PyElement? {
+        private fun getPyElement(result: Result, pyFile: PyFile, document: Document): PsiElement? {
             val start = document.getLineStartOffset(result.location.row - 1) + result.location.column - 1
             val end = document.getLineStartOffset(result.endLocation.row - 1) + result.endLocation.column - 1
-            return PsiTreeUtil.findElementOfClassAtRange(pyFile, start, end, PyElement::class.java)
+            return PsiTreeUtil.findElementOfClassAtRange(pyFile, start, end, PsiElement::class.java)
         }
     }
 
