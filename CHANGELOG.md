@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 0.0.4 - 2023-01-05
 - Support fix message [[#43](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/43)]
 - Fix element detection [[#44](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/44)]
 
