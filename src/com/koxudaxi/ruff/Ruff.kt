@@ -105,7 +105,7 @@ fun runRuff(module: Module, stdin: ByteArray?, vararg args: String): String {
     val executable = module.pythonSdk?.let { getRuffExecutableInSDK(it) } ?: getRuffExecutable()
     ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
 
-    return runCommand(executable, module.basePath, stdin, *args)
+    return runCommand(executable, module.project.basePath, stdin, *args)
 }
 
 inline fun <reified T> runRuffInBackground(
