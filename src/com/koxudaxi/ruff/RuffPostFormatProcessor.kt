@@ -23,12 +23,11 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val pyFile = source.containingFile
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
         val module = ModuleUtil.findModuleForPsiElement(source) ?: return TextRange.EMPTY_RANGE
-        val sdk = module.pythonSdk ?: return TextRange.EMPTY_RANGE
 
         val stdin = source.textToCharArray().toByteArrayAndClear()
 
         val formatted = executeOnPooledThread(null) {
-            runRuff(sdk, stdin, *args.toTypedArray())
+            runRuff(module, stdin, *args.toTypedArray())
         } ?: return TextRange.EMPTY_RANGE
         val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 

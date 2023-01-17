@@ -35,11 +35,10 @@ class RuffInspection : PyInspection() {
         private fun inspectFile(pyFile: PyFile) {
             val document = PsiDocumentManager.getInstance(pyFile.project).getDocument(pyFile) ?: return
             val module = ModuleUtil.findModuleForPsiElement(pyFile) ?: return
-            val sdk = module.pythonSdk ?: return
             val stdin = pyFile.textToCharArray().toByteArrayAndClear()
 
             val response = executeOnPooledThread(null) {
-                runRuff(sdk, stdin, *args.toTypedArray())
+                runRuff(module, stdin, *args.toTypedArray())
             } ?: return
             parseJsonResponse(response).forEach {
                 val psiElement = getPyElement(it, pyFile, document) ?: return@forEach

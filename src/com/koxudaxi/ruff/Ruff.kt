@@ -101,16 +101,11 @@ fun runCommand(
     }
 }
 
-fun runRuff(sdk: Sdk, stdin: ByteArray?, vararg args: String): String {
-    val projectPath = sdk.associatedModulePath
-        ?: throw PyExecutionException(
-            "Cannot find the project associated with this Ruff environment",
-            "Ruff", emptyList(), ProcessOutput()
-        )
-    val executable = getRuffExecutableInSDK(sdk) ?: getRuffExecutable()
+fun runRuff(module: Module, stdin: ByteArray?, vararg args: String): String {
+    val executable = module.pythonSdk?.let { getRuffExecutableInSDK(it) } ?: getRuffExecutable()
     ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
 
-    return runCommand(executable, projectPath, stdin, *args)
+    return runCommand(executable, module.basePath, stdin, *args)
 }
 
 inline fun <reified T> runRuffInBackground(
@@ -122,14 +117,13 @@ inline fun <reified T> runRuffInBackground(
 ): ProgressIndicator? {
     val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
-            val sdk = module.pythonSdk ?: return
             indicator.text = "$description..."
             val result: String? = try {
-                runRuff(sdk, stdin, *args.toTypedArray())
+                runRuff(module, stdin, *args.toTypedArray())
             } catch (_: RunCanceledByUserException) {
                 null
             } catch (e: ExecutionException) {
-                showSdkExecutionException(sdk, e, "Error Running Ruff")
+                showSdkExecutionException(module.pythonSdk, e, "Error Running Ruff")
                 null
             }
             callback(result)
