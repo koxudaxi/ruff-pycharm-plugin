@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fix system ruff detection [[#53](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/53)]
 
 ## 0.0.4 - 2023-01-05
 - Support fix message [[#43](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/43)]
