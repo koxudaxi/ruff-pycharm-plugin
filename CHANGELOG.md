@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 0.0.6 - 2023-01-22
 - Support file path when run ruff command [[#59](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/59)]
 - Support showing rule code in inspection message [[#60](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/60)]
 
