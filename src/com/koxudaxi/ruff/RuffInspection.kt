@@ -13,7 +13,6 @@ import com.jetbrains.python.inspections.PyInspection
 import com.jetbrains.python.inspections.PyInspectionVisitor
 import com.jetbrains.python.psi.*
 import com.jetbrains.python.psi.types.TypeEvalContext
-import com.jetbrains.python.sdk.pythonSdk
 
 class RuffInspection : PyInspection() {
     override fun buildVisitor(
@@ -24,8 +23,9 @@ class RuffInspection : PyInspection() {
 
     inner class Visitor(holder: ProblemsHolder, context: TypeEvalContext) :
         PyInspectionVisitor(holder, context) {
-        private val args =
-            listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json", "-")
+        private val argsBase =
+            listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json")
+
         override fun visitPyFile(node: PyFile) {
             super.visitPyFile(node)
 
@@ -38,7 +38,11 @@ class RuffInspection : PyInspection() {
             val stdin = pyFile.textToCharArray().toByteArrayAndClear()
 
             val response = executeOnPooledThread(null) {
-                runRuff(module, stdin, *args.toTypedArray())
+                runRuff(
+                    module,
+                    stdin,
+                    *(argsBase + getStdinFileNameArgs(pyFile)).toTypedArray()
+                )
             } ?: return
             parseJsonResponse(response).forEach {
                 val psiElement = getPyElement(it, pyFile, document) ?: return@forEach

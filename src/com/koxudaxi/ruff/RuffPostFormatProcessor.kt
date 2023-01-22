@@ -14,7 +14,7 @@ import com.jetbrains.python.sdk.pythonSdk
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
-    private val args = listOf("--exit-zero", "--no-cache", "--fix", "-")
+    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix")
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
 
@@ -27,7 +27,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val stdin = source.textToCharArray().toByteArrayAndClear()
 
         val formatted = executeOnPooledThread(null) {
-            runRuff(module, stdin, *args.toTypedArray())
+            runRuff(module, stdin, *(argsBase + getStdinFileNameArgs(source)).toTypedArray())
         } ?: return TextRange.EMPTY_RANGE
         val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
