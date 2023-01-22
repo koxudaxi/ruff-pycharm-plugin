@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Support file path when run ruff command [[#59](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/59)]
 
 ## 0.0.5 - 2023-01-17
 - Fix system ruff detection [[#53](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/53)]
