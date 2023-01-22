@@ -50,7 +50,7 @@ class RuffInspection : PyInspection() {
                 val psiElement = getPyElement(it, pyFile, document) ?: return@forEach
                 registerProblem(
                     psiElement,
-                    if(showRuleCode) "${it.code} ${it.message}" else {it.message},
+                    if(showRuleCode) "${it.code} ${it.message}" else it.message,
                     it.fix?.let { fix ->
                         RuffQuickFix.create(fix, document)
                     })
