@@ -44,11 +44,13 @@ class RuffInspection : PyInspection() {
                     *(argsBase + getStdinFileNameArgs(pyFile)).toTypedArray()
                 )
             } ?: return
+            val showRuleCode = RuffConfigService.getInstance(pyFile.project).showRuleCode
+
             parseJsonResponse(response).forEach {
                 val psiElement = getPyElement(it, pyFile, document) ?: return@forEach
                 registerProblem(
                     psiElement,
-                    it.message,
+                    if(showRuleCode) "${it.code} ${it.message}" else {it.message},
                     it.fix?.let { fix ->
                         RuffQuickFix.create(fix, document)
                     })
