@@ -1,54 +1,51 @@
 # Ruff PyCharm Plugin
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![](https://img.shields.io/jetbrains/plugin/v/20574)](https://plugins.jetbrains.com/plugin/20574-ruff)
+[![Total downloads](https://img.shields.io/jetbrains/plugin/d/20574-ruff)](https://plugins.jetbrains.com/plugin/20574-ruff)
 
-[A JetBrains PyCharm plugin](https://plugins.jetbrains.com/plugin/20574-ruff) for [`ruff`](https://github.com/charliermarsh/ruff).
+A [`ruff`](https://github.com/charliermarsh/ruff) integration [plugin](https://plugins.jetbrains.com/plugin/20574-ruff) for [JetBrains PyCharm](https://www.jetbrains.com/pycharm/).
 
-## Help
 See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more details.
-
-## Sponsors
-[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=200&v=4)](https://github.com/JetBrainsOfficial)
-
-## ScreenShots
-![inspection](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/inspection.png)
-![quickfix](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/quickfix.png)
-![action](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/action.png)
-![settings](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/settings.png)
 
 <!-- Plugin description -->
 ## Features
-- [x] Inspection and highlight
-- [x] Quick Fix(from mouse-over, `⌥⏎` or `Alt+Enter`)
+- [x] Inspection and highlighting
+- [x] Integrating `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
+- [x] Quick Fix (from mouse-over, `⌥⏎` or `Alt+Enter`)
   - [x] Show fix message
 - [x] Run `ruff --fix` as an action
-- [x] Integrate `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
 - [x] Run `ruff --fix` for a file when the file is saved
+- [x] Detect both global and project-specific instances of `ruff`
+- [x] Execute `ruff` command as a new process
 
-## Core
-- [x] detect global `ruff` and project `ruff`
-- [x] execute `ruff` command as a new process
+## Screenshots
 
-
+![inspection](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/inspection.png)
+![quickfix](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/quickfix.png)
+![settings](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/settings.png)
 
 <!-- Plugin description end -->
 
-## Quick Installation
-### MarketPlace
-The plugin is in Jetbrains repository ([Ruff Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff))
+## Installation
 
-You can install the stable version on PyCharm's `Marketplace` (Preference -> Plugins -> Marketplace) [Official Documentation](https://www.jetbrains.com/help/idea/managing-plugins.html)
+### JetBrains Marketplace
+
+You can install the stable version on PyCharm's `Marketplace` (_Preferences_ -> _Plugins_ -> _Marketplace_).
 
 ![search plugin](https://raw.githubusercontent.com/koxudaxi/ruff-pycharm-plugin/main/docs/search_plugin.png)
 
+See the section on [managing plugins](https://www.jetbrains.com/help/idea/managing-plugins.html) in the official documentation.
 
 ## Contribute
-We are waiting for your contributions to `ruff-pycharm-plugin`.
+
+See [Development](https://koxudaxi.github.io/ruff-pycharm-plugin/development/) section of the documentation.
+
+We are waiting for your contributions to `ruff-pycharm-plugin`!
 
 
 ## Links
-### JetBrains Plugin Page
+* [JetBrains Plugin Page](https://plugins.jetbrains.com/plugin/20574-ruff)
+* [Pydantic PyCharm Plugin](https://github.com/koxudaxi/pydantic-pycharm-plugin/)
 
-### Other PyCharm plugin projects
-[Pydantic PyCharm Plugin](https://github.com/koxudaxi/pydantic-pycharm-plugin/)
-
+## Sponsors
+[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=100&v=4)](https://github.com/JetBrainsOfficial)
