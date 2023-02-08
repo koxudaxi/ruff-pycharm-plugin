@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
@@ -29,7 +30,11 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
-const val RUFF_COMMAND: String = "ruff"
+
+val RUFF_COMMAND = when {
+    SystemInfo.isWindows -> "ruff.exe"
+    else -> "ruff"
+}
 
 val json = Json { ignoreUnknownKeys = true }
 
