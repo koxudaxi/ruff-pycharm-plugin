@@ -5,16 +5,16 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     // Kotlin support
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.8.10"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.11.0"
+    id("org.jetbrains.intellij") version "1.12.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.0.0"
     // Gradle Qodana Plugin
     id("org.jetbrains.qodana") version "0.1.13"
     // Gradle Kover Plugin
     id("org.jetbrains.kotlinx.kover") version "0.6.1"
-    kotlin("plugin.serialization") version "1.7.22"
+    kotlin("plugin.serialization") version "1.8.10"
 }
 
 group = properties("pluginGroup")
