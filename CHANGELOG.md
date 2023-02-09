@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Support Windows [[#73(https://github.com/koxudaxi/ruff-pycharm-plugin/pull/73)]
+- Support ruff command in user site  [[#77(https://github.com/koxudaxi/ruff-pycharm-plugin/pull/77)]
 
 ## 0.0.6 - 2023-01-22
 - Support file path when run ruff command [[#59](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/59)]
