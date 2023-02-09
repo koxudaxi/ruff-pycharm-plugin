@@ -36,6 +36,8 @@ val RUFF_COMMAND = when {
     else -> "ruff"
 }
 
+val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite()+ File.separator + "bin" + File.separator + RUFF_COMMAND
+
 val json = Json { ignoreUnknownKeys = true }
 
 var PropertiesComponent.ruffPath: @SystemDependent String?
@@ -50,9 +52,11 @@ fun getRuffExecutable(): File? =
 fun getRuffExecutableInSDK(sdk: Sdk): File? =
     sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
 
-fun detectRuffExecutable(): File? {
-    return PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND)
-}
+fun getRuffExecutableInUserSite(): File? =
+    File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
+
+fun detectRuffExecutable(): File? =
+    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: getRuffExecutableInUserSite()
 
 val PsiFile.isApplicableTo: Boolean
     get() =
