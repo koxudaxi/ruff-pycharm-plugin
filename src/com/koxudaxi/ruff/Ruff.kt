@@ -31,8 +31,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
-
 val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
     else -> "ruff"
@@ -47,17 +45,34 @@ val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite()+ File.separator + "bin" + 
 
 val json = Json { ignoreUnknownKeys = true }
 
-var PropertiesComponent.ruffPath: @SystemDependent String?
-    get() = getValue(RUFF_PATH_SETTING)
-    set(value) {
-        setValue(RUFF_PATH_SETTING, value)
+val Project.ruffExecutablePath: @SystemDependent String?
+    get() {
+        val ruffConfigService = RuffConfigService.getInstance(this)
+        return when {
+            ruffConfigService.alwaysUseGlobalRuff -> ruffConfigService.globalRuffExecutablePath
+            else -> ruffConfigService.ruffExecutablePath
+        }
     }
 
-fun getRuffExecutable(project: Project?): File? =
-    PropertiesComponent.getInstance().ruffPath?.let { File(it) }?.takeIf { it.exists() }
-        ?: project?.pythonSdk?.let { findRuffExecutableInSDK(it) }
-        ?: detectRuffExecutable()
-
+fun getRuffExecutable(project: Project): File? {
+    val ruffExecutable =  project.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() }
+    if (ruffExecutable is File) return ruffExecutable
+    val ruffConfigService =  RuffConfigService.getInstance(project)
+    if (!ruffConfigService.alwaysUseGlobalRuff) {
+        project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.let {
+            ruffConfigService.ruffExecutablePath = it.absolutePath
+            return it
+        }
+        detectRuffExecutable().let {
+            ruffConfigService.ruffExecutablePath = it?.absolutePath
+            return it
+        }
+    }
+    detectRuffExecutable().let {
+        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+        return it
+    }
+}
 fun findRuffExecutableInSDK(sdk: Sdk): File? =
     sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
 
