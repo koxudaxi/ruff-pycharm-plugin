@@ -7,13 +7,13 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
-import com.intellij.ide.util.PropertiesComponent
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.text.StringUtil
@@ -30,8 +30,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
-const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
-
 val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
     else -> "ruff"
@@ -42,33 +40,45 @@ val SCRIPT_DIR = when {
     else -> "bin"
 }
 
-val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite()+ File.separator + "bin" + File.separator + RUFF_COMMAND
+val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + RUFF_COMMAND
 
 val json = Json { ignoreUnknownKeys = true }
 
-var PropertiesComponent.ruffPath: @SystemDependent String?
-    get() = getValue(RUFF_PATH_SETTING)
-    set(value) {
-        setValue(RUFF_PATH_SETTING, value)
+
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
+    project.pythonSdk
+        ?.let {
+            findRuffExecutableInSDK(it)
+        }.let {
+            ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            it
+        }?.let { return it }
+
+    ruffConfigService.globalRuffExecutablePath
+        ?.let { File(it) }
+        ?.takeIf { it.exists() }
+        ?.let { return it }
+
+    return findGlobalRuffExecutable().let {
+        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+        it
     }
-
-fun getRuffExecutable(): File? =
-    PropertiesComponent.getInstance().ruffPath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable()
-
-fun getRuffExecutableInSDK(sdk: Sdk): File? =
+}
+fun findRuffExecutableInSDK(sdk: Sdk): File? =
     sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
 
-fun getRuffExecutableInUserSite(): File? =
+fun findRuffExecutableInUserSite(): File? =
     File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
-fun getRuffExecutableInConda(): File? {
+fun findRuffExecutableInConda(): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
     val condaDir = File(condaExecutable).parentFile.parent
     return File(condaDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
 }
 
-fun detectRuffExecutable(): File? =
-    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: getRuffExecutableInUserSite() ?: getRuffExecutableInConda()
+fun findGlobalRuffExecutable(): File? =
+    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: findRuffExecutableInUserSite()
+    ?: findRuffExecutableInConda()
 
 val PsiFile.isApplicableTo: Boolean
     get() =
@@ -122,11 +132,16 @@ fun runCommand(
     }
 }
 
-fun runRuff(module: Module, stdin: ByteArray?, vararg args: String): String {
-    val executable = module.pythonSdk?.let { getRuffExecutableInSDK(it) } ?: getRuffExecutable()
-    ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
+fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String {
+    val ruffConfigService = RuffConfigService.getInstance(project)
+    val executable =
+        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project,
+            ruffConfigService
+        )
+        ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
 
-    return runCommand(executable, module.project.basePath, stdin, *args)
+    return runCommand(executable, project.basePath, stdin, *args)
 }
 
 inline fun <reified T> runRuffInBackground(
@@ -140,7 +155,7 @@ inline fun <reified T> runRuffInBackground(
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
             val result: String? = try {
-                runRuff(module, stdin, *args.toTypedArray())
+                runRuff(project, stdin, *args.toTypedArray())
             } catch (_: RunCanceledByUserException) {
                 null
             } catch (e: ExecutionException) {

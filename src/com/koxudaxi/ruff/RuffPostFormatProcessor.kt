@@ -27,7 +27,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val stdin = source.textToCharArray().toByteArrayAndClear()
 
         val formatted = executeOnPooledThread(null) {
-            runRuff(module, stdin, *(argsBase + getStdinFileNameArgs(source)).toTypedArray())
+            runRuff(pyFile.project, stdin, *(argsBase + getStdinFileNameArgs(source)).toTypedArray())
         } ?: return TextRange.EMPTY_RANGE
         val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 

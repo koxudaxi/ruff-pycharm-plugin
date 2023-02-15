@@ -1,7 +1,8 @@
 # Changelog
 
 ## Unreleased
-
+- Add global ruff path to settings [[#86](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/86)]
+- 
 ## 0.0.7 - 2023-02-09
 - Support Windows [[#73](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/73)]
 - Support ruff command in user site  [[#77](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/77)]

@@ -26,13 +26,17 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
     override fun isModified(): Boolean {
         return (ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave) ||
                 (ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode) ||
-                (ruffConfigService.showRuleCode != configPanel.showRuleCode)
+                (ruffConfigService.showRuleCode != configPanel.showRuleCode ||
+                        ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
+                        ruffConfigService.globalRuffExecutablePath != configPanel.globalRuffExecutablePath)
     }
 
     override fun apply() {
         ruffConfigService.runRuffOnSave = configPanel.runRuffOnSave
         ruffConfigService.runRuffOnReformatCode = configPanel.runRuffOnReformatCode
         ruffConfigService.showRuleCode = configPanel.showRuleCode
+        ruffConfigService.alwaysUseGlobalRuff = configPanel.alwaysUseGlobalRuff
+        ruffConfigService.globalRuffExecutablePath = configPanel.globalRuffExecutablePath
     }
 
     override fun disposeUIResources() {
