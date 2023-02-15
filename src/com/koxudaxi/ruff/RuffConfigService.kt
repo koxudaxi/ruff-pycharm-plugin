@@ -24,7 +24,13 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     override fun loadState(config: RuffConfigService) {
         XmlSerializerUtil.copyBean(config, this)
     }
-
+    val ruffExecutablePath: @SystemDependent String?
+        get() {
+        return when {
+            alwaysUseGlobalRuff -> globalRuffExecutablePath
+            else -> projectRuffExecutablePath ?: globalRuffExecutablePath
+        }
+    }
     companion object {
         fun getInstance(project: Project): RuffConfigService {
             return project.getService(RuffConfigService::class.java)

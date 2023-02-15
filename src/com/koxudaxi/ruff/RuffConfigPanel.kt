@@ -6,9 +6,10 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.emptyText
+import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
 import org.jetbrains.annotations.SystemDependent
-import java.io.File
+
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JPanel
@@ -47,17 +48,18 @@ class RuffConfigPanel(project: Project) {
         setAutodetectedRuffButton.addActionListener { setAutodetectedRuff() }
 
         alwaysUseGlobalRuffCheckBox.addActionListener {
-            setProjectRuffExecutablePath(project)
+            projectRuffExecutablePathField.isEnabled = !alwaysUseGlobalRuffCheckBox.isSelected
         }
     }
 
+
     private fun setAutodetectedRuff() =
-        when (val ruffExecutable = findGlobalRuffExecutable()) {
-            is File -> globalRuffExecutablePathField.text = ruffExecutable.absolutePath
+        when (val ruffExecutablePath = findGlobalRuffExecutable()?.absolutePath) {
+            is String -> globalRuffExecutablePathField.text = ruffExecutablePath
             else -> globalRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
         }
     private fun setProjectRuffExecutablePath(project: Project) {
-        projectRuffExecutablePathField.text = detectRuffExecutable(project, updateConfig = false, alwaysUseGlobalRuff = alwaysUseGlobalRuffCheckBox.isSelected)?.absolutePath ?: RUFF_EXECUTABLE_NOT_FOUND
+        projectRuffExecutablePathField.text = project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.absolutePath ?: RUFF_EXECUTABLE_NOT_FOUND
     }
     val runRuffOnSave: Boolean
         get() = runRuffOnSaveCheckBox.isSelected

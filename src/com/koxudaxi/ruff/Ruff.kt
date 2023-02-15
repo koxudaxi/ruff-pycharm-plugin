@@ -40,42 +40,28 @@ val SCRIPT_DIR = when {
     else -> "bin"
 }
 
-val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite()+ File.separator + "bin" + File.separator + RUFF_COMMAND
+val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + RUFF_COMMAND
 
 val json = Json { ignoreUnknownKeys = true }
 
-val Project.ruffExecutablePath: @SystemDependent String?
-    get() {
-        val ruffConfigService = RuffConfigService.getInstance(this)
-        return when {
-            ruffConfigService.alwaysUseGlobalRuff -> ruffConfigService.globalRuffExecutablePath
-            else -> ruffConfigService.projectRuffExecutablePath
-        }
-    }
 
-fun detectRuffExecutable(project: Project, updateConfig: Boolean, alwaysUseGlobalRuff: Boolean?): File? {
-    val ruffExecutable =  project.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() }
-    if (ruffExecutable is File) return ruffExecutable
-    val ruffConfigService =  RuffConfigService.getInstance(project)
-    if (!(alwaysUseGlobalRuff ?: ruffConfigService.alwaysUseGlobalRuff)) {
-        project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.let {
-            if (updateConfig) {
-                ruffConfigService.projectRuffExecutablePath = it.absolutePath
-            }
-            return it
-        }
-        findGlobalRuffExecutable().let {
-            if (updateConfig) {
-                ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            }
-            return it
-        }
-    }
-    findGlobalRuffExecutable().let {
-        if (updateConfig) {
-            ruffConfigService.globalRuffExecutablePath = it?.absolutePath
-        }
-        return it
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
+    project.pythonSdk
+        ?.let {
+            findRuffExecutableInSDK(it)
+        }.let {
+            ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            it
+        }?.let { return it }
+
+    ruffConfigService.globalRuffExecutablePath
+        ?.let { File(it) }
+        ?.takeIf { it.exists() }
+        ?.let { return it }
+
+    return findGlobalRuffExecutable().let {
+        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+        it
     }
 }
 fun findRuffExecutableInSDK(sdk: Sdk): File? =
@@ -91,7 +77,8 @@ fun findRuffExecutableInConda(): File? {
 }
 
 fun findGlobalRuffExecutable(): File? =
-    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: findRuffExecutableInUserSite() ?: findRuffExecutableInConda()
+    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: findRuffExecutableInUserSite()
+    ?: findRuffExecutableInConda()
 
 val PsiFile.isApplicableTo: Boolean
     get() =
@@ -146,8 +133,13 @@ fun runCommand(
 }
 
 fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String {
-    val executable = detectRuffExecutable(project,  true,  null)
-    ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
+    val ruffConfigService = RuffConfigService.getInstance(project)
+    val executable =
+        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project,
+            ruffConfigService
+        )
+        ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
 
     return runCommand(executable, project.basePath, stdin, *args)
 }
