@@ -33,13 +33,13 @@ class RuffInspection : PyInspection() {
         }
 
         private fun inspectFile(pyFile: PyFile) {
+
             val document = PsiDocumentManager.getInstance(pyFile.project).getDocument(pyFile) ?: return
-            val module = ModuleUtil.findModuleForPsiElement(pyFile) ?: return
             val stdin = pyFile.textToCharArray().toByteArrayAndClear()
 
             val response = executeOnPooledThread(null) {
                 runRuff(
-                    module,
+                    pyFile.project,
                     stdin,
                     *(argsBase + getStdinFileNameArgs(pyFile)).toTypedArray()
                 )
