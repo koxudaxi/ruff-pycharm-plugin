@@ -16,6 +16,8 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Run `ruff --fix` as an action
 - [x] Run `ruff --fix` for a file when the file is saved
 - [x] Detect both global and project-specific instances of `ruff`
+  - [x] Always use global `ruff` command
+  - [x] Custom global `ruff` executable path
 - [x] Execute `ruff` command as a new process
 
 ## Screenshots
