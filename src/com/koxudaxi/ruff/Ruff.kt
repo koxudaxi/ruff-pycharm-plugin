@@ -20,6 +20,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
+import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import kotlinx.serialization.decodeFromString
@@ -34,6 +35,11 @@ const val RUFF_PATH_SETTING: String = "PyCharm.Ruff.Path"
 val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
     else -> "ruff"
+}
+
+val SCRIPT_DIR = when {
+    SystemInfo.isWindows -> "Scripts"
+    else -> "bin"
 }
 
 val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite()+ File.separator + "bin" + File.separator + RUFF_COMMAND
@@ -55,8 +61,14 @@ fun getRuffExecutableInSDK(sdk: Sdk): File? =
 fun getRuffExecutableInUserSite(): File? =
     File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
+fun getRuffExecutableInConda(): File? {
+    val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
+    val condaDir = File(condaExecutable).parentFile.parent
+    return File(condaDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+}
+
 fun detectRuffExecutable(): File? =
-    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: getRuffExecutableInUserSite()
+    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: getRuffExecutableInUserSite() ?: getRuffExecutableInConda()
 
 val PsiFile.isApplicableTo: Boolean
     get() =
