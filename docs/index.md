@@ -29,6 +29,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
   - [x] Always use global `ruff` command
   - [x] Custom global `ruff` executable path
 - [x] Execute `ruff` command as a new process
+- [x] Support `ruff` config file path as an option
 
 ## Contribute
 We are waiting for your contributions to `ruff-pycharm-plugin`.

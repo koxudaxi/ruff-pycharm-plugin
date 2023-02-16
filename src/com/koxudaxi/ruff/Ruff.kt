@@ -140,8 +140,15 @@ fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String {
             ruffConfigService
         )
         ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
-
-    return runCommand(executable, project.basePath, stdin, *args)
+    val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
+        listOf("--config", it, *args).toTypedArray()
+    }
+    return runCommand(
+        executable,
+        project.basePath,
+        stdin,
+        *(customConfigArgs ?: args)
+    )
 }
 
 inline fun <reified T> runRuffInBackground(
