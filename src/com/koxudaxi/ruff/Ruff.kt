@@ -142,7 +142,7 @@ fun runCommand(
     }
 }
 
-fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String {
+fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
@@ -153,12 +153,16 @@ fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String {
     val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it, *args).toTypedArray()
     }
-    return runCommand(
-        executable,
-        project.basePath,
-        stdin,
-        *(customConfigArgs ?: args)
-    )
+    return try {
+        runCommand(
+            executable,
+            project.basePath,
+            stdin,
+            *(customConfigArgs ?: args)
+        )
+    } catch (_: RunCanceledByUserException) {
+        null
+    }
 }
 
 inline fun <reified T> runRuffInBackground(
@@ -173,8 +177,6 @@ inline fun <reified T> runRuffInBackground(
             indicator.text = "$description..."
             val result: String? = try {
                 runRuff(project, stdin, *args.toTypedArray())
-            } catch (_: RunCanceledByUserException) {
-                null
             } catch (e: ExecutionException) {
                 showSdkExecutionException(module.pythonSdk, e, "Error Running Ruff")
                 null
