@@ -15,6 +15,7 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var globalRuffExecutablePath: @SystemDependent String? = null
     var alwaysUseGlobalRuff: Boolean = false
     var projectRuffExecutablePath: @SystemDependent String? = null
+    var ruffConfigPath: @SystemDependent String? = null
 
 
     override fun getState(): RuffConfigService {

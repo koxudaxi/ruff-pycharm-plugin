@@ -24,6 +24,8 @@ class RuffConfigPanel(project: Project) {
     private lateinit var setAutodetectedRuffButton: JButton
     private lateinit var alwaysUseGlobalRuffCheckBox: JCheckBox
     private lateinit var projectRuffExecutablePathField: JBTextField
+    private lateinit var ruffConfigPathField: TextFieldWithBrowseButton
+    private lateinit var clearRuffConfigPathButton: JButton
 
     init {
         val ruffConfigService = getInstance(project)
@@ -36,6 +38,7 @@ class RuffConfigPanel(project: Project) {
         alwaysUseGlobalRuffCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
         setProjectRuffExecutablePath(project)
+
         globalRuffExecutablePathField.apply {
             addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             if (textField is JBTextField) {
@@ -49,6 +52,15 @@ class RuffConfigPanel(project: Project) {
 
         alwaysUseGlobalRuffCheckBox.addActionListener {
             projectRuffExecutablePathField.isEnabled = !alwaysUseGlobalRuffCheckBox.isSelected
+        }
+
+        ruffConfigPathField.apply {
+            addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
+            textField.isEditable = false
+            textField.text = ruffConfigService.ruffConfigPath
+        }
+        clearRuffConfigPathButton.addActionListener {
+            ruffConfigPathField.text = ""
         }
     }
 
@@ -71,7 +83,8 @@ class RuffConfigPanel(project: Project) {
         get() = globalRuffExecutablePathField.text.takeIf { it.isNotBlank() }
     val alwaysUseGlobalRuff: Boolean
         get() = alwaysUseGlobalRuffCheckBox.isSelected
-
+    val ruffConfigPath: @SystemDependent String?
+        get() = ruffConfigPathField.text.takeIf { it.isNotBlank() }
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND =  "Ruff executable not found"
     }

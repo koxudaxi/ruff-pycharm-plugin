@@ -24,11 +24,13 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
     override fun reset() {}
 
     override fun isModified(): Boolean {
-        return (ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave) ||
-                (ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode) ||
-                (ruffConfigService.showRuleCode != configPanel.showRuleCode ||
-                        ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
-                        ruffConfigService.globalRuffExecutablePath != configPanel.globalRuffExecutablePath)
+        return ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave ||
+                ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
+                ruffConfigService.showRuleCode != configPanel.showRuleCode ||
+                ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
+                ruffConfigService.globalRuffExecutablePath != configPanel.globalRuffExecutablePath ||
+                ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath
+
     }
 
     override fun apply() {
@@ -37,6 +39,7 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.showRuleCode = configPanel.showRuleCode
         ruffConfigService.alwaysUseGlobalRuff = configPanel.alwaysUseGlobalRuff
         ruffConfigService.globalRuffExecutablePath = configPanel.globalRuffExecutablePath
+        ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
     }
 
     override fun disposeUIResources() {
