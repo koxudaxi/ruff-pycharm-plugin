@@ -23,11 +23,13 @@ import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.io.IOError
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -65,6 +67,7 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
         it
     }
 }
+
 fun findRuffExecutableInSDK(sdk: Sdk): File? =
     sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
 
@@ -105,6 +108,8 @@ fun runCommand(
                 try {
                     write(stdin)
                     close()
+                } catch (_: IOException) {
+                    throw RunCanceledByUserException()
                 } catch (_: IOError) {
                     throw RunCanceledByUserException()
                 }
@@ -203,7 +208,11 @@ inline fun <reified T> executeOnPooledThread(
     }
 }
 
-fun parseJsonResponse(response: String): List<Result> = json.decodeFromString(response)
+fun parseJsonResponse(response: String): List<Result> = try {
+    json.decodeFromString(response)
+} catch (_: SerializationException) {
+    listOf()
+}
 
 val PsiFile.projectRelativeFilePath: String?
     get() {
