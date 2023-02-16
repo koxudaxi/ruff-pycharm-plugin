@@ -13,7 +13,7 @@
         <postFormatProcessor
                 implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
         <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
-                         displayName="Ruff inspeciton"
+                         displayName="Ruff inspection"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="com.koxudaxi.ruff.RuffInspection"/>
     </extensions>
