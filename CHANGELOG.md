@@ -7,6 +7,7 @@
 - Support ruff config path [[#89](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/89)]
 - Fix unexpected io error [[#90](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/90)]
 - Fix unexpected decode error  [[#92](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/92)]
+- Improve error handling [[#94](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/94)]
 
 ## 0.0.7 - 2023-02-09
 - Support Windows [[#73](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/73)]
