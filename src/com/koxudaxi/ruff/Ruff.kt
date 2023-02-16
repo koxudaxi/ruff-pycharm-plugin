@@ -27,6 +27,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
+import java.io.IOError
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
@@ -101,8 +102,12 @@ fun runCommand(
     val result = with(handler) {
         if (stdin is ByteArray) {
             with(processInput) {
-                write(stdin)
-                close()
+                try {
+                    write(stdin)
+                    close()
+                } catch (_: IOError) {
+                    throw RunCanceledByUserException()
+                }
             }
         }
 
