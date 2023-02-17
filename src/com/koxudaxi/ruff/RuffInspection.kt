@@ -4,7 +4,6 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor

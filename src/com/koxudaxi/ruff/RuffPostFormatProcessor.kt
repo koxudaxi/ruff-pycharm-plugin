@@ -3,14 +3,12 @@ package com.koxudaxi.ruff
 import com.intellij.credentialStore.toByteArrayAndClear
 
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.impl.source.codeStyle.PostFormatProcessor
 import com.jetbrains.python.psi.PyUtil
-import com.jetbrains.python.sdk.pythonSdk
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
@@ -22,7 +20,6 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         if (!RuffConfigService.getInstance(source.project).runRuffOnReformatCode) return TextRange.EMPTY_RANGE
         val pyFile = source.containingFile
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
-        val module = ModuleUtil.findModuleForPsiElement(source) ?: return TextRange.EMPTY_RANGE
 
         val stdin = source.textToCharArray().toByteArrayAndClear()
 
