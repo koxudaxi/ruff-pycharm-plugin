@@ -20,6 +20,8 @@
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"
                   topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
+        <listener class="com.koxudaxi.ruff.RuffPackageManagerListener"
+                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
     </projectListeners>
     <actions>
         <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"
