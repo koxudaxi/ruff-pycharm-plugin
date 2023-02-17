@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 0.0.8 - 2023-02-17
 - Support conda system path  [[#84](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/84)]
 - Add global ruff path to settings [[#86](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/86)]
 - Fix misspelled displayName in plugin.xml [[#88](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/88)]
