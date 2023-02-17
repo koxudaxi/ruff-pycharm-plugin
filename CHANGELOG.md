@@ -1,8 +1,14 @@
 # Changelog
 
 ## Unreleased
+- Support conda system path  [[#84](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/84)]
 - Add global ruff path to settings [[#86](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/86)]
-- 
+- Fix misspelled displayName in plugin.xml [[#88](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/88)]
+- Support ruff config path [[#89](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/89)]
+- Fix unexpected io error [[#90](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/90)]
+- Fix unexpected decode error  [[#92](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/92)]
+- Improve error handling [[#94](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/94)]
+
 ## 0.0.7 - 2023-02-09
 - Support Windows [[#73](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/73)]
 - Support ruff command in user site  [[#77](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/77)]
