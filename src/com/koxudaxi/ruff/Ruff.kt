@@ -9,7 +9,6 @@ import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -166,19 +165,19 @@ fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String? {
 }
 
 inline fun <reified T> runRuffInBackground(
-    module: Module,
+    project: Project,
     stdin: ByteArray?,
     args: List<String>,
     description: String,
     crossinline callback: (String?) -> T
 ): ProgressIndicator? {
-    val task = object : Task.Backgroundable(module.project, StringUtil.toTitleCase(description), true) {
+    val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
             val result: String? = try {
                 runRuff(project, stdin, *args.toTypedArray())
             } catch (e: ExecutionException) {
-                showSdkExecutionException(module.pythonSdk, e, "Error Running Ruff")
+                showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
                 null
             }
             callback(result)
