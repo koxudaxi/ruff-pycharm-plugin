@@ -228,7 +228,7 @@ val PsiFile.projectRelativeFilePath: String?
 fun getStdinFileNameArgs(psiFile: PsiFile) =
     psiFile.projectRelativeFilePath?.let { listOf("--stdin-filename", it, "-") } ?: listOf("-")
 
-fun Document.getStartEndOffset(startLocation: Location, endLocation: Location, offset: Int): TextRange {
+fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset
     val lastLine = endLocation.row - 1
     val end: Int = when (lineCount) {

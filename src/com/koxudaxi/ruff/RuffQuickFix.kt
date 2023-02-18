@@ -30,7 +30,7 @@ class RuffQuickFix(private val content: String, private val range: TextRange, pr
     companion object {
         private const val DEFAULT_FIX_MESSAGE = "Quick fix with ruff"
         fun create(fix: Fix, document: Document): RuffQuickFix {
-            return RuffQuickFix(fix.content, document.getStartEndOffset(fix.location, fix.endLocation, 0), fix.message)
+            return RuffQuickFix(fix.content, document.getStartEndRange(fix.location, fix.endLocation, 0), fix.message)
         }
     }
 }
