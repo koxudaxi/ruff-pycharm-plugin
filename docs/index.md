@@ -28,6 +28,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Detect both global and project-specific instances of `ruff`
   - [x] Always use global `ruff` command
   - [x] Custom global `ruff` executable path
+  - [x] Detect a project ruff after packages refreshed
 - [x] Execute `ruff` command as a new process
 - [x] Support `ruff` config file path as an option
 
