@@ -235,5 +235,5 @@ fun Document.getStartEndOffset(startLocation: Location, endLocation: Location, o
         lastLine -> textLength
         else -> getLineStartOffset(lastLine) + endLocation.column + offset
     }
-    return TextRange(start, maxOf(start, end))
+    return TextRange(start, end)
 }
