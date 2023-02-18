@@ -58,9 +58,14 @@ class RuffInspection : PyInspection() {
         }
 
         private fun getPyElement(result: Result, pyFile: PyFile, document: Document): PsiElement? {
-            val start = document.getLineStartOffset(result.location.row - 1) + result.location.column - 1
-            val end = document.getLineStartOffset(result.endLocation.row - 1) + result.endLocation.column - 1
-            return PsiTreeUtil.findElementOfClassAtRange(pyFile, start, end, PsiElement::class.java)
+            document.getStartEndRange(result.location, result.endLocation, -1).let {
+                return PsiTreeUtil.findElementOfClassAtRange(
+                    pyFile,
+                    it.startOffset,
+                    it.endOffset,
+                    PsiElement::class.java
+                )
+            }
         }
     }
 

@@ -9,12 +9,14 @@ import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
@@ -225,3 +227,13 @@ val PsiFile.projectRelativeFilePath: String?
 
 fun getStdinFileNameArgs(psiFile: PsiFile) =
     psiFile.projectRelativeFilePath?.let { listOf("--stdin-filename", it, "-") } ?: listOf("-")
+
+fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
+    val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset
+    val lastLine = endLocation.row - 1
+    val end: Int = when (lineCount) {
+        lastLine -> textLength
+        else -> getLineStartOffset(lastLine) + endLocation.column + offset
+    }
+    return TextRange(start, end)
+}
