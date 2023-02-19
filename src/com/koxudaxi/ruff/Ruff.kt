@@ -1,5 +1,6 @@
 package com.koxudaxi.ruff
 
+import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.RunCanceledByUserException
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -18,6 +19,7 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
@@ -50,18 +52,14 @@ val json = Json { ignoreUnknownKeys = true }
 
 
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
-    project.pythonSdk
-        ?.let {
-            findRuffExecutableInSDK(it)
-        }.let {
-            ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            it
-        }?.let { return it }
+    project.pythonSdk?.let {
+        findRuffExecutableInSDK(it)
+    }.let {
+        ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+        it
+    }?.let { return it }
 
-    ruffConfigService.globalRuffExecutablePath
-        ?.let { File(it) }
-        ?.takeIf { it.exists() }
-        ?.let { return it }
+    ruffConfigService.globalRuffExecutablePath?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
     return findGlobalRuffExecutable().let {
         ruffConfigService.globalRuffExecutablePath = it?.absolutePath
@@ -72,8 +70,7 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
 fun findRuffExecutableInSDK(sdk: Sdk): File? =
     sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
 
-fun findRuffExecutableInUserSite(): File? =
-    File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
+fun findRuffExecutableInUserSite(): File? = File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
 fun findRuffExecutableInConda(): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
@@ -86,18 +83,14 @@ fun findGlobalRuffExecutable(): File? =
     ?: findRuffExecutableInConda()
 
 val PsiFile.isApplicableTo: Boolean
-    get() =
-        when {
-            InjectedLanguageManager.getInstance(project).isInjectedFragment(this) -> false
-            else -> language.isKindOf(PythonLanguage.getInstance())
-        }
+    get() = when {
+        InjectedLanguageManager.getInstance(project).isInjectedFragment(this) -> false
+        else -> language.isKindOf(PythonLanguage.getInstance())
+    }
 
 
 fun runCommand(
-    executable: File,
-    projectPath: @SystemDependent String?,
-    stdin: ByteArray?,
-    vararg args: String
+    executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
 ): String {
     val command = listOf(executable.path) + args
     val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath)
@@ -123,43 +116,41 @@ fun runCommand(
                 runProcessWithProgressIndicator(indicator)
             }
 
-            else ->
-                runProcess()
+            else -> runProcess()
         }
     }
     return with(result) {
         when {
-            isCancelled ->
-                throw RunCanceledByUserException()
+            isCancelled -> throw RunCanceledByUserException()
 
-            exitCode != 0 ->
-                throw PyExecutionException(
-                    "Error Running Ruff", executable.path, args.asList(),
-                    stdout, stderr, exitCode, emptyList()
-                )
+            exitCode != 0 -> throw PyExecutionException(
+                "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
+            )
 
             else -> stdout
         }
     }
 }
 
-fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String? {
+fun runRuff(psiFile: PsiFile, args: List<String>): String? =
+    runRuff(
+        psiFile.project,
+        psiFile.textToCharArray().toByteArrayAndClear(),
+        args + getStdinFileNameArgs(psiFile)
+    )
+
+fun runRuff(project: Project, stdin: ByteArray?, args: List<String>): String? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project,
-            ruffConfigService
-        )
-        ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
+            project, ruffConfigService
+        ) ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
     val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
-        listOf("--config", it, *args).toTypedArray()
+        listOf("--config", it) + args
     }
     return try {
         runCommand(
-            executable,
-            project.basePath,
-            stdin,
-            *(customConfigArgs ?: args)
+            executable, project.basePath, stdin, *(customConfigArgs ?: args).toTypedArray()
         )
     } catch (_: RunCanceledByUserException) {
         null
@@ -167,17 +158,24 @@ fun runRuff(project: Project, stdin: ByteArray?, vararg args: String): String? {
 }
 
 inline fun <reified T> runRuffInBackground(
-    project: Project,
-    stdin: ByteArray?,
-    args: List<String>,
-    description: String,
-    crossinline callback: (String?) -> T
+    psiFile: PsiFile, args: List<String>, crossinline callback: (String?) -> T
+): ProgressIndicator? =
+    runRuffInBackground(
+        psiFile.project,
+        psiFile.textToCharArray().toByteArrayAndClear(),
+        args + getStdinFileNameArgs(psiFile),
+        "running ruff ${psiFile.name}",
+        callback
+    )
+
+inline fun <reified T> runRuffInBackground(
+    project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
 ): ProgressIndicator? {
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
             val result: String? = try {
-                runRuff(project, stdin, *args.toTypedArray())
+                runRuff(project, stdin, args)
             } catch (e: ExecutionException) {
                 showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
                 null
@@ -192,9 +190,7 @@ inline fun <reified T> runRuffInBackground(
 }
 
 inline fun <reified T> executeOnPooledThread(
-    defaultResult: T,
-    timeoutSeconds: Long = 30,
-    crossinline action: () -> T
+    defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
 ): T {
     return try {
         ApplicationManager.getApplication().executeOnPooledThread<T> {
@@ -215,18 +211,24 @@ fun parseJsonResponse(response: String): List<Result> = try {
     json.decodeFromString(response)
 } catch (_: SerializationException) {
     listOf()
+} catch (_: Exception) {
+    listOf()
 }
 
-val PsiFile.projectRelativeFilePath: String?
-    get() {
-        val canonicalPath = virtualFile.canonicalPath ?: return null
-        return project.basePath?.takeIf { canonicalPath.startsWith(it) }?.let {
-            canonicalPath.substring(it.length + 1)
-        }
+fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
+    val canonicalPath = virtualFile.canonicalPath ?: return null
+    return project.basePath?.takeIf { canonicalPath.startsWith(it) }?.let {
+        canonicalPath.substring(it.length + 1)
     }
+}
 
-fun getStdinFileNameArgs(psiFile: PsiFile) =
-    psiFile.projectRelativeFilePath?.let { listOf("--stdin-filename", it, "-") } ?: listOf("-")
+fun getStdinFileNameArgs(psiFile: PsiFile) = psiFile.virtualFile?.let {
+    getProjectRelativeFilePath(psiFile.project, it)?.let { projectRelativeFilePath ->
+        listOf(
+            "--stdin-filename", projectRelativeFilePath, "-"
+        )
+    }
+} ?: listOf("-")
 
 fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset

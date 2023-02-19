@@ -2,7 +2,6 @@ package com.koxudaxi.ruff
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.openapi.editor.Document
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -32,24 +31,19 @@ class RuffInspection : PyInspection() {
         }
 
         private fun inspectFile(pyFile: PyFile) {
-
-            val document = PsiDocumentManager.getInstance(pyFile.project).getDocument(pyFile) ?: return
-            val stdin = pyFile.textToCharArray().toByteArrayAndClear()
-
+            if (!pyFile.isApplicableTo) return
+            val project = pyFile.project
+            val document = PsiDocumentManager.getInstance(project).getDocument(pyFile) ?: return
             val response = executeOnPooledThread(null) {
-                runRuff(
-                    pyFile.project,
-                    stdin,
-                    *(argsBase + getStdinFileNameArgs(pyFile)).toTypedArray()
-                )
+                runRuff(pyFile, argsBase)
             } ?: return
-            val showRuleCode = RuffConfigService.getInstance(pyFile.project).showRuleCode
+            val showRuleCode = RuffConfigService.getInstance(project).showRuleCode
 
             parseJsonResponse(response).forEach {
                 val psiElement = getPyElement(it, pyFile, document) ?: return@forEach
                 registerProblem(
                     psiElement,
-                    if(showRuleCode) "${it.code} ${it.message}" else it.message,
+                    if (showRuleCode) "${it.code} ${it.message}" else it.message,
                     it.fix?.let { fix ->
                         RuffQuickFix.create(fix, document)
                     })
