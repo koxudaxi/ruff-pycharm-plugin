@@ -3,7 +3,8 @@
 ## Unreleased
 - Detect project ruff after packages refreshed [[#96](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/96)]
 - Refactor unnecessary variables [[#97](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/97)]
-- Fix string index out of bounds exception [[#98](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/978)]
+- Fix string index out of bounds exception [[#98](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/98)]
+- Add file path args when a save action [[#100](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/100)]
 
 ## 0.0.8 - 2023-02-17
 - Support conda system path  [[#84](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/84)]
