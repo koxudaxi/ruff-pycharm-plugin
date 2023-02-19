@@ -1,7 +1,5 @@
 package com.koxudaxi.ruff
 
-import com.intellij.credentialStore.toByteArrayAndClear
-
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
@@ -21,10 +19,8 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val pyFile = source.containingFile
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
 
-        val stdin = source.textToCharArray().toByteArrayAndClear()
-
         val formatted = executeOnPooledThread(null) {
-            runRuff(pyFile.project, stdin, *(argsBase + getStdinFileNameArgs(source)).toTypedArray())
+            runRuff(pyFile, argsBase)
         } ?: return TextRange.EMPTY_RANGE
         val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 

@@ -9,6 +9,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService
                 serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
+        <projectService serviceImplementation="com.koxudaxi.ruff.RuffFixService"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
         <postFormatProcessor
                 implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
