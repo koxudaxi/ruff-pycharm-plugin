@@ -14,7 +14,7 @@ class RuffFileDocumentManagerListener(private val project: Project) : FileDocume
     private val undoManager = UndoManager.getInstance(project)
     private val ruffConfigService = RuffConfigService.getInstance(project)
     private val psiDocumentManager = PsiDocumentManager.getInstance(project)
-    private val args = listOf("--exit-zero", "--no-cache", "--fix",  "-")
+    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix")
     override fun beforeDocumentSaving(document: Document) {
         if (!ruffConfigService.runRuffOnSave) return
         val psiFile = psiDocumentManager.getPsiFile(document) ?: return
@@ -22,7 +22,7 @@ class RuffFileDocumentManagerListener(private val project: Project) : FileDocume
         val fileName = psiFile.name
 
         val stdin = document.text.toByteArray(psiFile.virtualFile.charset)
-        runRuffInBackground(project, stdin, args, "running ruff $fileName") {
+        runRuffInBackground(project, stdin, argsBase + getStdinFileNameArgs(psiFile), "running ruff $fileName") {
             if (it !is String) return@runRuffInBackground
             runInEdt {
                 runWriteAction {
