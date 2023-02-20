@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 0.0.9 - 2023-02-20
 - Detect project ruff after packages refreshed [[#96](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/96)]
 - Refactor unnecessary variables [[#97](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/97)]
 - Fix string index out of bounds exception [[#98](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/98)]
