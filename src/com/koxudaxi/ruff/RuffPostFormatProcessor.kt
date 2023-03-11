@@ -22,31 +22,31 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         val formatted = executeOnPooledThread(null) {
             runRuff(pyFile, argsBase)
         } ?: return TextRange.EMPTY_RANGE
-        val diffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
+        val sourceDiffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
-        val newPartEnd = formatted.length - (source.text.length - diffRange.endOffset)
-        val newPart = formatted.substring(diffRange.startOffset, newPartEnd)
+        val formattedDiffRange = diffRange(formatted, source.text) ?: return TextRange.EMPTY_RANGE
+        val formattedPart = formatted.substring(formattedDiffRange.startOffset, formattedDiffRange.endOffset)
 
         return PyUtil.updateDocumentUnblockedAndCommitted<TextRange>(
             pyFile
         ) { document: Document ->
             document.replaceString(
-                diffRange.startOffset,
-                diffRange.endOffset,
-                newPart
+                sourceDiffRange.startOffset,
+                sourceDiffRange.endOffset,
+                formattedPart
             )
-            TextRange.from(diffRange.startOffset, newPart.length)
+            sourceDiffRange
         } ?: TextRange.EMPTY_RANGE
     }
 
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null
         if (s2.isEmpty()) return TextRange(0, s1.length)
-        val miLength = minOf(s1.length, s2.length)
-        val start = s1.zip(s2).indexOfFirst { pair -> pair.first != pair.second }.let { if (it == -1) miLength else it }
+        val minLength = minOf(s1.length, s2.length)
+        val start = s1.zip(s2).indexOfFirst { pair -> pair.first != pair.second }.let { if (it == -1) minLength else it }
 
-        val relativeEnd = (1..miLength)
-            .indexOfFirst { s1[s1.length - it] != s2[s2.length - it] }.let { if (it == -1) miLength else it - 1 }
+        val relativeEnd = (1..minLength)
+            .indexOfFirst { s1[s1.length - it] != s2[s2.length - it] }.let { if (it == -1) minLength else it - 1}
         val end = s1.length - relativeEnd
         return TextRange(start, end)
     }
