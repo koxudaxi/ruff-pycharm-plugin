@@ -7,8 +7,8 @@ import com.intellij.psi.PsiDocumentManager
 
 class RuffFileDocumentManagerListener(project: Project) : FileDocumentManagerListener {
     private val ruffConfigService = RuffConfigService.getInstance(project)
-    private val ruffFixService = RuffFixService.getInstance(project)
-    private val psiDocumentManager = PsiDocumentManager.getInstance(project)
+    private val ruffFixService by lazy { RuffFixService.getInstance(project)}
+    private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
     override fun beforeDocumentSaving(document: Document) {
         if (!ruffConfigService.runRuffOnSave) return
         val psiFile = psiDocumentManager.getPsiFile(document) ?: return

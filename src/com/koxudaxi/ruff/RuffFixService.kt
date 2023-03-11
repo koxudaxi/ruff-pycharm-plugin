@@ -11,8 +11,8 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 
 class RuffFixService(val project: Project) {
-    private val undoManager = UndoManager.getInstance(project)
-    private val psiDocumentManager = PsiDocumentManager.getInstance(project)
+    private val undoManager by lazy { UndoManager.getInstance(project) }
+    private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
     private val argsBase = listOf("--exit-zero", "--no-cache", "--fix")
 
     fun fix(psiFile: PsiFile) {
