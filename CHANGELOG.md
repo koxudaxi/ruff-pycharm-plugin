@@ -2,7 +2,8 @@
 
 ## Unreleased
 - Fix invalid text range error [[#116](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/116)]
-  Fix Cannot create listener error [[#117](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/117)]
+- Fix Cannot create listener error [[#117](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/117)]
+- Enable showRuleCode as default [[#118](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/118)]
 
 ## 0.0.9 - 2023-02-20
 - Detect project ruff after packages refreshed [[#96](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/96)]
