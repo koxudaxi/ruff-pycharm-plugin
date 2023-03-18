@@ -41,3 +41,4 @@ hs_err_pid*
 /venv/
 /site
 /docs/changelog.md
+.qodana
