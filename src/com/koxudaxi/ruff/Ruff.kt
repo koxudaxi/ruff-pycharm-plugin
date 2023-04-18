@@ -93,7 +93,7 @@ fun runCommand(
     executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
 ): String {
     val command = listOf(executable.path) + args
-    val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath)
+    val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
     val handler = CapturingProcessHandler(commandLine)
     val indicator = ProgressManager.getInstance().progressIndicator
     val result = with(handler) {

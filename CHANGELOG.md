@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fix unicode corruption on Windows [[#137](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/137)]
 
 ## 0.0.10 - 2023-03-13
 - Fix invalid text range error [[#116](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/116)]
