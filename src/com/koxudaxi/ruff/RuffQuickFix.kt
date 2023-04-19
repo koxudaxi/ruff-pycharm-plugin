@@ -7,8 +7,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.python.psi.PyUtil
 
-class RuffQuickFix(private val content: String, private val range: TextRange, private val message: String?) :
+class RuffQuickFix(private val edits: List<Edit>, private val message: String?) :
     LocalQuickFix {
+    data class Edit(
+        val content: String,
+        val range: TextRange,
+    )
+
     override fun getFamilyName(): String =
         when (message) {
             is String -> message
@@ -19,18 +24,34 @@ class RuffQuickFix(private val content: String, private val range: TextRange, pr
         PyUtil.updateDocumentUnblockedAndCommitted(
             descriptor.psiElement.containingFile
         ) { document: Document ->
-            document.replaceString(
-                range.startOffset,
-                range.endOffset,
-                content
-            )
+            edits.forEach { edit ->
+                document.replaceString(
+                    edit.range.startOffset,
+                    edit.range.endOffset,
+                    edit.content
+                )
+            }
+
         }
     }
 
     companion object {
         private const val DEFAULT_FIX_MESSAGE = "Quick fix with ruff"
-        fun create(fix: Fix, document: Document): RuffQuickFix {
-            return RuffQuickFix(fix.content, document.getStartEndRange(fix.location, fix.endLocation, 0), fix.message)
+        fun create(fix: Fix, document: Document): RuffQuickFix? {
+            return when {
+                fix.edits != null -> fix.edits.map {
+                    Edit(it.content, document.getStartEndRange(it.location, it.endLocation, 0))
+                }
+                fix.location != null && fix.endLocation != null && fix.content != null -> listOf(
+                    Edit(
+                        fix.content,
+                        document.getStartEndRange(fix.location, fix.endLocation, 0)
+                    )
+                )
+                else -> null
+            }?.let {
+                RuffQuickFix(it, fix.message)
+            }
         }
     }
 }
