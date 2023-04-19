@@ -11,12 +11,21 @@ data class Location(
 )
 
 @Serializable
-data class Fix(
+data class Edit(
     val content: String,
     val location: Location,
     @SerialName("end_location") val endLocation: Location,
-    val message: String? = null
 )
+@Serializable
+data class Fix(
+    val content: String? = null,
+    val location: Location? = null,
+    @SerialName("end_location") val endLocation: Location? = null,
+    val message: String? = null,
+    val edits: List<Edit>? = null,
+)
+
+
 @Serializable
 data class Result(
     val code: String,
@@ -24,5 +33,5 @@ data class Result(
     val fix: Fix?,
     val location: Location,
     @SerialName("end_location") val endLocation: Location,
-    val filename: String
+    val filename: String,
 )
