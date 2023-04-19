@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support ruff 0.0.260 [[#144](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/144)]
 
 ## [0.0.11] - 2023-04-19
 - Fix unicode corruption on Windows [[#137](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/137)]
