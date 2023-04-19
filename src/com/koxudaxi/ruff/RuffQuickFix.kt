@@ -39,15 +39,22 @@ class RuffQuickFix(private val edits: List<Edit>, private val message: String?) 
         private const val DEFAULT_FIX_MESSAGE = "Quick fix with ruff"
         fun create(fix: Fix, document: Document): RuffQuickFix? {
             return when {
-                fix.edits != null -> fix.edits.map {
-                    Edit(it.content, document.getStartEndRange(it.location, it.endLocation, 0))
+                fix.edits != null -> {
+                    var offset = 0
+                    fix.edits.map {
+                        val range = document.getStartEndRange(it.location, it.endLocation, offset)
+                        offset = offset - range.length + it.content.length
+                        Edit(it.content, range)
+                    }
                 }
+
                 fix.location != null && fix.endLocation != null && fix.content != null -> listOf(
                     Edit(
                         fix.content,
                         document.getStartEndRange(fix.location, fix.endLocation, 0)
                     )
                 )
+
                 else -> null
             }?.let {
                 RuffQuickFix(it, fix.message)
