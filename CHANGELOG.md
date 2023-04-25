@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.13] - 2023-04-25
 - Add disableOnSaveOutsideOfProject option [[#155](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/155)]
 
 ## [0.0.12] - 2023-04-19
@@ -65,7 +67,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.12...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.13...HEAD
+[0.0.13]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.11...v0.0.12
 [0.0.11]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.10...v0.0.11
 [0.0.10]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.9...v0.0.10
