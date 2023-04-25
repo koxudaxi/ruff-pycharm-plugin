@@ -215,6 +215,9 @@ fun parseJsonResponse(response: String): List<Result> = try {
     listOf()
 }
 
+fun VirtualFile.isInProjectDir(project: Project): Boolean =
+    project.basePath?.let { canonicalPath?.startsWith(it) } ?: false
+
 fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
     val canonicalPath = virtualFile.canonicalPath ?: return null
     return project.basePath?.takeIf { canonicalPath.startsWith(it) }?.let {
