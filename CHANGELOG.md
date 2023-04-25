@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add disableOnSaveOutsideOfProject option [[#155](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/155)]
 
 ## [0.0.12] - 2023-04-19
 - Support ruff 0.0.260 [[#144](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/144)]
