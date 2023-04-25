@@ -26,6 +26,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var projectRuffExecutablePathField: JBTextField
     private lateinit var ruffConfigPathField: TextFieldWithBrowseButton
     private lateinit var clearRuffConfigPathButton: JButton
+    private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox
 
     init {
         val ruffConfigService = getInstance(project)
@@ -37,6 +38,11 @@ class RuffConfigPanel(project: Project) {
         showRuleCodeCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
+        disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
+        disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
+        runRuffOnSaveCheckBox.addActionListener {
+            disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
+        }
         setProjectRuffExecutablePath(project)
 
         globalRuffExecutablePathField.apply {
@@ -85,6 +91,8 @@ class RuffConfigPanel(project: Project) {
         get() = alwaysUseGlobalRuffCheckBox.isSelected
     val ruffConfigPath: @SystemDependent String?
         get() = ruffConfigPathField.text.takeIf { it.isNotBlank() }
+    val disableOnSaveOutsideOfProject: Boolean
+        get() = disableOnSaveOutsideOfProjectCheckBox.isSelected
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND =  "Ruff executable not found"
     }
