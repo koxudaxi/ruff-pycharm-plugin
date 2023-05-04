@@ -9,6 +9,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.util.TextRange
 import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
@@ -32,11 +33,8 @@ class RuffExternalAnnotator :
         HighlightDisplayLevel.WARNING to ProblemHighlightType.WARNING,
         HighlightDisplayLevel.WEAK_WARNING to ProblemHighlightType.WEAK_WARNING,
     )
-    override fun getPairedBatchInspectionShortName(): String? {
-        return RuffInspection.INSPECTION_SHORT_NAME
-    }
 
-
+    override fun getPairedBatchInspectionShortName(): String = RuffInspection.INSPECTION_SHORT_NAME
 
     override fun collectInformation(file: PsiFile): RuffExternalAnnotatorInfo? {
         if (file !is PyFile) return null
@@ -49,14 +47,19 @@ class RuffExternalAnnotator :
         val highlightDisplayLevel = highlightSeverityLevels[level] ?: return null
         val problemHighlightType = problemHighlightTypeLevels[level] ?: return null
         val showRuleCode = RuffConfigService.getInstance(file.project).showRuleCode
-        val commandArgs =  generateCommandArgs(file, argsBase)
+        val commandArgs = generateCommandArgs(file, argsBase)
         return RuffExternalAnnotatorInfo(showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 
     override fun doAnnotate(info: RuffExternalAnnotatorInfo): RuffExternalAnnotatorResult? {
         val response = runRuff(info.commandArgs) ?: return null
         val result = parseJsonResponse(response)
-        return RuffExternalAnnotatorResult(info.showRuleCode, info.highlightDisplayLevel, info.problemHighlightType, result)
+        return RuffExternalAnnotatorResult(
+            info.showRuleCode,
+            info.highlightDisplayLevel,
+            info.problemHighlightType,
+            result
+        )
     }
 
     override fun apply(file: PsiFile, annotationResult: RuffExternalAnnotatorResult?, holder: AnnotationHolder) {
@@ -68,7 +71,8 @@ class RuffExternalAnnotator :
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
 
         result.forEach {
-            val psiElement = getPyElement(it, file, document) ?: return@forEach
+            val range = document.getStartEndRange(it.location, it.endLocation, -1)
+            val psiElement = getPyElement(file, range) ?: return@forEach
             val builder = holder.newAnnotation(
                 annotationResult.highlightDisplayLevel,
                 if (showRuleCode) "${it.code} ${it.message}" else it.message
@@ -76,10 +80,17 @@ class RuffExternalAnnotator :
             if (it.fix != null) {
                 RuffQuickFix.create(it.fix, document)?.let { quickFix ->
                     val problemDescriptor = InspectionManager.getInstance(file.project)
-                        .createProblemDescriptor(psiElement, it.message, quickFix, annotationResult.problemHighlightType, true)
-                    builder.needsUpdateOnTyping().newLocalQuickFix(quickFix, problemDescriptor).registerFix() }
+                        .createProblemDescriptor(
+                            psiElement,
+                            it.message,
+                            quickFix,
+                            annotationResult.problemHighlightType,
+                            true
+                        )
+                    builder.needsUpdateOnTyping().newLocalQuickFix(quickFix, problemDescriptor).registerFix()
+                }
             }
-            if (isForFile(document, it, trimOriginalLength)) {
+            if (isForFile(document, it, trimOriginalLength, range)) {
                 builder.fileLevel()
             } else {
                 builder.range(psiElement)
@@ -89,9 +100,8 @@ class RuffExternalAnnotator :
 
     }
 
-    private fun isForFile(document: Document, result: Result, trimOriginalLength: Int): Boolean {
+    private fun isForFile(document: Document, result: Result, trimOriginalLength: Int, range: TextRange): Boolean {
         if (result.location.row == 1 && result.location.column == 1) {
-            val range = document.getStartEndRange(result.location, result.endLocation, -   1)
             val trimResultLength = range.substring(document.text).trimEnd().length
             if (trimResultLength == trimOriginalLength) {
                 return true
@@ -100,16 +110,13 @@ class RuffExternalAnnotator :
         return false
     }
 
-    private fun getPyElement(result: Result, psiFile: PsiFile, document: Document): PsiElement? {
-        document.getStartEndRange(result.location, result.endLocation, -1).let {
-            return PsiTreeUtil.findElementOfClassAtRange(
-                psiFile,
-                it.startOffset,
-                it.endOffset,
-                PsiElement::class.java
-            )
-        }
-    }
+    private fun getPyElement(psiFile: PsiFile, range: TextRange): PsiElement? =
+        PsiTreeUtil.findElementOfClassAtRange(
+            psiFile,
+            range.startOffset,
+            range.endOffset,
+            PsiElement::class.java
+        )
 
 
     data class RuffExternalAnnotatorInfo(
