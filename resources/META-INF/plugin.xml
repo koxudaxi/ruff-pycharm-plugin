@@ -13,10 +13,10 @@
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
         <postFormatProcessor
                 implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
-<!--        <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"-->
-<!--                         displayName="Ruff inspection"-->
-<!--                         enabledByDefault="true" level="WARNING"-->
-<!--                         implementationClass="com.koxudaxi.ruff.RuffInspection"/>-->
+        <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
+                         displayName="Ruff inspection"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="com.koxudaxi.ruff.RuffInspection"/>
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
     </extensions>
     <projectListeners>
