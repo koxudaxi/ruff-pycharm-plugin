@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.python.psi.PyUtil
 
-class RuffQuickFix(private val edits: List<Edit>, private val message: String?) :
+class RuffQuickFix(private val edits: List<Edit>, val message: String?) :
     LocalQuickFix {
     data class Edit(
         val content: String,

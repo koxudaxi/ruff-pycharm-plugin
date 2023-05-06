@@ -88,6 +88,11 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
+fun runCommand(
+    commandArgs: CommandArgs
+): String = runCommand(
+    commandArgs.executable, commandArgs.projectPath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+)
 
 fun runCommand(
     executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
@@ -133,13 +138,19 @@ fun runCommand(
 }
 
 fun runRuff(psiFile: PsiFile, args: List<String>): String? =
-    runRuff(
-        psiFile.project,
-        psiFile.textToCharArray().toByteArrayAndClear(),
-        args + getStdinFileNameArgs(psiFile)
-    )
+    runRuff(generateCommandArgs(psiFile, args))
 
-fun runRuff(project: Project, stdin: ByteArray?, args: List<String>): String? {
+data class CommandArgs(
+    val executable: File, val projectPath: @SystemDependent String?,
+    val stdin: ByteArray?, val args: List<String>,
+)
+
+fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs =
+    generateCommandArgs(psiFile.project, psiFile.textToCharArray().toByteArrayAndClear(), args + getStdinFileNameArgs(psiFile))
+
+fun generateCommandArgs(project: Project,
+                         stdin: ByteArray?,
+                         args: List<String>): CommandArgs  {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
@@ -148,14 +159,18 @@ fun runRuff(project: Project, stdin: ByteArray?, args: List<String>): String? {
     val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it) + args
     }
+    return CommandArgs(executable, project.basePath, stdin, customConfigArgs ?: args)
+}
+
+fun runRuff(commandArgs: CommandArgs): String? {
     return try {
-        runCommand(
-            executable, project.basePath, stdin, *(customConfigArgs ?: args).toTypedArray()
-        )
+        runCommand(commandArgs)
     } catch (_: RunCanceledByUserException) {
         null
     }
 }
+
+
 
 inline fun <reified T> runRuffInBackground(
     psiFile: PsiFile, args: List<String>, crossinline callback: (String?) -> T
@@ -171,11 +186,12 @@ inline fun <reified T> runRuffInBackground(
 inline fun <reified T> runRuffInBackground(
     project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
 ): ProgressIndicator? {
+    val commandArgs = generateCommandArgs(project, stdin, args)
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
             val result: String? = try {
-                runRuff(project, stdin, args)
+                runRuff(commandArgs)
             } catch (e: ExecutionException) {
                 showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
                 null
