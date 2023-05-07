@@ -10,7 +10,7 @@ import com.jetbrains.python.psi.PyUtil
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
-    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix")
+    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix", "--force-exclude")
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
 

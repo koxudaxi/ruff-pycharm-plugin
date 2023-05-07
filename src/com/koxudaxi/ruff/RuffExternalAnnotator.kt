@@ -22,7 +22,7 @@ import com.jetbrains.python.psi.impl.PyFileImpl
 class RuffExternalAnnotator :
     ExternalAnnotator<RuffExternalAnnotator.RuffExternalAnnotatorInfo, RuffExternalAnnotator.RuffExternalAnnotatorResult>() {
     private val argsBase =
-        listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json")
+        listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json", "--force-exclude")
     private val highlightSeverityLevels = mapOf<HighlightDisplayLevel, HighlightSeverity>(
         HighlightDisplayLevel.ERROR to HighlightSeverity.ERROR,
         HighlightDisplayLevel.WARNING to HighlightSeverity.WARNING,
