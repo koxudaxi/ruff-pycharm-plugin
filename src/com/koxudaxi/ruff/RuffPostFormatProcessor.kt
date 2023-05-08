@@ -10,9 +10,6 @@ import com.jetbrains.python.psi.PyUtil
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
-    private val argsBase = listOf("--exit-zero", "--no-cache", "--force-exclude")
-    private val fixArgs = argsBase + listOf("--fix")
-    private val noFixArgs = argsBase + listOf("--no-fix", "--format", "json")
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
 
@@ -40,15 +37,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
             sourceDiffRange
         } ?: TextRange.EMPTY_RANGE
     }
-    private fun format(pyFile: PsiFile): String?  {
-        val fixResult = runRuff(pyFile, fixArgs) ?: return null
-        if (fixResult.isNotBlank()) return fixResult
-        val noFixResult = runRuff(pyFile, noFixArgs) ?: return null
 
-        // check the file is excluded
-        if (noFixResult == "[]\n") return null
-        return fixResult
-    }
 
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null

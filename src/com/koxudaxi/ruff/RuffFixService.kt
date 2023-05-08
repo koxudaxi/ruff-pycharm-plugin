@@ -13,7 +13,6 @@ import com.intellij.psi.PsiFile
 class RuffFixService(val project: Project) {
     private val undoManager by lazy { UndoManager.getInstance(project) }
     private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
-    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix", "--force-exclude")
 
     fun fix(psiFile: PsiFile) {
         val document = psiDocumentManager.getDocument(psiFile) ?: return
@@ -21,15 +20,15 @@ class RuffFixService(val project: Project) {
     }
 
     fun fix(document: Document, psiFile: PsiFile) =
-        runRuffInBackground(psiFile, argsBase) {
-            if (it !is String) return@runRuffInBackground
+        runRuffInBackground(psiFile, FIX_ARGS) {
+            val formatted = checkFixResult(psiFile, it) ?: return@runRuffInBackground
             runInEdt {
                 runWriteAction {
                     CommandProcessor.getInstance().executeCommand(
                         project,
                         {
                             if (!undoManager.isUndoInProgress) {
-                                document.setText(it)
+                                document.setText(formatted)
                             }
                         },
                         "Run ruff",
