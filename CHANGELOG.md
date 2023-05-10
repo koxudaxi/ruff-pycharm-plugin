@@ -3,6 +3,7 @@
 ## [Unreleased]
 - Move inspection to external_annotator [[#158](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/158)]
 - Add --force-exclude to default arguments [[#162](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/162)]
+- Fix content vanishes when set --force-exclude [[#164](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/164)]
 
 ## [0.0.13] - 2023-04-25
 - Add disableOnSaveOutsideOfProject option [[#155](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/155)]
