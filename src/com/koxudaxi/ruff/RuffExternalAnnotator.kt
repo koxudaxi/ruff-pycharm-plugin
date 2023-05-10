@@ -21,8 +21,6 @@ import com.jetbrains.python.psi.impl.PyFileImpl
 
 class RuffExternalAnnotator :
     ExternalAnnotator<RuffExternalAnnotator.RuffExternalAnnotatorInfo, RuffExternalAnnotator.RuffExternalAnnotatorResult>() {
-    private val argsBase =
-        listOf("--exit-zero", "--no-cache", "--no-fix", "--format", "json", "--force-exclude")
     private val highlightSeverityLevels = mapOf<HighlightDisplayLevel, HighlightSeverity>(
         HighlightDisplayLevel.ERROR to HighlightSeverity.ERROR,
         HighlightDisplayLevel.WARNING to HighlightSeverity.WARNING,
@@ -47,7 +45,7 @@ class RuffExternalAnnotator :
         val highlightDisplayLevel = highlightSeverityLevels[level] ?: return null
         val problemHighlightType = problemHighlightTypeLevels[level] ?: return null
         val showRuleCode = RuffConfigService.getInstance(file.project).showRuleCode
-        val commandArgs = generateCommandArgs(file, argsBase)
+        val commandArgs = generateCommandArgs(file, NO_FIX_ARGS)
         return RuffExternalAnnotatorInfo(showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 

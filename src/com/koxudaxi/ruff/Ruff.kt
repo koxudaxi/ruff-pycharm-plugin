@@ -50,6 +50,9 @@ val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite() + File.separator + "bin" +
 
 val json = Json { ignoreUnknownKeys = true }
 
+val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
+val FIX_ARGS = ARGS_BASE + listOf("--fix")
+val NO_FIX_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
     project.pythonSdk?.let {
@@ -257,4 +260,19 @@ fun Document.getStartEndRange(startLocation: Location, endLocation: Location, of
         else -> getLineStartOffset(lastLine) + endLocation.column + offset
     }
     return TextRange(start, end)
+}
+
+fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
+    if (fixResult == null) return null
+    if (fixResult.isNotBlank()) return fixResult
+    val noFixResult = runRuff(pyFile, NO_FIX_ARGS) ?: return null
+
+    // check the file is excluded
+    if (noFixResult == "[]\n") return null
+    return fixResult
+}
+
+fun format(pyFile: PsiFile): String?  {
+    val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
+    return checkFixResult(pyFile, fixResult)
 }

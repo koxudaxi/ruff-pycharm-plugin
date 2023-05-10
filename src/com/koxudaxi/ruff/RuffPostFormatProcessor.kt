@@ -10,7 +10,6 @@ import com.jetbrains.python.psi.PyUtil
 
 
 class RuffPostFormatProcessor : PostFormatProcessor {
-    private val argsBase = listOf("--exit-zero", "--no-cache", "--fix", "--force-exclude")
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
 
@@ -20,7 +19,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
 
         val formatted = executeOnPooledThread(null) {
-            runRuff(pyFile, argsBase)
+            format(pyFile)
         } ?: return TextRange.EMPTY_RANGE
         val sourceDiffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
@@ -38,6 +37,7 @@ class RuffPostFormatProcessor : PostFormatProcessor {
             sourceDiffRange
         } ?: TextRange.EMPTY_RANGE
     }
+
 
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null
