@@ -8,6 +8,8 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.execution.process.ProcessOutput
+import com.intellij.execution.wsl.WSLCommandLineOptions
+import com.intellij.execution.wsl.WslPath
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
@@ -93,17 +95,24 @@ val PsiFile.isApplicableTo: Boolean
 
 fun runCommand(
     commandArgs: CommandArgs
-): String = runCommand(
+): String? = runCommand(
     commandArgs.executable, commandArgs.projectPath, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
+
 fun runCommand(
     executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
-): String {
+): String? {
     val command = listOf(executable.path) + args
     val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
-    val handler = CapturingProcessHandler(commandLine)
     val indicator = ProgressManager.getInstance().progressIndicator
+    val handler = if (WslPath.isWslUncPath(executable.path)) {
+        val wslDistribution = WslPath.getDistributionByWindowsUncPath(executable.path) ?: return null
+        wslDistribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+    } else {
+        commandLine
+    }.let { CapturingProcessHandler(it) }
+
     val result = with(handler) {
         if (stdin is ByteArray) {
             with(processInput) {
@@ -149,11 +158,17 @@ data class CommandArgs(
 )
 
 fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs =
-    generateCommandArgs(psiFile.project, psiFile.textToCharArray().toByteArrayAndClear(), args + getStdinFileNameArgs(psiFile))
+    generateCommandArgs(
+        psiFile.project,
+        psiFile.textToCharArray().toByteArrayAndClear(),
+        args + getStdinFileNameArgs(psiFile)
+    )
 
-fun generateCommandArgs(project: Project,
-                         stdin: ByteArray?,
-                         args: List<String>): CommandArgs  {
+fun generateCommandArgs(
+    project: Project,
+    stdin: ByteArray?,
+    args: List<String>
+): CommandArgs {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
@@ -272,7 +287,7 @@ fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
     return fixResult
 }
 
-fun format(pyFile: PsiFile): String?  {
+fun format(pyFile: PsiFile): String? {
     val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
     return checkFixResult(pyFile, fixResult)
 }
