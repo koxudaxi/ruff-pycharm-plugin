@@ -100,17 +100,22 @@ fun runCommand(
 )
 
 
+fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
+    GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
+
 fun runCommand(
     executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
 ): String? {
-    val command = listOf(executable.path) + args
-    val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
+
     val indicator = ProgressManager.getInstance().progressIndicator
     val handler = if (WslPath.isWslUncPath(executable.path)) {
-        val wslDistribution = WslPath.getDistributionByWindowsUncPath(executable.path) ?: return null
-        wslDistribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+        val options = WSLCommandLineOptions()
+        options.setExecuteCommandInShell(false)
+        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
+        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
     } else {
-        commandLine
+        getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }.let { CapturingProcessHandler(it) }
 
     val result = with(handler) {
