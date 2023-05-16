@@ -28,6 +28,7 @@ import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
+import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
@@ -99,15 +100,22 @@ fun findRuffExecutableInSDK(sdk: Sdk): File? {
             val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
             File(distribution.getWindowsPath(homeParent), WSL_RUFF_COMMAND)
         }
-        else -> sdk.homeDirectory?.parent?.path?.let {  File(it, RUFF_COMMAND) }
+       (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
+           sdk.homeDirectory?.parent?.path?.let { findRuffExecutableInConda(it) }
+        else -> {
+            val parent = sdk.homeDirectory?.parent?.path
+            parent?.let {  File(it, RUFF_COMMAND) }}
     }?.takeIf { it.exists() }
 }
 fun findRuffExecutableInUserSite(): File? = File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
+fun findRuffExecutableInConda(condaHomeDir: String): File? {
+    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+}
 fun findRuffExecutableInConda(): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
     val condaDir = File(condaExecutable).parentFile.parent
-    return File(condaDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+    return findRuffExecutableInConda(condaDir)
 }
 
 fun findGlobalRuffExecutable(): File? =
