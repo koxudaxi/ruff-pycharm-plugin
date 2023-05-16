@@ -59,6 +59,22 @@ val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
 val FIX_ARGS = ARGS_BASE + listOf("--fix")
 val NO_FIX_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 
+private var wslSdkIsSupported: Boolean? = null
+val Sdk.wslIsSupported: Boolean
+    get() {
+        if (wslSdkIsSupported is Boolean) {
+            return wslSdkIsSupported as Boolean
+        }
+        return when {
+            !SystemInfo.isWindows -> false
+            else -> try {
+                isWsl
+                true
+            } catch (e: ClassNotFoundException) {
+                false
+            }
+        }.also { wslSdkIsSupported = it }
+    }
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it)
@@ -77,7 +93,7 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
 
 fun findRuffExecutableInSDK(sdk: Sdk): File? {
     return when {
-        sdk.isWsl -> {
+        sdk.wslIsSupported && sdk.isWsl -> {
             val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
             val distribution = (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution ?: return null
             val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
