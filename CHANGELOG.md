@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support WSL [[#172](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/172)]
 
 ## [0.0.14] - 2023-05-10
 - Move inspection to external_annotator [[#158](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/158)]
