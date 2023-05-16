@@ -7,9 +7,9 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
-import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.wsl.WSLCommandLineOptions
 import com.intellij.execution.wsl.WslPath
+import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
@@ -28,6 +28,8 @@ import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
+import com.jetbrains.python.target.PyTargetAwareAdditionalData
+import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -42,6 +44,7 @@ val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
     else -> "ruff"
 }
+const val WSL_RUFF_COMMAND = "ruff"
 
 val SCRIPT_DIR = when {
     SystemInfo.isWindows -> "Scripts"
@@ -72,9 +75,17 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
     }
 }
 
-fun findRuffExecutableInSDK(sdk: Sdk): File? =
-    sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
-
+fun findRuffExecutableInSDK(sdk: Sdk): File? {
+    return when {
+        sdk.isWsl -> {
+            val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
+            val distribution = (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution ?: return null
+            val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
+            File(distribution.getWindowsPath(homeParent), WSL_RUFF_COMMAND)
+        }
+        else -> sdk.homeDirectory?.parent?.path?.let {  File(it, RUFF_COMMAND) }
+    }?.takeIf { it.exists() }
+}
 fun findRuffExecutableInUserSite(): File? = File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
 fun findRuffExecutableInConda(): File? {
@@ -155,14 +166,15 @@ fun runCommand(
 }
 
 fun runRuff(psiFile: PsiFile, args: List<String>): String? =
-    runRuff(generateCommandArgs(psiFile, args))
+        generateCommandArgs(psiFile, args)?.let { runRuff(it) }
+
 
 data class CommandArgs(
     val executable: File, val projectPath: @SystemDependent String?,
     val stdin: ByteArray?, val args: List<String>,
 )
 
-fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs =
+fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs? =
     generateCommandArgs(
         psiFile.project,
         psiFile.textToCharArray().toByteArrayAndClear(),
@@ -173,12 +185,12 @@ fun generateCommandArgs(
     project: Project,
     stdin: ByteArray?,
     args: List<String>
-): CommandArgs {
+): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService
-        ) ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
+        ) ?: return null
     val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it) + args
     }
@@ -209,7 +221,7 @@ inline fun <reified T> runRuffInBackground(
 inline fun <reified T> runRuffInBackground(
     project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
 ): ProgressIndicator? {
-    val commandArgs = generateCommandArgs(project, stdin, args)
+    val commandArgs = generateCommandArgs(project, stdin, args) ?: return null
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
