@@ -70,7 +70,7 @@ val Sdk.wslIsSupported: Boolean
             else -> try {
                 isWsl
                 true
-            } catch (e: ClassNotFoundException) {
+            } catch (e: NoClassDefFoundError) {
                 false
             }
         }.also { wslSdkIsSupported = it }
