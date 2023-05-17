@@ -9,6 +9,7 @@ import com.intellij.openapi.ui.emptyText
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
 import org.jetbrains.annotations.SystemDependent
+import java.io.File
 
 import javax.swing.JButton
 import javax.swing.JCheckBox
@@ -43,12 +44,21 @@ class RuffConfigPanel(project: Project) {
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
         }
-        setProjectRuffExecutablePath(project)
+        val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project)
+        if (projectRuffExecutablePath is String) {
+            projectRuffExecutablePathField.text = projectRuffExecutablePath
+        } else  {
+            projectRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
+        }
 
         globalRuffExecutablePathField.apply {
             addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             if (textField is JBTextField) {
-                setAutodetectedRuff()
+                if (ruffConfigService.globalRuffExecutablePath is String) {
+                    textField.text = ruffConfigService.globalRuffExecutablePath
+                } else {
+                    setAutodetectedRuff()
+                }
             }
             textField.isEditable = false
         }
@@ -76,8 +86,8 @@ class RuffConfigPanel(project: Project) {
             is String -> globalRuffExecutablePathField.text = ruffExecutablePath
             else -> globalRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
         }
-    private fun setProjectRuffExecutablePath(project: Project) {
-        projectRuffExecutablePathField.text = project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.absolutePath ?: RUFF_EXECUTABLE_NOT_FOUND
+    private fun getProjectRuffExecutablePath(project: Project): String? {
+     return project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.absolutePath
     }
     val runRuffOnSave: Boolean
         get() = runRuffOnSaveCheckBox.isSelected
