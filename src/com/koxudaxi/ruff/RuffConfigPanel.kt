@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBTextField
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.emptyText
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
@@ -28,7 +29,6 @@ class RuffConfigPanel(project: Project) {
     private lateinit var ruffConfigPathField: TextFieldWithBrowseButton
     private lateinit var clearRuffConfigPathButton: JButton
     private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox
-
     init {
         val ruffConfigService = getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
@@ -44,20 +44,13 @@ class RuffConfigPanel(project: Project) {
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
         }
-        val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project)
-        if (projectRuffExecutablePath is String) {
-            projectRuffExecutablePathField.text = projectRuffExecutablePath
-        } else  {
-            projectRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
-        }
 
         globalRuffExecutablePathField.apply {
             addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             if (textField is JBTextField) {
-                if (ruffConfigService.globalRuffExecutablePath is String) {
-                    textField.text = ruffConfigService.globalRuffExecutablePath
-                } else {
-                    setAutodetectedRuff()
+                when (val globalRuffExecutablePath = ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() }) {
+                    is String -> textField.text = globalRuffExecutablePath
+                    else -> setAutodetectedRuff()
                 }
             }
             textField.isEditable = false
@@ -70,6 +63,13 @@ class RuffConfigPanel(project: Project) {
             projectRuffExecutablePathField.isEnabled = !alwaysUseGlobalRuffCheckBox.isSelected
         }
 
+        when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project)) {
+            is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
+            else -> {
+                projectRuffExecutablePathField.text = ""
+                projectRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
+            }
+        }
         ruffConfigPathField.apply {
             addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             textField.isEditable = false
@@ -80,11 +80,13 @@ class RuffConfigPanel(project: Project) {
         }
     }
 
-
     private fun setAutodetectedRuff() =
         when (val ruffExecutablePath = findGlobalRuffExecutable()?.absolutePath) {
             is String -> globalRuffExecutablePathField.text = ruffExecutablePath
-            else -> globalRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
+            else -> {
+                globalRuffExecutablePathField.text = ""
+                globalRuffExecutablePathField.emptyText.text = RUFF_EXECUTABLE_NOT_FOUND
+            }
         }
     private fun getProjectRuffExecutablePath(project: Project): String? {
      return project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.absolutePath
