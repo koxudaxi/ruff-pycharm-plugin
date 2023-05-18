@@ -33,6 +33,8 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
   - [x] Detect a project ruff after packages refreshed
 - [x] Execute `ruff` command as a new process
 - [x] Support `ruff` config file path as an option
+- [x] Detect `ruff` executalbe in Conda environment
+- [x] Detect `ruff` executalbe in WSL
 
 ## Contribute
 We are waiting for your contributions to `ruff-pycharm-plugin`.
