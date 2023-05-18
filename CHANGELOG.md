@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.15] - 2023-05-18
 - Support WSL [[#172](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/172)]
 - Support Conda virtual environment [[#174](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/174)]
 - Fix ruff executable path rollback problem [[#176](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/176)]
@@ -75,7 +77,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.14...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.15...HEAD
+[0.0.15]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.13...v0.0.14
 [0.0.13]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.11...v0.0.12
