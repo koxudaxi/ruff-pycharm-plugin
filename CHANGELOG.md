@@ -3,7 +3,8 @@
 ## [Unreleased]
 - Support WSL [[#172](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/172)]
 - Support Conda virtual environment [[#174](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/174)]
-
+- Fix ruff executable path rollback problem [[#176](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/176)]
+- 
 ## [0.0.14] - 2023-05-10
 - Move inspection to external_annotator [[#158](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/158)]
 - Add --force-exclude to default arguments [[#162](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/162)]
