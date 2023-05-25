@@ -40,7 +40,7 @@ class RuffQuickFix(private val edits: List<Edit>, val message: String?) :
         fun create(fix: Fix, document: Document): RuffQuickFix? {
             return when {
                 fix.edits != null -> {
-                    var offset = if (fix.applicability != null) { -1 } else { 0 }
+                    var offset = 0
                     fix.edits.map {
                         val range = document.getStartEndRange(it.location, it.endLocation, offset)
                         offset = offset - range.length + it.content.length
