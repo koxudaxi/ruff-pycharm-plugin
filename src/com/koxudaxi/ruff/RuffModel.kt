@@ -23,6 +23,7 @@ data class Fix(
     @SerialName("end_location") val endLocation: Location? = null,
     val message: String? = null,
     val edits: List<Edit>? = null,
+    val applicability: String? = null,
 )
 
 
