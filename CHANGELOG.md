@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support one-based column indices for Edits [[#182](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/182)]
 
 ## [0.0.15] - 2023-05-18
 - Support WSL [[#172](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/172)]
