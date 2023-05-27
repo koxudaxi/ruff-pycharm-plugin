@@ -7,7 +7,9 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
-import com.intellij.execution.process.ProcessOutput
+import com.intellij.execution.wsl.WSLCommandLineOptions
+import com.intellij.execution.wsl.WslPath
+import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
@@ -26,6 +28,9 @@ import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
+import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
+import com.jetbrains.python.target.PyTargetAwareAdditionalData
+import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -40,6 +45,7 @@ val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
     else -> "ruff"
 }
+const val WSL_RUFF_COMMAND = "ruff"
 
 val SCRIPT_DIR = when {
     SystemInfo.isWindows -> "Scripts"
@@ -50,7 +56,26 @@ val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite() + File.separator + "bin" +
 
 val json = Json { ignoreUnknownKeys = true }
 
+val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
+val FIX_ARGS = ARGS_BASE + listOf("--fix")
+val NO_FIX_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 
+private var wslSdkIsSupported: Boolean? = null
+val Sdk.wslIsSupported: Boolean
+    get() {
+        if (wslSdkIsSupported is Boolean) {
+            return wslSdkIsSupported as Boolean
+        }
+        return when {
+            !SystemInfo.isWindows -> false
+            else -> try {
+                isWsl
+                true
+            } catch (e: NoClassDefFoundError) {
+                false
+            }
+        }.also { wslSdkIsSupported = it }
+    }
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it)
@@ -67,15 +92,30 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
     }
 }
 
-fun findRuffExecutableInSDK(sdk: Sdk): File? =
-    sdk.homeDirectory?.parent?.let { File(it.path, RUFF_COMMAND) }?.takeIf { it.exists() }
-
+fun findRuffExecutableInSDK(sdk: Sdk): File? {
+    return when {
+        sdk.wslIsSupported && sdk.isWsl -> {
+            val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
+            val distribution = (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution ?: return null
+            val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
+            File(distribution.getWindowsPath(homeParent), WSL_RUFF_COMMAND)
+        }
+       (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
+           sdk.homeDirectory?.parent?.path?.let { findRuffExecutableInConda(it) }
+        else -> {
+            val parent = sdk.homeDirectory?.parent?.path
+            parent?.let {  File(it, RUFF_COMMAND) }}
+    }?.takeIf { it.exists() }
+}
 fun findRuffExecutableInUserSite(): File? = File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
 
+fun findRuffExecutableInConda(condaHomeDir: String): File? {
+    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+}
 fun findRuffExecutableInConda(): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
     val condaDir = File(condaExecutable).parentFile.parent
-    return File(condaDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+    return findRuffExecutableInConda(condaDir)
 }
 
 fun findGlobalRuffExecutable(): File? =
@@ -88,14 +128,31 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
+fun runCommand(
+    commandArgs: CommandArgs
+): String? = runCommand(
+    commandArgs.executable, commandArgs.projectPath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+)
+
+
+fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
+    GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
 fun runCommand(
     executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
-): String {
-    val command = listOf(executable.path) + args
-    val commandLine = GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
-    val handler = CapturingProcessHandler(commandLine)
+): String? {
+
     val indicator = ProgressManager.getInstance().progressIndicator
+    val handler = if (WslPath.isWslUncPath(executable.path)) {
+        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+        val options = WSLCommandLineOptions()
+        options.setExecuteCommandInShell(false)
+        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
+        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+    } else {
+        getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+    }.let { CapturingProcessHandler(it) }
+
     val result = with(handler) {
         if (stdin is ByteArray) {
             with(processInput) {
@@ -133,29 +190,46 @@ fun runCommand(
 }
 
 fun runRuff(psiFile: PsiFile, args: List<String>): String? =
-    runRuff(
+        generateCommandArgs(psiFile, args)?.let { runRuff(it) }
+
+
+data class CommandArgs(
+    val executable: File, val projectPath: @SystemDependent String?,
+    val stdin: ByteArray?, val args: List<String>,
+)
+
+fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs? =
+    generateCommandArgs(
         psiFile.project,
         psiFile.textToCharArray().toByteArrayAndClear(),
         args + getStdinFileNameArgs(psiFile)
     )
 
-fun runRuff(project: Project, stdin: ByteArray?, args: List<String>): String? {
+fun generateCommandArgs(
+    project: Project,
+    stdin: ByteArray?,
+    args: List<String>
+): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService
-        ) ?: throw PyExecutionException("Cannot find Ruff", "ruff", emptyList(), ProcessOutput())
+        ) ?: return null
     val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it) + args
     }
+    return CommandArgs(executable, project.basePath, stdin, customConfigArgs ?: args)
+}
+
+fun runRuff(commandArgs: CommandArgs): String? {
     return try {
-        runCommand(
-            executable, project.basePath, stdin, *(customConfigArgs ?: args).toTypedArray()
-        )
+        runCommand(commandArgs)
     } catch (_: RunCanceledByUserException) {
         null
     }
 }
+
+
 
 inline fun <reified T> runRuffInBackground(
     psiFile: PsiFile, args: List<String>, crossinline callback: (String?) -> T
@@ -171,11 +245,12 @@ inline fun <reified T> runRuffInBackground(
 inline fun <reified T> runRuffInBackground(
     project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
 ): ProgressIndicator? {
+    val commandArgs = generateCommandArgs(project, stdin, args) ?: return null
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
             val result: String? = try {
-                runRuff(project, stdin, args)
+                runRuff(commandArgs)
             } catch (e: ExecutionException) {
                 showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
                 null
@@ -215,6 +290,9 @@ fun parseJsonResponse(response: String): List<Result> = try {
     listOf()
 }
 
+fun VirtualFile.isInProjectDir(project: Project): Boolean =
+    project.basePath?.let { canonicalPath?.startsWith(it) } ?: false
+
 fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
     val canonicalPath = virtualFile.canonicalPath ?: return null
     return project.basePath?.takeIf { canonicalPath.startsWith(it) }?.let {
@@ -238,4 +316,19 @@ fun Document.getStartEndRange(startLocation: Location, endLocation: Location, of
         else -> getLineStartOffset(lastLine) + endLocation.column + offset
     }
     return TextRange(start, end)
+}
+
+fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
+    if (fixResult == null) return null
+    if (fixResult.isNotBlank()) return fixResult
+    val noFixResult = runRuff(pyFile, NO_FIX_ARGS) ?: return null
+
+    // check the file is excluded
+    if (noFixResult == "[]\n") return null
+    return fixResult
+}
+
+fun format(pyFile: PsiFile): String? {
+    val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
+    return checkFixResult(pyFile, fixResult)
 }

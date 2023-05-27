@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [0.0.16] - 2023-05-26
+- Support one-based column indices for Edits [[#182](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/182)]
+
+## [0.0.15] - 2023-05-18
+- Support WSL [[#172](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/172)]
+- Support Conda virtual environment [[#174](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/174)]
+- Fix ruff executable path rollback problem [[#176](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/176)]
+
+## [0.0.14] - 2023-05-10
+- Move inspection to external_annotator [[#158](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/158)]
+- Add --force-exclude to default arguments [[#162](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/162)]
+- Fix content vanishes when set --force-exclude [[#164](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/164)]
+
+## [0.0.13] - 2023-04-25
+- Add disableOnSaveOutsideOfProject option [[#155](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/155)]
+
 ## [0.0.12] - 2023-04-19
 - Support ruff 0.0.260 [[#144](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/144)]
 - Fix multi-edit fixes [[#145](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/145)]
@@ -64,7 +80,11 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.12...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.16...HEAD
+[0.0.16]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.15...v0.0.16
+[0.0.15]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.14...v0.0.15
+[0.0.14]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.13...v0.0.14
+[0.0.13]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.11...v0.0.12
 [0.0.11]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.10...v0.0.11
 [0.0.10]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.9...v0.0.10

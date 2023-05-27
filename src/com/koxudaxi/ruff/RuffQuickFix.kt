@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.jetbrains.python.psi.PyUtil
 
-class RuffQuickFix(private val edits: List<Edit>, private val message: String?) :
+class RuffQuickFix(private val edits: List<Edit>, val message: String?) :
     LocalQuickFix {
     data class Edit(
         val content: String,
@@ -40,7 +40,7 @@ class RuffQuickFix(private val edits: List<Edit>, private val message: String?) 
         fun create(fix: Fix, document: Document): RuffQuickFix? {
             return when {
                 fix.edits != null -> {
-                    var offset = 0
+                    var offset = if (fix.applicability != null) { -1 } else { 0 }
                     fix.edits.map {
                         val range = document.getStartEndRange(it.location, it.endLocation, offset)
                         offset = offset - range.length + it.content.length

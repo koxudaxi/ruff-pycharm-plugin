@@ -29,7 +29,8 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
                 ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
                 ruffConfigService.globalRuffExecutablePath != configPanel.globalRuffExecutablePath ||
-                ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath
+                ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
+                ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject
 
     }
 
@@ -40,6 +41,7 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.alwaysUseGlobalRuff = configPanel.alwaysUseGlobalRuff
         ruffConfigService.globalRuffExecutablePath = configPanel.globalRuffExecutablePath
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
+        ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
     }
 
     override fun disposeUIResources() {
