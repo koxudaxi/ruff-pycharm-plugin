@@ -8,7 +8,7 @@ plugins {
     // Kotlin support
     kotlin("jvm") version "1.8.20"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.intellij") version "1.14.1"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.0.0"
     // Gradle Qodana Plugin
@@ -125,7 +125,7 @@ tasks {
 dependencies {
     compileOnly("org.apache.tuweni:tuweni-toml:2.3.1")
     compileOnly(group = "org.ini4j", name = "ini4j", version = "0.5.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation(kotlin("test"))
 }
 
