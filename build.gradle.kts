@@ -6,7 +6,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     // Kotlin support
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.8.22"
     // Gradle IntelliJ Plugin
     id("org.jetbrains.intellij") version "1.14.1"
     // Gradle Changelog Plugin
@@ -15,7 +15,8 @@ plugins {
     id("org.jetbrains.qodana") version "0.1.13"
     // Gradle Kover Plugin
     id("org.jetbrains.kotlinx.kover") version "0.7.1"
-    kotlin("plugin.serialization") version "1.8.10"
+    id("org.jetbrains.kotlinx.kover") version "0.6.1"
+    kotlin("plugin.serialization") version "1.8.20"
 }
 
 group = properties("pluginGroup").get()
