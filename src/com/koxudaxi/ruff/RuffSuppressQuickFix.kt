@@ -6,36 +6,35 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.jetbrains.python.psi.PyUtil
 
-class RuffSuppressQuickFix(private val edits: Edit) :
+class RuffSuppressQuickFix(
+    private val code: String,
+    private val message: String,
+    private val offset: Int) :
     LocalQuickFix {
-    data class Edit(
-        val code: String,
-        val message: String,
-        val offset: Int,
-    )
+
 
     override fun getFamilyName(): String =
-        "Suppress ${edits.code} ${edits.message}"
+        "Suppress \"$code ${message}\""
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         PyUtil.updateDocumentUnblockedAndCommitted(
             descriptor.psiElement.containingFile
         ) { document: Document ->
                 document.replaceString(
-                    edits.offset,
-                    edits.offset,
-                    " # noqa: ${edits.code}"
+                    offset,
+                    offset,
+                    " # noqa: $code"
                 )
         }
     }
 
     companion object {
         fun create(result: Result, document: Document): RuffSuppressQuickFix {
-            return RuffSuppressQuickFix(Edit(
+            return RuffSuppressQuickFix(
                 result.code,
                 result.message,
                 document.getLineEndOffset(result.location.row - 1)
-            ))
+            )
         }
     }
 }

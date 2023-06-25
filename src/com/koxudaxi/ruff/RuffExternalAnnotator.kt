@@ -67,6 +67,7 @@ class RuffExternalAnnotator :
         val result = annotationResult.result
         val trimOriginalLength = file.text.trimEnd().length
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
+        val inspectionManager = InspectionManager.getInstance(file.project)
 
         result.forEach {
             val range = document.getStartEndRange(it.location, it.endLocation, -1)
@@ -77,27 +78,25 @@ class RuffExternalAnnotator :
             ).needsUpdateOnTyping()
             if (it.fix != null) {
                 RuffQuickFix.create(it.fix, document)?.let { quickFix ->
-                    val problemDescriptor = InspectionManager.getInstance(file.project)
-                        .createProblemDescriptor(
-                            psiElement,
-                            it.message,
-                            quickFix,
-                            annotationResult.problemHighlightType,
-                            true
-                        )
+                    val problemDescriptor = inspectionManager.createProblemDescriptor(
+                        psiElement,
+                        it.message,
+                        quickFix,
+                        annotationResult.problemHighlightType,
+                        true
+                    )
                     builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
                 }
             }
 
             RuffSuppressQuickFix.create(it, document).let { quickFix ->
-                val problemDescriptor = InspectionManager.getInstance(file.project)
-                    .createProblemDescriptor(
-                        psiElement,
-                        quickFix.familyName,
-                        quickFix,
-                        annotationResult.problemHighlightType,
-                        true
-                    )
+                val problemDescriptor = inspectionManager.createProblemDescriptor(
+                    psiElement,
+                    quickFix.familyName,
+                    quickFix,
+                    annotationResult.problemHighlightType,
+                    true
+                )
                 builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
             }
             if (isForFile(document, it, trimOriginalLength, range)) {
