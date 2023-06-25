@@ -74,7 +74,7 @@ class RuffExternalAnnotator :
             val builder = holder.newAnnotation(
                 annotationResult.highlightDisplayLevel,
                 if (showRuleCode) "${it.code} ${it.message}" else it.message
-            )
+            ).needsUpdateOnTyping()
             if (it.fix != null) {
                 RuffQuickFix.create(it.fix, document)?.let { quickFix ->
                     val problemDescriptor = InspectionManager.getInstance(file.project)
@@ -85,8 +85,20 @@ class RuffExternalAnnotator :
                             annotationResult.problemHighlightType,
                             true
                         )
-                    builder.needsUpdateOnTyping().newLocalQuickFix(quickFix, problemDescriptor).registerFix()
+                    builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
                 }
+            }
+
+            RuffSuppressQuickFix.create(it, document).let { quickFix ->
+                val problemDescriptor = InspectionManager.getInstance(file.project)
+                    .createProblemDescriptor(
+                        psiElement,
+                        quickFix.familyName,
+                        quickFix,
+                        annotationResult.problemHighlightType,
+                        true
+                    )
+                builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
             }
             if (isForFile(document, it, trimOriginalLength, range)) {
                 builder.fileLevel()
