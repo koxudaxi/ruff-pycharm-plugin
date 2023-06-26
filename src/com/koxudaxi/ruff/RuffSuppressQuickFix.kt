@@ -24,12 +24,14 @@ class RuffSuppressQuickFix(
         Pattern.CASE_INSENSITIVE
     )
     data class NoqaCodes(val codes: List<String>?, val noqaStartOffset: Int, val noqaEndOffset: Int)
-    fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
-        return null
+    private fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
         val commentText = comment.text ?: return null
         val noqaOffset = commentText.lowercase().indexOf("# noqa")
         val noqaStartOffset = comment.textRange.startOffset + noqaOffset
-        val matcher = NOQA_COMMENT_PATTERN.matcher(commentText.substring(noqaOffset)) ?: return NoqaCodes(null, noqaStartOffset, noqaStartOffset + "# noqa".length)
+        val matcher = NOQA_COMMENT_PATTERN.matcher(commentText.substring(noqaOffset))
+        if (!matcher.find()) {
+            return NoqaCodes(null, noqaStartOffset, noqaStartOffset + "# noqa".length)
+        }
         val codes = matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
         return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
     }
