@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- Support 232 EAP [[#196](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/196)]
+- Add suppress QuickFix [[#198](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/189)]
 
 ## [0.0.16] - 2023-05-26
 - Support one-based column indices for Edits [[#182](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/182)]
