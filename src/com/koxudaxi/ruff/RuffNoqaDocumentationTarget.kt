@@ -25,14 +25,14 @@ class RuffNoqaDocumentationTarget(val psiComment: PsiComment, private val origin
         get() = psiComment as? Navigatable
 
     private val replaceHtmlTags = listOf(
-        "<h1>" to "<h2>",
-        "</h1>" to "</h2>",
-        "<h2>" to "<h3>",
-        "</h2>" to "</h3>",
-        "<h3>" to "<h4>",
-        "</h3>" to "</h4>",
-        "<h4>" to "<h5>",
-        "</h4>" to "</h5>",
+        "<h1>" to "<h3>",
+        "</h1>" to "</h3>",
+        "<h2>" to "<h4>",
+        "</h2>" to "</h4>",
+        "<h3>" to "<h5>",
+        "</h3>" to "</h5>",
+        "<h4>" to "<h6>",
+        "</h4>" to "</h6>",
         "<h5>" to "<h6>",
         "</h5>" to "</h6>",
     ).reversed()
