@@ -58,7 +58,7 @@ class RuffSuppressQuickFix(
         }
 
         PyUtil.updateDocumentUnblockedAndCommitted(psiFile) { document: Document ->
-            val prefix = if (startOffset != null &&  document.text[startOffset -1] == ' ') ""  else " "
+            val prefix = if (startOffset != null && document.text[startOffset -1] == ' ') ""  else " "
             document.replaceString(
                 startOffset ?: document.getLineEndOffset(lineOffset),
                 endOffset ?: document.getLineEndOffset(lineOffset),
