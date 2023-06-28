@@ -22,6 +22,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
@@ -40,6 +41,7 @@ import java.io.IOError
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import java.util.regex.Pattern
 
 val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
@@ -192,6 +194,10 @@ fun runCommand(
 fun runRuff(psiFile: PsiFile, args: List<String>): String? =
         generateCommandArgs(psiFile, args)?.let { runRuff(it) }
 
+fun runRuff(project: Project, args: List<String>): String? =
+    generateCommandArgs(project, null, args)?.let { runRuff(it) }
+
+
 
 data class CommandArgs(
     val executable: File, val projectPath: @SystemDependent String?,
@@ -331,4 +337,21 @@ fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
 fun format(pyFile: PsiFile): String? {
     val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
     return checkFixResult(pyFile, fixResult)
+}
+
+val NOQA_COMMENT_PATTERN: Pattern = Pattern.compile(
+    "# noqa(?::[\\s]?(?<codes>([A-Z]+[0-9]+(?:[,\\s]+)?)+))?.*",
+    Pattern.CASE_INSENSITIVE
+)
+data class NoqaCodes(val codes: List<String>?, val noqaStartOffset: Int, val noqaEndOffset: Int)
+fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
+    val commentText = comment.text ?: return null
+    val noqaOffset = commentText.lowercase().indexOf("# noqa")
+    val noqaStartOffset = comment.textRange.startOffset + noqaOffset
+    val matcher = NOQA_COMMENT_PATTERN.matcher(commentText.substring(noqaOffset))
+    if (!matcher.find()) {
+        return NoqaCodes(null, noqaStartOffset, noqaStartOffset + "# noqa".length)
+    }
+    val codes = matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
+    return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
 }

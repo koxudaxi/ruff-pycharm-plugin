@@ -18,6 +18,8 @@
                          enabledByDefault="true" level="WARNING"
                          implementationClass="com.koxudaxi.ruff.RuffInspection"/>
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
+        <platform.backend.documentation.targetProvider
+                implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"

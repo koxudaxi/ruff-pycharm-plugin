@@ -5,11 +5,9 @@ import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.jetbrains.python.psi.PyUtil
 import com.jetbrains.python.psi.impl.PyPsiUtils
-import java.util.regex.Pattern
 
 class RuffSuppressQuickFix(
     private val code: String,
@@ -19,22 +17,6 @@ class RuffSuppressQuickFix(
 ) :
     LocalQuickFix {
 
-    private val NOQA_COMMENT_PATTERN = Pattern.compile(
-        "# noqa(?::[\\s]?(?<codes>([A-Z]+[0-9]+(?:[,\\s]+)?)+))?.*",
-        Pattern.CASE_INSENSITIVE
-    )
-    data class NoqaCodes(val codes: List<String>?, val noqaStartOffset: Int, val noqaEndOffset: Int)
-    private fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
-        val commentText = comment.text ?: return null
-        val noqaOffset = commentText.lowercase().indexOf("# noqa")
-        val noqaStartOffset = comment.textRange.startOffset + noqaOffset
-        val matcher = NOQA_COMMENT_PATTERN.matcher(commentText.substring(noqaOffset))
-        if (!matcher.find()) {
-            return NoqaCodes(null, noqaStartOffset, noqaStartOffset + "# noqa".length)
-        }
-        val codes = matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
-        return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
-    }
 
     override fun getFamilyName(): String =
         "Suppress \"$code ${message}\""
