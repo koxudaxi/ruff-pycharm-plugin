@@ -25,6 +25,8 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Integrating `Reformat Code` with `⌥⇧ ⌘ L` or `Ctrl+Alt+L`
 - [x] Quick Fix (from mouse-over, `⌥⏎` or `Alt+Enter`)
   - [x] Show fix message
+  - [x] Suppressing warnings with `# noqa:`
+- [x] Show code explanation tooltips when hovering `# noqa: <code>`
 - [x] Run `ruff --fix` as an action
 - [x] Run `ruff --fix` for a file when the file is saved
 - [x] Detect both global and project-specific instances of `ruff`
