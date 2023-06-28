@@ -28,12 +28,14 @@ import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
-import com.jetbrains.python.sdk.*
+import com.jetbrains.python.sdk.PythonSdkAdditionalData
+import com.jetbrains.python.sdk.PythonSdkUtil
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
+import com.jetbrains.python.sdk.pythonSdk
+import com.jetbrains.python.sdk.showSdkExecutionException
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
@@ -182,9 +184,14 @@ fun runCommand(
         when {
             isCancelled -> throw RunCanceledByUserException()
 
-            exitCode != 0 -> throw PyExecutionException(
-                "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
-            )
+            exitCode != 0 -> {
+                if (stderr.startsWith("error: TOML parse error at line ", ignoreCase = false)) {
+                    throw TOMLParseException()
+                }
+                throw PyExecutionException(
+                    "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
+                )
+            }
 
             else -> stdout
         }
@@ -227,10 +234,15 @@ fun generateCommandArgs(
     return CommandArgs(executable, project.basePath, stdin, customConfigArgs ?: args)
 }
 
+
+class TOMLParseException : ExecutionException("TOML parse error")
+
 fun runRuff(commandArgs: CommandArgs): String? {
     return try {
         runCommand(commandArgs)
     } catch (_: RunCanceledByUserException) {
+        null
+    } catch (_: TOMLParseException) {
         null
     }
 }
