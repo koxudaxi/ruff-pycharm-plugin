@@ -38,7 +38,7 @@ class RuffExternalAnnotator :
         if (file !is PyFile) return null
         if (!file.isApplicableTo) return null
         val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(file.getProject()).currentProfile
-        val key = HighlightDisplayKey.find(RuffInspection.INSPECTION_SHORT_NAME)
+        val key = HighlightDisplayKey.find(RuffInspection.INSPECTION_SHORT_NAME) ?: return null
         if (!profile.isToolEnabled(key, file)) return null
         if (file is PyFileImpl && !file.isAcceptedFor(RuffInspection::class.java)) return null
         val level = profile.getErrorLevel(key, file)
@@ -49,7 +49,8 @@ class RuffExternalAnnotator :
         return RuffExternalAnnotatorInfo(showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 
-    override fun doAnnotate(info: RuffExternalAnnotatorInfo): RuffExternalAnnotatorResult? {
+    override fun doAnnotate(info: RuffExternalAnnotatorInfo?): RuffExternalAnnotatorResult? {
+        if (info == null) return null
         val response = runRuff(info.commandArgs) ?: return null
         val result = parseJsonResponse(response)
         return RuffExternalAnnotatorResult(
