@@ -1,7 +1,6 @@
 # Changelog
 
 ## [Unreleased]
-- Support 232 EAP [[#196](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/196)]
 - Add suppress QuickFix [[#198](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/189)]
 - Add inlay hint for noqa code [[#201](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/201)]
 - Ignore toml parse error [[#203](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/203)]
