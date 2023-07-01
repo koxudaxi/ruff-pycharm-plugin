@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.17] - 2023-07-01
 - Add suppress QuickFix [[#198](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/189)]
 - Add inlay hint for noqa code [[#201](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/201)]
 - Ignore toml parse error [[#203](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/203)]
@@ -83,7 +85,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.16...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.17...HEAD
+[0.0.17]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.13...v0.0.14
