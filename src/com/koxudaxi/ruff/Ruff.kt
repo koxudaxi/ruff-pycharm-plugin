@@ -359,6 +359,7 @@ data class NoqaCodes(val codes: List<String>?, val noqaStartOffset: Int, val noq
 fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
     val commentText = comment.text ?: return null
     val noqaOffset = commentText.lowercase().indexOf("# noqa")
+    if (noqaOffset == -1) return null
     val noqaStartOffset = comment.textRange.startOffset + noqaOffset
     val matcher = NOQA_COMMENT_PATTERN.matcher(commentText.substring(noqaOffset))
     if (!matcher.find()) {
