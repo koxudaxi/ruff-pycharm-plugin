@@ -31,7 +31,7 @@ class RuffNoqaDocumentationTarget(val psiComment: PsiComment, private val origin
     override fun computeDocumentation(): DocumentationResult? {
         val noqaCode = getNoqaCode(psiComment, offset) ?: return null
         return DocumentationResult.asyncDocumentation {
-            val markdown = runRuff(psiComment.project, listOf("--explain", noqaCode)) ?: return@asyncDocumentation null
+            val markdown = runRuff(psiComment.project, listOf("--explain", noqaCode), true) ?: return@asyncDocumentation null
             val html = HtmlMarkdownUtils.toHtml(markdown, true) ?: return@asyncDocumentation null
             val downscaledHtml = replaceHtmlTags.fold(html) { acc, (from, to) ->
                 acc.replace(from, to)
