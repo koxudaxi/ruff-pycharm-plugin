@@ -201,8 +201,8 @@ fun runCommand(
 fun runRuff(psiFile: PsiFile, args: List<String>): String? =
         generateCommandArgs(psiFile, args)?.let { runRuff(it) }
 
-fun runRuff(project: Project, args: List<String>): String? =
-    generateCommandArgs(project, null, args)?.let { runRuff(it) }
+fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false): String? =
+    generateCommandArgs(project, null, args, withoutConfig)?.let { runRuff(it) }
 
 
 
@@ -221,14 +221,15 @@ fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs? =
 fun generateCommandArgs(
     project: Project,
     stdin: ByteArray?,
-    args: List<String>
+    args: List<String>,
+    withoutConfig: Boolean = false
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService
         ) ?: return null
-    val customConfigArgs = ruffConfigService.ruffConfigPath?.let {
+    val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it) + args
     }
     return CommandArgs(executable, project.basePath, stdin, customConfigArgs ?: args)
