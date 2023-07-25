@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- Fix StringIndexOutofBoundException error [[#227](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/227)]
+- Fix New hover on error code throws exception [[#228](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/228)]
 
 ## [0.0.18] - 2023-07-01
 - Support EAP 232 [[#210](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/210)]
