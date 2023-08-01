@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.19] - 2023-07-25
 - Fix StringIndexOutofBoundException error [[#227](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/227)]
 - Fix New hover on error code throws exception [[#228](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/228)]
 
@@ -88,7 +90,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.18...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.19...HEAD
+[0.0.19]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.18...v0.0.19
 [0.0.18]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.16...v0.0.18
 [0.0.16]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.14...v0.0.15
