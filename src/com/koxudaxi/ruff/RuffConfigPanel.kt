@@ -81,7 +81,7 @@ class RuffConfigPanel(project: Project) {
     }
 
     private fun setAutodetectedRuff() =
-        when (val ruffExecutablePath = findGlobalRuffExecutable()?.absolutePath) {
+        when (val ruffExecutablePath = findGlobalRuffExecutable(false)?.absolutePath) {
             is String -> globalRuffExecutablePathField.text = ruffExecutablePath
             else -> {
                 globalRuffExecutablePathField.text = ""
@@ -89,7 +89,7 @@ class RuffConfigPanel(project: Project) {
             }
         }
     private fun getProjectRuffExecutablePath(project: Project): String? {
-     return project.pythonSdk?.let { findRuffExecutableInSDK(it) }?.absolutePath
+     return project.pythonSdk?.let { findRuffExecutableInSDK(it, false) }?.absolutePath
     }
     val runRuffOnSave: Boolean
         get() = runRuffOnSaveCheckBox.isSelected

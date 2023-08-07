@@ -51,12 +51,23 @@ val RUFF_COMMAND = when {
 }
 const val WSL_RUFF_COMMAND = "ruff"
 
+val RUFF_LSP_COMMAND = when {
+    SystemInfo.isWindows -> "ruff-lsp.exe"
+    else -> "ruff-lsp"
+}
+const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
+
+fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
+
+fun getRuffWlsCommand(lsp: Boolean) = if (lsp) WSL_RUFF_LSP_COMMAND else WSL_RUFF_COMMAND
+
+
 val SCRIPT_DIR = when {
     SystemInfo.isWindows -> "Scripts"
     else -> "bin"
 }
 
-val USER_SITE_RUFF_PATH = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + RUFF_COMMAND
+fun get_user_site_ruff_path(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + RUFF_COMMAND
 
 val json = Json { ignoreUnknownKeys = true }
 
@@ -80,9 +91,9 @@ val Sdk.wslIsSupported: Boolean
             }
         }.also { wslSdkIsSupported = it }
     }
-fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService): File? {
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
     project.pythonSdk?.let {
-        findRuffExecutableInSDK(it)
+        findRuffExecutableInSDK(it, lsp)
     }.let {
         ruffConfigService.projectRuffExecutablePath = it?.absolutePath
         it
@@ -90,41 +101,41 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService)
 
     ruffConfigService.globalRuffExecutablePath?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
-    return findGlobalRuffExecutable().let {
+    return findGlobalRuffExecutable(lsp).let {
         ruffConfigService.globalRuffExecutablePath = it?.absolutePath
         it
     }
 }
 
-fun findRuffExecutableInSDK(sdk: Sdk): File? {
+fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
             val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
             val distribution = (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution ?: return null
             val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
-            File(distribution.getWindowsPath(homeParent), WSL_RUFF_COMMAND)
+            File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp))
         }
        (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
-           sdk.homeDirectory?.parent?.path?.let { findRuffExecutableInConda(it) }
+           sdk.homeDirectory?.parent?.path?.let { findRuffExecutableInConda(it, lsp) }
         else -> {
             val parent = sdk.homeDirectory?.parent?.path
-            parent?.let {  File(it, RUFF_COMMAND) }}
+            parent?.let {  File(it, getRuffCommand(lsp)) }}
     }?.takeIf { it.exists() }
 }
-fun findRuffExecutableInUserSite(): File? = File(USER_SITE_RUFF_PATH).takeIf { it.exists() }
+fun findRuffExecutableInUserSite(lsp: Boolean): File? = File(get_user_site_ruff_path(lsp)).takeIf { it.exists() }
 
-fun findRuffExecutableInConda(condaHomeDir: String): File? {
-    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, RUFF_COMMAND).takeIf { it.exists() }
+fun findRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File? {
+    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp)).takeIf { it.exists() }
 }
-fun findRuffExecutableInConda(): File? {
+fun findRuffExecutableInConda(lsp: Boolean): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
     val condaDir = File(condaExecutable).parentFile.parent
-    return findRuffExecutableInConda(condaDir)
+    return findRuffExecutableInConda(condaDir, lsp)
 }
 
-fun findGlobalRuffExecutable(): File? =
-    PathEnvironmentVariableUtil.findInPath(RUFF_COMMAND) ?: findRuffExecutableInUserSite()
-    ?: findRuffExecutableInConda()
+fun findGlobalRuffExecutable(lsp: Boolean): File? =
+    PathEnvironmentVariableUtil.findInPath(if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND) ?: findRuffExecutableInUserSite(lsp)
+    ?: findRuffExecutableInConda(lsp)
 
 val PsiFile.isApplicableTo: Boolean
     get() = when {
@@ -227,7 +238,7 @@ fun generateCommandArgs(
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService
+            project, ruffConfigService, false
         ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         listOf("--config", it) + args
