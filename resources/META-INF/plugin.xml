@@ -6,7 +6,7 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.ultimate</depends>
+    <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
         <projectService
                 serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
@@ -21,7 +21,6 @@
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
-        <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"

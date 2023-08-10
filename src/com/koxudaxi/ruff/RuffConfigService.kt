@@ -17,6 +17,7 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var projectRuffExecutablePath: @SystemDependent String? = null
     var ruffConfigPath: @SystemDependent String? = null
     var disableOnSaveOutsideOfProject: Boolean = true
+    var useRuffLsp: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this

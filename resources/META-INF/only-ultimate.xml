@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
+    </extensions>
+</idea-plugin>
