@@ -25,11 +25,8 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         val inspectionProfileManager = ProjectInspectionProfileManager.getInstance(project)
 
         val toolWrapper = InspectionToolRegistrar.getInstance().createTools()
-            .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME }
-
-        return toolWrapper?.let {
-            inspectionProfileManager.currentProfile.isToolEnabled(it.displayKey)
-        } ?: false
+            .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME } ?: return false
+        return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
     }
 }
 

@@ -23,9 +23,12 @@ class RuffConfigPanel(project: Project) {
     private lateinit var runRuffOnReformatCodeCheckBox: JCheckBox
     private lateinit var showRuleCodeCheckBox: JCheckBox
     private lateinit var globalRuffExecutablePathField: TextFieldWithBrowseButton
+    private lateinit var globalRuffLspExecutablePathField: TextFieldWithBrowseButton
     private lateinit var setAutodetectedRuffButton: JButton
+    private lateinit var setAutodetectedRuffLspButton: JButton
     private lateinit var alwaysUseGlobalRuffCheckBox: JCheckBox
     private lateinit var projectRuffExecutablePathField: JBTextField
+    private lateinit var projectRuffLspExecutablePathField: JBTextField
     private lateinit var ruffConfigPathField: TextFieldWithBrowseButton
     private lateinit var clearRuffConfigPathButton: JButton
     private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox

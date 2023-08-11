@@ -107,6 +107,22 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
     }
 }
 
+fun detectRuffLspExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+    project.pythonSdk?.let {
+        findRuffExecutableInSDK(it, lsp)
+    }.let {
+        ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+        it
+    }?.let { return it }
+
+    ruffConfigService.globalRuffExecutablePath?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
+
+    return findGlobalRuffExecutable(lsp).let {
+        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+        it
+    }
+}
+
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
