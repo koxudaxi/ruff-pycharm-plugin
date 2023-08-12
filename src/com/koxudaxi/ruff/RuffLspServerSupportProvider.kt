@@ -9,7 +9,8 @@ import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService
 import com.koxudaxi.ruff.RuffInspection
-import com.koxudaxi.ruff.findRuffExecutableInSDK
+import com.koxudaxi.ruff.detectRuffExecutable
+import java.io.File
 
 
 class RuffLspServerSupportProvider : LspServerSupportProvider {
@@ -18,7 +19,12 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
 
-        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project))
+        val ruffConfigService = RuffConfigService.getInstance(project)
+        val executable =
+            ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+                project, ruffConfigService, false
+            ) ?: return
+        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable))
     }
 
     fun isInspectionEnabled(project: Project): Boolean {
@@ -31,18 +37,14 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 }
 
 
-private class RuffLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "Ruff") {
+private class RuffLspServerDescriptor(project: Project, val executable: File) : ProjectWideLspServerDescriptor(project, "Ruff") {
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
 
-    override fun createCommandLine(): GeneralCommandLine {
-        project.pythonSdk?.let {
-            findRuffExecutableInSDK(it, true)?.let {
-                return GeneralCommandLine(it.absolutePath)
-            }
-        }
-        return GeneralCommandLine("ruff-lsp")
-    }
+    override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
 
+//    override fun createInitializationOptions(): Any? {
+        // TODO create config JSON for pyproject.toml
+//    }
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
 }

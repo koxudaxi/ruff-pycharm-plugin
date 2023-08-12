@@ -104,6 +104,8 @@ class RuffConfigPanel(project: Project) {
         get() = showRuleCodeCheckBox.isSelected
     val globalRuffExecutablePath: @SystemDependent String?
         get() = globalRuffExecutablePathField.text.takeIf { it.isNotBlank() }
+    val globalRuffLspExecutablePath: @SystemDependent String?
+        get() = globalRuffLspExecutablePathField.text.takeIf { it.isNotBlank() }
     val alwaysUseGlobalRuff: Boolean
         get() = alwaysUseGlobalRuffCheckBox.isSelected
     val ruffConfigPath: @SystemDependent String?
