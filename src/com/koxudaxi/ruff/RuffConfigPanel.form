@@ -104,7 +104,7 @@
               <text value="Auto-detect ruff"/>
             </properties>
           </component>
-          <component id="187c1" class="javax.swing.JLabel">
+          <component id="187c1" class="javax.swing.JLabel" binding="globalRuffLspLabel">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -145,7 +145,7 @@
         <properties/>
         <border type="none" title="Project Specific"/>
         <children>
-          <component id="752bb" class="javax.swing.JLabel">
+          <component id="752bb" class="javax.swing.JLabel" binding="projectRuffLabel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -159,7 +159,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="3e2be" class="javax.swing.JLabel">
+          <component id="3e2be" class="javax.swing.JLabel" binding="projectRuffLspLabel">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -193,13 +193,13 @@
               <text value="Ruff config file"/>
             </properties>
           </component>
-          <component id="4ec2e" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="textFieldWithBrowseButton3" default-binding="true">
+          <component id="4ec2e" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="ruffConfigPathField">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
           </component>
-          <component id="90f7c" class="javax.swing.JButton" binding="clearButton1" default-binding="true">
+          <component id="90f7c" class="javax.swing.JButton" binding="clearRuffConfigPathButton">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>

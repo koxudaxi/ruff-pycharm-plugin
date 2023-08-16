@@ -24,6 +24,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFile
+import com.intellij.testFramework.common.checkEditorsReleased
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
@@ -67,8 +68,9 @@ val SCRIPT_DIR = when {
     else -> "bin"
 }
 
-fun get_user_site_ruff_path(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + RUFF_COMMAND
+fun getUserSiteRuffPath(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + getRuffCommand(lsp)
 
+fun isPro() = ApplicationManager.getApplication().checkEditorsReleased()
 val json = Json { ignoreUnknownKeys = true }
 
 val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
@@ -95,34 +97,26 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
-        ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+        when {
+            lsp -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            else -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+        }
         it
     }?.let { return it }
 
-    ruffConfigService.globalRuffExecutablePath?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
+    when(lsp) {
+        true -> ruffConfigService.globalRuffExecutablePath
+        false -> ruffConfigService.globalRuffLspExecutablePath
+    }?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
     return findGlobalRuffExecutable(lsp).let {
-        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+        when(lsp) {
+            true -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
+            false -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
+        }
         it
     }
 }
-
-fun detectRuffLspExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-    project.pythonSdk?.let {
-        findRuffExecutableInSDK(it, lsp)
-    }.let {
-        ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-        it
-    }?.let { return it }
-
-    ruffConfigService.globalRuffExecutablePath?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
-
-    return findGlobalRuffExecutable(lsp).let {
-        ruffConfigService.globalRuffExecutablePath = it?.absolutePath
-        it
-    }
-}
-
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
@@ -138,7 +132,7 @@ fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
             parent?.let {  File(it, getRuffCommand(lsp)) }}
     }?.takeIf { it.exists() }
 }
-fun findRuffExecutableInUserSite(lsp: Boolean): File? = File(get_user_site_ruff_path(lsp)).takeIf { it.exists() }
+fun findRuffExecutableInUserSite(lsp: Boolean): File? = File(getUserSiteRuffPath(lsp)).takeIf { it.exists() }
 
 fun findRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File? {
     return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp)).takeIf { it.exists() }

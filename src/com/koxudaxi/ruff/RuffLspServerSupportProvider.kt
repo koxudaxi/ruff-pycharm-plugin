@@ -6,19 +6,23 @@ import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
-import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService
 import com.koxudaxi.ruff.RuffInspection
-import com.koxudaxi.ruff.findRuffExecutableInSDK
+import com.koxudaxi.ruff.detectRuffExecutable
+import java.io.File
 
 
 class RuffLspServerSupportProvider : LspServerSupportProvider {
     override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
-        if (!RuffConfigService.getInstance(project).useRuffLsp) return
+        val ruffConfigService = RuffConfigService.getInstance(project)
+        if (!ruffConfigService.useRuffLsp) return
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
-
-        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project))
+        val executable =
+            ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+                project, ruffConfigService, true
+            ) ?: return
+        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable))
     }
 
     fun isInspectionEnabled(project: Project): Boolean {
@@ -31,17 +35,9 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 }
 
 
-private class RuffLspServerDescriptor(project: Project) : ProjectWideLspServerDescriptor(project, "Ruff") {
+private class RuffLspServerDescriptor(project: Project, val executable: File) : ProjectWideLspServerDescriptor(project, "Ruff") {
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
-
-    override fun createCommandLine(): GeneralCommandLine {
-        project.pythonSdk?.let {
-            findRuffExecutableInSDK(it, true)?.let {
-                return GeneralCommandLine(it.absolutePath)
-            }
-        }
-        return GeneralCommandLine("ruff-lsp")
-    }
+    override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
