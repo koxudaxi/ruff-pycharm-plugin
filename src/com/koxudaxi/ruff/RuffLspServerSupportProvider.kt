@@ -6,9 +6,8 @@ import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
-import com.koxudaxi.ruff.RuffConfigService
-import com.koxudaxi.ruff.RuffInspection
-import com.koxudaxi.ruff.detectRuffExecutable
+import com.koxudaxi.ruff.*
+import kotlinx.serialization.Serializable
 import java.io.File
 
 
@@ -22,7 +21,8 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
             ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
                 project, ruffConfigService, true
             ) ?: return
-        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable))
+        val config = ruffConfigService.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() }
+        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, config))
     }
 
     fun isInspectionEnabled(project: Project): Boolean {
@@ -35,13 +35,25 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 }
 
 
-private class RuffLspServerDescriptor(project: Project, val executable: File) : ProjectWideLspServerDescriptor(project, "Ruff") {
+private class RuffLspServerDescriptor(project: Project, val executable: File, val config: File?) : ProjectWideLspServerDescriptor(project, "Ruff") {
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
+    override fun createInitializationOptions(): Any? {
+        if (config == null) return null
+        return InitOptions(Settings(listOf("--config", config.absolutePath)))
+    }
 
-//    override fun createInitializationOptions(): Any? {
-        // TODO create config JSON for pyproject.toml
-//    }
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
 }
+
+@Serializable
+data class Settings(
+    val args: List<String>
+)
+
+
+@Serializable
+data class InitOptions(
+    val settings: Settings
+)
