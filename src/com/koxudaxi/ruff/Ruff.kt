@@ -22,9 +22,9 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.common.checkEditorsReleased
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
@@ -70,7 +70,7 @@ val SCRIPT_DIR = when {
 
 fun getUserSiteRuffPath(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + getRuffCommand(lsp)
 
-fun isPro() = ApplicationManager.getApplication().checkEditorsReleased()
+
 val json = Json { ignoreUnknownKeys = true }
 
 val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
@@ -93,6 +93,22 @@ val Sdk.wslIsSupported: Boolean
             }
         }.also { wslSdkIsSupported = it }
     }
+
+private var lspIsSupportedValue: Boolean? = null
+val lspIsSupported: Boolean
+    get() {
+        if (lspIsSupportedValue is Boolean) {
+            return lspIsSupportedValue as Boolean
+        }
+        return try {
+                LspServerSupportProvider
+                true
+            } catch (e: NoClassDefFoundError) {
+                false
+            }.also { lspIsSupportedValue = it }
+    }
+
+
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)

@@ -48,6 +48,7 @@ class RuffConfigPanel(project: Project) {
         alwaysUseGlobalRuffCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
         disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
+        useRuffLspCheckBox.isEnabled = lspIsSupported
         useRuffLspCheckBox.isSelected = ruffConfigService.useRuffLsp
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         runRuffOnSaveCheckBox.addActionListener {
@@ -76,32 +77,18 @@ class RuffConfigPanel(project: Project) {
             textField.isEditable = false
         }
 
+        updateLspExecutableFields()
+        updateProjectExecutableFields()
+
         setAutodetectedRuffButton.addActionListener {
             setAutodetectedRuff()
         }
 
         setAutodetectedRuffLspButton.addActionListener { setAutodetectedRuffLsp() }
 
-        useRuffLspCheckBox.addActionListener {
-            val enabled = useRuffLspCheckBox.isSelected
-            globalRuffLspExecutablePathField.isEnabled =enabled
-            globalRuffLspLabel.isEnabled = enabled
-            setAutodetectedRuffLspButton.isEnabled = enabled
-            if (!alwaysUseGlobalRuffCheckBox.isSelected) {
-                projectRuffLspExecutablePathField.isEnabled = enabled
-                projectRuffLspLabel.isEnabled = enabled
-            }
-        }
+        useRuffLspCheckBox.addActionListener { updateLspExecutableFields() }
 
-        alwaysUseGlobalRuffCheckBox.addActionListener {
-            val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
-            projectRuffExecutablePathField.isEnabled = enabled
-            projectRuffLabel.isEnabled = enabled
-            if (useRuffLspCheckBox.isSelected) {
-                projectRuffLspExecutablePathField.isEnabled = enabled
-                projectRuffLspLabel.isEnabled = enabled
-            }
-        }
+        alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
         when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
             else -> {
@@ -129,6 +116,25 @@ class RuffConfigPanel(project: Project) {
         }
     }
 
+    private fun updateLspExecutableFields() {
+        val enabled = lspIsSupported && useRuffLspCheckBox.isSelected
+        globalRuffLspExecutablePathField.isEnabled = enabled
+        globalRuffLspLabel.isEnabled = enabled
+        setAutodetectedRuffLspButton.isEnabled = enabled
+        if (!alwaysUseGlobalRuffCheckBox.isSelected) {
+            projectRuffLspExecutablePathField.isEnabled = enabled
+            projectRuffLspLabel.isEnabled = enabled
+        }
+    }
+    private fun updateProjectExecutableFields() {
+        val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
+        projectRuffExecutablePathField.isEnabled = enabled
+        projectRuffLabel.isEnabled = enabled
+        if (lspIsSupported && useRuffLspCheckBox.isSelected) {
+            projectRuffLspExecutablePathField.isEnabled = enabled
+            projectRuffLspLabel.isEnabled = enabled
+        }
+    }
     private fun setAutodetectedRuff() =
         when (val ruffExecutablePath = findGlobalRuffExecutable(false)?.absolutePath) {
             is String -> globalRuffExecutablePathField.text = ruffExecutablePath
