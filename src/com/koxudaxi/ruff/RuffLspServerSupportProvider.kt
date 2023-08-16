@@ -39,6 +39,9 @@ private class RuffLspServerDescriptor(project: Project, val executable: File) : 
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
 
+//    override fun createInitializationOptions(): Any? {
+        // TODO create config JSON for pyproject.toml
+//    }
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
 }
