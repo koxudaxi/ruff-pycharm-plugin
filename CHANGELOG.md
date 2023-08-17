@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.20] - 2023-08-17
 - (🎁) Add icon [[#233](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/233)]
 - Support ruff-lsp [[#237](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/237)]
 
@@ -92,7 +94,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.19...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.20...HEAD
+[0.0.20]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.19...v0.0.20
 [0.0.19]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.18...v0.0.19
 [0.0.18]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.16...v0.0.18
 [0.0.16]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.15...v0.0.16
