@@ -26,6 +26,16 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Support `ruff` config file path as an option
 - [x] Detect `ruff` executalbe in Conda environment
 - [x] Detect `ruff` executalbe in WSL
+- [x] Support `ruff-lsp` with [LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate [Experimental] 
+
+### Support `ruff-lsp` for only PyCharm Pro/IDEA Ultimate
+You can enable it in `Preferences/Settings` -> `Tools` -> `Ruff` -> `Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate`
+
+The lsp integration applies only below features:
+- Errors/warnings highlighting ([textDocument/publishDiagnostics](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics))
+- Quick-fixes for these errors/warnings ([textDocument/codeAction](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction)
+
+_This is experimental feature._
 
 ## Screenshots
 
