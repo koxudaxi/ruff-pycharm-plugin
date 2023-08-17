@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+- (🎁) Add icon [[#233](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/233)]
+- Support ruff-lsp [[#237](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/237)]
 
 ## [0.0.19] - 2023-07-25
 - Fix StringIndexOutofBoundException error [[#227](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/227)]
