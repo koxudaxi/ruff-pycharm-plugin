@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.koxudaxi.ruff.RuffConfigPanel">
-  <grid id="27dc6" binding="configPanel" default-binding="true" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="configPanel" default-binding="true" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="360" y="153" width="2880" height="5535"/>
@@ -10,7 +10,7 @@
     </properties>
     <border type="none"/>
     <children>
-      <grid id="da542" layout-manager="GridLayoutManager" row-count="6" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="da542" layout-manager="GridLayoutManager" row-count="7" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -53,7 +53,7 @@
             </constraints>
             <properties>
               <actionCommand value="Always use global ruff executable. (if the option isn't checked then use ruff of current project environment)"/>
-              <text value="Always use Global Ruff executable. (if the option isn't checked then use ruff of current project environment)"/>
+              <text value="Always use Global executable. (if the option isn't checked then use ruff of current project environment)"/>
             </properties>
           </component>
           <component id="288de" class="javax.swing.JCheckBox" binding="disableOnSaveOutsideOfProjectCheckBox">
@@ -64,34 +64,36 @@
               <text value="Exclude files outside of the project"/>
             </properties>
           </component>
+          <component id="1c73c" class="javax.swing.JCheckBox" binding="useRuffLspCheckBox">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate"/>
+            </properties>
+          </component>
         </children>
       </grid>
       <vspacer id="a33f9">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
-      <grid id="73d9e" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="73d9e" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-        <border type="none"/>
+        <border type="none" title="Global"/>
         <children>
           <component id="461cd" class="javax.swing.JLabel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Global ruff executable:"/>
+              <text value="ruff executable:"/>
             </properties>
-          </component>
-          <component id="53b34" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="globalRuffExecutablePathField">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties/>
           </component>
           <component id="de91c" class="javax.swing.JButton" binding="setAutodetectedRuffButton">
             <constraints>
@@ -102,15 +104,70 @@
               <text value="Auto-detect ruff"/>
             </properties>
           </component>
-          <component id="187c1" class="javax.swing.JLabel">
+          <component id="187c1" class="javax.swing.JLabel" binding="globalRuffLspLabel">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="Project ruff executable"/>
+              <text value="ruff-lsp executable"/>
             </properties>
           </component>
-          <component id="b89ba" class="com.intellij.ui.components.JBTextField" binding="projectRuffExecutablePathField">
+          <component id="b89ba" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="globalRuffLspExecutablePathField">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <editable value="false"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="4fe97" class="javax.swing.JButton" binding="setAutodetectedRuffLspButton">
+            <constraints>
+              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Auto-detect ruff-lsp"/>
+            </properties>
+          </component>
+          <component id="53b34" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="globalRuffExecutablePathField">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+        </children>
+      </grid>
+      <grid id="ff2f7" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none" title="Project Specific"/>
+        <children>
+          <component id="752bb" class="javax.swing.JLabel" binding="projectRuffLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="ruff executable:"/>
+            </properties>
+          </component>
+          <component id="bc0c" class="com.intellij.ui.components.JBTextField" binding="projectRuffExecutablePathField">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="3e2be" class="javax.swing.JLabel" binding="projectRuffLspLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="ruff-lsp executable"/>
+            </properties>
+          </component>
+          <component id="347e" class="com.intellij.ui.components.JBTextField" binding="projectRuffLspExecutablePathField">
             <constraints>
               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -118,23 +175,33 @@
               <editable value="false"/>
             </properties>
           </component>
-          <component id="ad697" class="javax.swing.JLabel">
+        </children>
+      </grid>
+      <grid id="73b16" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="7b228" class="javax.swing.JLabel">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Ruff config file"/>
             </properties>
           </component>
-          <component id="138d5" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="ruffConfigPathField">
+          <component id="4ec2e" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="ruffConfigPathField">
             <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
           </component>
-          <component id="e2660" class="javax.swing.JButton" binding="clearRuffConfigPathButton">
+          <component id="90f7c" class="javax.swing.JButton" binding="clearRuffConfigPathButton">
             <constraints>
-              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Clear"/>
@@ -144,7 +211,7 @@
       </grid>
       <hspacer id="7685f">
         <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
       </hspacer>
     </children>

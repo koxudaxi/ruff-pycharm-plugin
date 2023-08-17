@@ -13,10 +13,13 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var runRuffOnReformatCode: Boolean = true
     var showRuleCode: Boolean = true
     var globalRuffExecutablePath: @SystemDependent String? = null
+    var globalRuffLspExecutablePath: @SystemDependent String? = null
     var alwaysUseGlobalRuff: Boolean = false
     var projectRuffExecutablePath: @SystemDependent String? = null
+    var projectRuffLspExecutablePath: @SystemDependent String? = null
     var ruffConfigPath: @SystemDependent String? = null
     var disableOnSaveOutsideOfProject: Boolean = true
+    var useRuffLsp: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this
@@ -32,6 +35,13 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
             else -> projectRuffExecutablePath ?: globalRuffExecutablePath
         }
     }
+    val ruffLspExecutablePath: @SystemDependent String?
+        get() {
+            return when {
+                alwaysUseGlobalRuff -> globalRuffLspExecutablePath
+                else -> projectRuffLspExecutablePath ?: globalRuffLspExecutablePath
+            }
+        }
     companion object {
         fun getInstance(project: Project): RuffConfigService {
             return project.getService(RuffConfigService::class.java)
