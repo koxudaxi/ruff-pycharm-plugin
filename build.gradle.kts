@@ -125,7 +125,7 @@ tasks {
 dependencies {
     compileOnly("org.apache.tuweni:tuweni-toml:2.3.1")
     compileOnly(group = "org.ini4j", name = "ini4j", version = "0.5.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     testImplementation(kotlin("test"))
 }
 
