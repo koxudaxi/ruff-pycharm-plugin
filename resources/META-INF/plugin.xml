@@ -12,8 +12,8 @@
                 serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
         <projectService serviceImplementation="com.koxudaxi.ruff.RuffFixService"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
-        <postFormatProcessor
-                implementation="com.koxudaxi.ruff.RuffPostFormatProcessor"/>
+        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFixProcessor"/>
+        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFormatProcessor"/>
         <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
                          displayName="Ruff inspection"
                          enabledByDefault="true" level="WARNING"

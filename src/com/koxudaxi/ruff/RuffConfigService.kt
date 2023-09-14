@@ -20,6 +20,7 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var ruffConfigPath: @SystemDependent String? = null
     var disableOnSaveOutsideOfProject: Boolean = true
     var useRuffLsp: Boolean = false
+    var useFormat: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this

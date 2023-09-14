@@ -76,6 +76,8 @@ val json = Json { ignoreUnknownKeys = true }
 val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
 val FIX_ARGS = ARGS_BASE + listOf("--fix")
 val NO_FIX_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
+val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
+val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
 
 private var wslSdkIsSupported: Boolean? = null
 val Sdk.wslIsSupported: Boolean
@@ -267,9 +269,9 @@ fun generateCommandArgs(
             project, ruffConfigService, false
         ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
-        listOf("--config", it) + args
+        args + listOf("--config", it)
     }
-    return CommandArgs(executable, project.basePath, stdin, customConfigArgs ?: args)
+    return CommandArgs(executable, project.basePath, stdin, (customConfigArgs ?: args) + if (stdin == null) listOf() else listOf("-"))
 }
 
 
@@ -359,10 +361,10 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
 fun getStdinFileNameArgs(psiFile: PsiFile) = psiFile.virtualFile?.let {
     getProjectRelativeFilePath(psiFile.project, it)?.let { projectRelativeFilePath ->
         listOf(
-            "--stdin-filename", projectRelativeFilePath, "-"
+            "--stdin-filename", projectRelativeFilePath
         )
     }
-} ?: listOf("-")
+} ?: listOf()
 
 fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset
@@ -384,9 +386,28 @@ fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
     return fixResult
 }
 
-fun format(pyFile: PsiFile): String? {
+fun checkFormatResult(pyFile: PsiFile, formatResult: String?): String? {
+    if (formatResult == null) return null
+    if (formatResult.isNotBlank()) return formatResult
+
+    try {
+        runRuff(pyFile, FORMAT_CHECK_ARGS)
+    } catch (e: PyExecutionException) {
+        if (e.exitCode == 1) {
+            return formatResult
+        }
+    }
+    return null
+}
+
+fun fix(pyFile: PsiFile): String? {
     val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
     return checkFixResult(pyFile, fixResult)
+}
+
+fun format(pyFile: PsiFile): String? {
+    val formatResult = runRuff(pyFile, FORMAT_ARGS) ?: return null
+    return checkFormatResult(pyFile, formatResult)
 }
 
 val NOQA_COMMENT_PATTERN: Pattern = Pattern.compile(

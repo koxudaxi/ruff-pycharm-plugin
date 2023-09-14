@@ -9,17 +9,15 @@ import com.intellij.psi.impl.source.codeStyle.PostFormatProcessor
 import com.jetbrains.python.psi.PyUtil
 
 
-class RuffPostFormatProcessor : PostFormatProcessor {
+abstract class RuffPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
-
-
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
         if (!RuffConfigService.getInstance(source.project).runRuffOnReformatCode) return TextRange.EMPTY_RANGE
         val pyFile = source.containingFile
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
 
         val formatted = executeOnPooledThread(null) {
-            format(pyFile)
+            fix(pyFile)
         } ?: return TextRange.EMPTY_RANGE
         val sourceDiffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
@@ -38,6 +36,8 @@ class RuffPostFormatProcessor : PostFormatProcessor {
         } ?: TextRange.EMPTY_RANGE
     }
 
+    abstract fun isEnabled(element: PsiElement): Boolean
+    abstract fun process(pyFile: PsiFile): String?
 
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null
