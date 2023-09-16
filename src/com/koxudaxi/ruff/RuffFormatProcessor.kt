@@ -7,7 +7,7 @@ import com.intellij.psi.PsiFile
 class RuffFormatProcessor : RuffPostFormatProcessor() {
     override fun isEnabled(element: PsiElement): Boolean {
         val ruffConfigService = RuffConfigService.getInstance(element.project)
-        return ruffConfigService.runRuffOnReformatCode && ruffConfigService.useFormat
+        return ruffConfigService.runRuffOnReformatCode && ruffConfigService.useRuffFormat
     }
     override fun process(pyFile: PsiFile): String? =  format(pyFile)
 }
