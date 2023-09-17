@@ -20,7 +20,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         val executable =
             ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
                 project, ruffConfigService, true
-            ) ?: return
+            ).apply { RuffCacheService.setVersion(project) } ?: return
         val config = ruffConfigService.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() }
         serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, config))
     }

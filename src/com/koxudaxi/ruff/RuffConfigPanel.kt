@@ -51,7 +51,8 @@ class RuffConfigPanel(project: Project) {
         disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
         useRuffLspCheckBox.isEnabled = lspIsSupported
         useRuffLspCheckBox.isSelected = ruffConfigService.useRuffLsp
-        useRuffFormatCheckBox.isEnabled = lspIsSupported
+        useRuffFormatCheckBox.isEnabled = true
+        useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
@@ -177,6 +178,10 @@ class RuffConfigPanel(project: Project) {
         get() = disableOnSaveOutsideOfProjectCheckBox.isSelected
     val useRuffLsp: Boolean
         get() = useRuffLspCheckBox.isSelected
+
+    val useRuffFormat: Boolean
+        get() = useRuffFormatCheckBox.isSelected
+
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND =  "Ruff executable not found"
         const val RUFF_LSP_EXECUTABLE_NOT_FOUND =  "Ruff-lsp executable not found"

@@ -32,7 +32,8 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
                 ruffConfigService.globalRuffLspExecutablePath != configPanel.globalRuffLspExecutablePath ||
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
-                ruffConfigService.useRuffLsp != configPanel.useRuffLsp
+                ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
+                ruffConfigService.useRuffFormat != configPanel.useRuffFormat
 
     }
 
@@ -46,6 +47,7 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+        ruffConfigService.useRuffFormat = configPanel.useRuffFormat
 
     }
 

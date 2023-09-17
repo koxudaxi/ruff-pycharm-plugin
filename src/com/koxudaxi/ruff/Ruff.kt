@@ -58,6 +58,8 @@ val RUFF_LSP_COMMAND = when {
 }
 const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
 
+val ruffVersionCache: HashMap<String, RuffVersion> = hashMapOf()
+
 fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
 
 fun getRuffWlsCommand(lsp: Boolean) = if (lsp) WSL_RUFF_LSP_COMMAND else WSL_RUFF_COMMAND
@@ -267,11 +269,16 @@ fun generateCommandArgs(
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService, false
-        ) ?: return null
+        ).apply { RuffCacheService.setVersion(project) } ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf("--config", it)
     }
-    return CommandArgs(executable, project.basePath, stdin, (customConfigArgs ?: args) + if (stdin == null) listOf() else listOf("-"))
+    return CommandArgs(
+        executable,
+        project.basePath,
+        stdin,
+        (customConfigArgs ?: args) + if (stdin == null) listOf() else listOf("-")
+    )
 }
 
 

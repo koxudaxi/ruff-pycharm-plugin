@@ -12,12 +12,12 @@ import com.jetbrains.python.psi.PyUtil
 abstract class RuffPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
-        if (!RuffConfigService.getInstance(source.project).runRuffOnReformatCode) return TextRange.EMPTY_RANGE
+        if (!isEnabled(source)) return TextRange.EMPTY_RANGE
         val pyFile = source.containingFile
         if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
 
         val formatted = executeOnPooledThread(null) {
-            fix(pyFile)
+            process(pyFile)
         } ?: return TextRange.EMPTY_RANGE
         val sourceDiffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
 
