@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support format [[#259](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/259)]
 
 ## [0.0.20] - 2023-08-17
 - (🎁) Add icon [[#233](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/233)]
