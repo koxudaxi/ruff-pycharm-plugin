@@ -12,7 +12,11 @@ import java.io.File
 
 
 class RuffLspServerSupportProvider : LspServerSupportProvider {
-    override fun fileOpened(project: Project, file: VirtualFile, serverStarter: LspServerSupportProvider.LspServerStarter) {
+    override fun fileOpened(
+        project: Project,
+        file: VirtualFile,
+        serverStarter: LspServerSupportProvider.LspServerStarter
+    ) {
         val ruffConfigService = RuffConfigService.getInstance(project)
         if (!ruffConfigService.useRuffLsp) return
         if (!isInspectionEnabled(project)) return
@@ -21,8 +25,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
             ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
                 project, ruffConfigService, true
             ) ?: return
-        val config = ruffConfigService.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() }
-        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, config))
+        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))
     }
 
     fun isInspectionEnabled(project: Project): Boolean {
@@ -35,11 +38,23 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 }
 
 
-private class RuffLspServerDescriptor(project: Project, val executable: File, val config: File?) : ProjectWideLspServerDescriptor(project, "Ruff") {
+private class RuffLspServerDescriptor(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
+    ProjectWideLspServerDescriptor(project, "Ruff") {
+
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
-    override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
+
+    private fun createBaseCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
+
+    override fun createCommandLine(): GeneralCommandLine {
+        val commandLine = createBaseCommandLine()
+        if (ruffConfig.useRuffFormat) {
+            return commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
+        }
+        return commandLine
+    }
+
     override fun createInitializationOptions(): Any? {
-        if (config == null) return null
+        val config = ruffConfig.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
         return InitOptions(Settings(listOf("--config", config.absolutePath)))
     }
 
