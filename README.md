@@ -24,8 +24,8 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
   - [x] Detect a project ruff after packages refreshed
 - [x] Execute `ruff` command as a new process
 - [x] Support `ruff` config file path as an option
-- [x] Detect `ruff` executalbe in Conda environment
-- [x] Detect `ruff` executalbe in WSL
+- [x] Detect `ruff` executable in Conda environment
+- [x] Detect `ruff` executable in WSL
 - [x] Support `ruff-lsp` with [LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate [Experimental] 
 - [x] Support `ruff format` for ruff version `0.0.289` or later [Experimental]
 
