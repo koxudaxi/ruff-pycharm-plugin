@@ -7,8 +7,8 @@ import com.intellij.openapi.project.Project
 class RuffCacheService(val project: Project) {
     private var version: RuffVersion? = null
     private var hasFormatter: Boolean? = null
+    private var hasOutputFormat: Boolean? = null
 
-    private fun hasFormatter(version: RuffVersion?): Boolean = version?.let { it >= RuffVersion(0, 0, 289) } == true
 
     fun getVersion(): RuffVersion? {
         val v = executeOnPooledThread(null) {
@@ -19,7 +19,8 @@ class RuffCacheService(val project: Project) {
 
     private fun getOrPutVersionFromVersionCache(version: String): RuffVersion? {
         return ruffVersionCache.getOrPut(version) {
-            val versionList = version.trimEnd().split(" ").lastOrNull()?.split(".")?.map { it.toIntOrNull() ?: 0 } ?: return null
+            val versionList =
+                version.trimEnd().split(" ").lastOrNull()?.split(".")?.map { it.toIntOrNull() ?: 0 } ?: return null
             val ruffVersion = when {
                 versionList.size == 1 -> RuffVersion(versionList[0])
                 versionList.size == 2 -> RuffVersion(versionList[0], versionList[1])
@@ -35,14 +36,16 @@ class RuffCacheService(val project: Project) {
         if (version != null) return version
         return getVersion().apply {
             version = this
-            hasFormatter = hasFormatter(this)
+            hasFormatter = this?.hasFormatter
+            hasOutputFormat = this?.hasOutputFormat
         }
     }
 
     internal fun setVersion(): RuffVersion? {
         return getVersion().also {
             this.version = it
-            hasFormatter = hasFormatter(it)
+            hasFormatter = it?.hasFormatter
+            hasOutputFormat = it?.hasOutputFormat
         }
     }
 
@@ -53,9 +56,18 @@ class RuffCacheService(val project: Project) {
         return hasFormatter ?: false
     }
 
+    internal fun hasOutputFormat(): Boolean {
+        if (hasOutputFormat == null) {
+            setVersion()
+        }
+        return hasOutputFormat ?: false
+    }
+
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
+
+        fun hasOutputFormat(project: Project): Boolean = getInstance(project).hasOutputFormat()
 
         fun getVersion(project: Project): RuffVersion? {
             return getInstance(project).getOrPutVersion()
