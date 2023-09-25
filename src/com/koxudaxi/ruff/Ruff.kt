@@ -77,9 +77,11 @@ val json = Json { ignoreUnknownKeys = true }
 
 val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
 val FIX_ARGS = ARGS_BASE + listOf("--fix")
-val NO_FIX_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
+val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
+val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
+val Project.NO_FIX_ARGS get() = if (RuffCacheService.hasOutputFormat(this)) NO_FIX_OUTPUT_FORMAT_ARGS else NO_FIX_FORMAT_ARGS
 
 private var wslSdkIsSupported: Boolean? = null
 val Sdk.wslIsSupported: Boolean
@@ -386,7 +388,7 @@ fun Document.getStartEndRange(startLocation: Location, endLocation: Location, of
 fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
     if (fixResult == null) return null
     if (fixResult.isNotBlank()) return fixResult
-    val noFixResult = runRuff(pyFile, NO_FIX_ARGS) ?: return null
+    val noFixResult = runRuff(pyFile, pyFile.project.NO_FIX_ARGS) ?: return null
 
     // check the file is excluded
     if (noFixResult == "[]\n") return null

@@ -36,10 +36,11 @@ class RuffExternalAnnotator :
 
     override fun collectInformation(file: PsiFile): RuffExternalAnnotatorInfo? {
         if (file !is PyFile) return null
-        val config = RuffConfigService.getInstance(file.project)
+        val project = file.project
+        val config = RuffConfigService.getInstance(project)
         if (config.useRuffLsp) return null
         if (!file.isApplicableTo) return null
-        val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(file.getProject()).currentProfile
+        val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(project).currentProfile
         val key = HighlightDisplayKey.find(RuffInspection.INSPECTION_SHORT_NAME) ?: return null
         if (!profile.isToolEnabled(key, file)) return null
         if (file is PyFileImpl && !file.isAcceptedFor(RuffInspection::class.java)) return null
@@ -47,7 +48,7 @@ class RuffExternalAnnotator :
         val highlightDisplayLevel = highlightSeverityLevels[level] ?: return null
         val problemHighlightType = problemHighlightTypeLevels[level] ?: return null
         val showRuleCode = config.showRuleCode
-        val commandArgs = generateCommandArgs(file, NO_FIX_ARGS) ?: return null
+        val commandArgs = generateCommandArgs(file, project.NO_FIX_ARGS) ?: return null
         return RuffExternalAnnotatorInfo(showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 
