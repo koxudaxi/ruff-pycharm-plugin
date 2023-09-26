@@ -349,6 +349,16 @@ inline fun <reified T> executeOnPooledThread(
     }
 }
 
+inline fun executeOnPooledThread(crossinline action: () -> Unit) {
+    ApplicationManager.getApplication().executeOnPooledThread {
+        try {
+            action.invoke()
+        } catch (_: PyExecutionException) {
+        } catch (_: ProcessNotCreatedException) {
+        }
+    }
+}
+
 fun parseJsonResponse(response: String): List<Result> = try {
     json.decodeFromString(response)
 } catch (_: SerializationException) {
