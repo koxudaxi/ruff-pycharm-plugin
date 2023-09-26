@@ -271,7 +271,7 @@ fun generateCommandArgs(
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService, false
-        ).apply { RuffCacheService.setVersion(project) } ?: return null
+        ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf("--config", it)
     }

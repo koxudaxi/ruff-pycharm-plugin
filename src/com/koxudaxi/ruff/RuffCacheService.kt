@@ -10,12 +10,12 @@ class RuffCacheService(val project: Project) {
     private var hasOutputFormat: Boolean? = null
 
 
-    fun getVersion(): RuffVersion? {
-        val v = executeOnPooledThread(null) {
+    private fun getVersion(): RuffVersion? =
+        // TODO: Move to background task to avoid blocking UI thread
+        executeOnPooledThread(null) {
             runRuff(project, listOf("--version"), true)
-        }
-        return v?.let { getOrPutVersionFromVersionCache(it) }
-    }
+        }?.let { getOrPutVersionFromVersionCache(it) }
+
 
     private fun getOrPutVersionFromVersionCache(version: String): RuffVersion? {
         return ruffVersionCache.getOrPut(version) {
@@ -32,34 +32,21 @@ class RuffCacheService(val project: Project) {
         }
     }
 
-    internal fun getOrPutVersion(): RuffVersion? {
-        if (version != null) return version
-        return getVersion().apply {
-            version = this
-            hasFormatter = this?.hasFormatter
-            hasOutputFormat = this?.hasOutputFormat
-        }
+    private fun setVersion(version: RuffVersion?) {
+        this.version = version
+        hasFormatter = version?.hasFormatter
+        hasOutputFormat = version?.hasOutputFormat
     }
 
     internal fun setVersion(): RuffVersion? {
-        return getVersion().also {
-            this.version = it
-            hasFormatter = it?.hasFormatter
-            hasOutputFormat = it?.hasOutputFormat
-        }
+        return getVersion().apply { setVersion(this) }
     }
 
     internal fun hasFormatter(): Boolean {
-        if (hasFormatter == null) {
-            setVersion()
-        }
         return hasFormatter ?: false
     }
 
     internal fun hasOutputFormat(): Boolean {
-        if (hasOutputFormat == null) {
-            setVersion()
-        }
         return hasOutputFormat ?: false
     }
 
@@ -69,16 +56,8 @@ class RuffCacheService(val project: Project) {
 
         fun hasOutputFormat(project: Project): Boolean = getInstance(project).hasOutputFormat()
 
-        fun getVersion(project: Project): RuffVersion? {
-            return getInstance(project).getOrPutVersion()
-        }
-
         fun setVersion(project: Project): RuffVersion? {
             return getInstance(project).setVersion()
-        }
-
-        fun getOrPutVersionFromVersionCache(project: Project, version: String): RuffVersion? {
-            return getInstance(project).getOrPutVersionFromVersionCache(version)
         }
 
         internal fun getInstance(project: Project): RuffCacheService {
