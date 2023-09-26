@@ -8,6 +8,7 @@
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
         <projectService
                 serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
         <projectService serviceImplementation="com.koxudaxi.ruff.RuffFixService"/>

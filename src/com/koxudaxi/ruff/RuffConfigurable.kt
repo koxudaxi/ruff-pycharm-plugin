@@ -52,12 +52,6 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffCacheService.setVersion()
     }
 
-    private val useGlobalRuff: Boolean get() {
-        if (ruffConfigService.alwaysUseGlobalRuff) return true
-        if (ruffConfigService.projectRuffExecutablePath is String) return false
-        return ruffConfigService.globalRuffExecutablePath is String
-    }
-
     override fun disposeUIResources() {
     }
 }

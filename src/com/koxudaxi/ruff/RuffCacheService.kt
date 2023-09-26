@@ -9,8 +9,10 @@ class RuffCacheService(val project: Project) {
     private var hasFormatter: Boolean? = null
     private var hasOutputFormat: Boolean? = null
 
-
-    private fun getVersion(): RuffVersion? =
+    fun getVersion(): RuffVersion? {
+        return version
+    }
+    private fun getVersionFromCommand(): RuffVersion? =
         // TODO: Move to background task to avoid blocking UI thread
         executeOnPooledThread(null) {
             runRuff(project, listOf("--version"), true)
@@ -39,7 +41,7 @@ class RuffCacheService(val project: Project) {
     }
 
     internal fun setVersion(): RuffVersion? {
-        return getVersion().apply { setVersion(this) }
+        return getVersionFromCommand().apply { setVersion(this) }
     }
 
     internal fun hasFormatter(): Boolean {
