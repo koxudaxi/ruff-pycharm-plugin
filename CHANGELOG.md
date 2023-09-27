@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fixed a bug that called ruff command infinitely [[#272](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/272)]
 
 ## [0.0.21] - 2023-09-20
 
