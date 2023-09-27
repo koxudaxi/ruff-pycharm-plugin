@@ -41,6 +41,10 @@ class RuffCacheService(val project: Project) {
         hasOutputFormat = version?.hasOutputFormat
     }
 
+    internal fun clearVersion() {
+        setVersion(null)
+    }
+
     internal fun setVersion() {
         return setVersionFromCommand()
     }
