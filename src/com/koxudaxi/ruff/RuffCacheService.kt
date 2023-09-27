@@ -35,6 +35,7 @@ class RuffCacheService(val project: Project) {
         }
     }
 
+    @Synchronized
     private fun setVersion(version: RuffVersion?) {
         this.version = version
         hasFormatter = version?.hasFormatter
