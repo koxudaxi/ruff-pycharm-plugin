@@ -8,6 +8,7 @@ import javax.swing.JComponent
 class RuffConfigurable internal constructor(project: Project) : Configurable {
     private val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
     private val configPanel: RuffConfigPanel = RuffConfigPanel(project)
+    private val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
     override fun getDisplayName(): String {
         return "Ruff"
     }
@@ -48,7 +49,7 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffLsp = configPanel.useRuffLsp
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
-
+        ruffCacheService.setVersion()
     }
 
     override fun disposeUIResources() {

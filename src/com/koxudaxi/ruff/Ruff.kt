@@ -178,7 +178,7 @@ val PsiFile.isApplicableTo: Boolean
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.projectPath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable, commandArgs.project.basePath, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
 
@@ -228,12 +228,20 @@ fun runCommand(
             isCancelled -> throw RunCanceledByUserException()
 
             exitCode != 0 -> {
-                if (stderr.startsWith("error: TOML parse error at line ", ignoreCase = false)) {
-                    throw TOMLParseException()
+                when {
+                    stderr.startsWith("error: TOML parse error at line ", ignoreCase = false) -> {
+                        throw TOMLParseException()
+                    }
+                    stderr.startsWith("error: unexpected argument '--output-format' found", ignoreCase = false) -> {
+                        throw UnexpectedNewArgumentException(NewArgument.OUTPUT_FORMAT)
+                    }
+                    Regex("(-|format):\\d+:\\d+: E902 No such file or directory \\(os error 2\\)\n").findAll(stdout).count() == 2-> {
+                        throw UnexpectedNewArgumentException(NewArgument.FORMAT)
+                    }
+                    else -> throw PyExecutionException(
+                        "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
+                    )
                 }
-                throw PyExecutionException(
-                    "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
-                )
             }
 
             else -> stdout
@@ -250,7 +258,7 @@ fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false
 
 
 data class CommandArgs(
-    val executable: File, val projectPath: @SystemDependent String?,
+    val executable: File, val project: Project,
     val stdin: ByteArray?, val args: List<String>,
 )
 
@@ -271,13 +279,13 @@ fun generateCommandArgs(
     val executable =
         ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
             project, ruffConfigService, false
-        ).apply { RuffCacheService.setVersion(project) } ?: return null
+        ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf("--config", it)
     }
     return CommandArgs(
         executable,
-        project.basePath,
+        project,
         stdin,
         (customConfigArgs ?: args) + if (stdin == null) listOf() else listOf("-")
     )
@@ -286,12 +294,22 @@ fun generateCommandArgs(
 
 class TOMLParseException : ExecutionException("TOML parse error")
 
+enum class NewArgument(val argument: String) {
+    OUTPUT_FORMAT("--output-format"),
+    FORMAT("--format")
+}
+open class UnexpectedArgumentException(argument: String) : ExecutionException("Unexpected argument: $argument")
+class UnexpectedNewArgumentException(newArgument: NewArgument) : UnexpectedArgumentException(newArgument.argument)
+
 fun runRuff(commandArgs: CommandArgs): String? {
     return try {
         runCommand(commandArgs)
     } catch (_: RunCanceledByUserException) {
         null
     } catch (_: TOMLParseException) {
+        null
+    } catch (e: UnexpectedNewArgumentException) {
+        RuffCacheService.getInstance(commandArgs.project).clearVersion()
         null
     }
 }
@@ -346,6 +364,16 @@ inline fun <reified T> executeOnPooledThread(
         }.get(timeoutSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
         defaultResult
+    }
+}
+
+inline fun executeOnPooledThread(crossinline action: () -> Unit) {
+    ApplicationManager.getApplication().executeOnPooledThread {
+        try {
+            action.invoke()
+        } catch (_: PyExecutionException) {
+        } catch (_: ProcessNotCreatedException) {
+        }
     }
 }
 
