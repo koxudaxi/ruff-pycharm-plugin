@@ -249,8 +249,21 @@ fun runCommand(
     }
 }
 
-fun runRuff(psiFile: PsiFile, args: List<String>): String? =
-        generateCommandArgs(psiFile, args)?.let { runRuff(it) }
+data class SourceFile(private val psiFile: PsiFile) {
+    val text: String by lazy { psiFile.text }
+    val project: Project get() = psiFile.project
+    val virtualFile: VirtualFile? get() = psiFile.virtualFile
+
+    val name: String get() = psiFile.name
+    val asStdin: ByteArray get() = text.toCharArray().toByteArrayAndClear()
+
+    fun hasSameContentAsDocument(document: Document): Boolean = text == document.charsSequence
+}
+
+val PsiFile.sourceFile: SourceFile get() = SourceFile(this)
+
+fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
+        generateCommandArgs(sourceFile, args)?.let { runRuff(it) }
 
 fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false): String? =
     generateCommandArgs(project, null, args, withoutConfig)?.let { runRuff(it) }
@@ -262,11 +275,11 @@ data class CommandArgs(
     val stdin: ByteArray?, val args: List<String>,
 )
 
-fun generateCommandArgs(psiFile: PsiFile, args: List<String>): CommandArgs? =
+fun generateCommandArgs(sourceFile: SourceFile, args: List<String>): CommandArgs? =
     generateCommandArgs(
-        psiFile.project,
-        psiFile.textToCharArray().toByteArrayAndClear(),
-        args + getStdinFileNameArgs(psiFile)
+        sourceFile.project,
+        sourceFile.asStdin,
+        args + getStdinFileNameArgs(sourceFile)
     )
 
 fun generateCommandArgs(
@@ -317,13 +330,13 @@ fun runRuff(commandArgs: CommandArgs): String? {
 
 
 inline fun <reified T> runRuffInBackground(
-    psiFile: PsiFile, args: List<String>, crossinline callback: (String?) -> T
+    sourceFile: SourceFile, args: List<String>, crossinline callback: (String?) -> T
 ): ProgressIndicator? =
     runRuffInBackground(
-        psiFile.project,
-        psiFile.textToCharArray().toByteArrayAndClear(),
-        args + getStdinFileNameArgs(psiFile),
-        "running ruff ${psiFile.name}",
+        sourceFile.project,
+        sourceFile.asStdin,
+        args + getStdinFileNameArgs(sourceFile),
+        "running ruff ${sourceFile.name}",
         callback
     )
 
@@ -395,8 +408,8 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
     }
 }
 
-fun getStdinFileNameArgs(psiFile: PsiFile) = psiFile.virtualFile?.let {
-    getProjectRelativeFilePath(psiFile.project, it)?.let { projectRelativeFilePath ->
+fun getStdinFileNameArgs(sourceFile: SourceFile) = sourceFile.virtualFile?.let {
+    getProjectRelativeFilePath(sourceFile.project, it)?.let { projectRelativeFilePath ->
         listOf(
             "--stdin-filename", projectRelativeFilePath
         )
@@ -413,22 +426,22 @@ fun Document.getStartEndRange(startLocation: Location, endLocation: Location, of
     return TextRange(start, end)
 }
 
-fun checkFixResult(pyFile: PsiFile, fixResult: String?): String? {
+fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     if (fixResult == null) return null
     if (fixResult.isNotBlank()) return fixResult
-    val noFixResult = runRuff(pyFile, pyFile.project.NO_FIX_ARGS) ?: return null
+    val noFixResult = runRuff(sourceFile, sourceFile.project.NO_FIX_ARGS) ?: return null
 
     // check the file is excluded
     if (noFixResult == "[]\n") return null
     return fixResult
 }
 
-fun checkFormatResult(pyFile: PsiFile, formatResult: String?): String? {
+fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
     if (formatResult == null) return null
     if (formatResult.isNotBlank()) return formatResult
 
     try {
-        runRuff(pyFile, FORMAT_CHECK_ARGS)
+        runRuff(sourceFile, FORMAT_CHECK_ARGS)
     } catch (e: PyExecutionException) {
         if (e.exitCode == 1) {
             return formatResult
@@ -437,14 +450,14 @@ fun checkFormatResult(pyFile: PsiFile, formatResult: String?): String? {
     return null
 }
 
-fun fix(pyFile: PsiFile): String? {
-    val fixResult = runRuff(pyFile, FIX_ARGS) ?: return null
-    return checkFixResult(pyFile, fixResult)
+fun fix(sourceFile: SourceFile): String? {
+    val fixResult = runRuff(sourceFile, FIX_ARGS) ?: return null
+    return checkFixResult(sourceFile, fixResult)
 }
 
-fun format(pyFile: PsiFile): String? {
-    val formatResult = runRuff(pyFile, FORMAT_ARGS) ?: return null
-    return checkFormatResult(pyFile, formatResult)
+fun format(sourceFile: SourceFile): String? {
+    val formatResult = runRuff(sourceFile, FORMAT_ARGS) ?: return null
+    return checkFormatResult(sourceFile, formatResult)
 }
 
 val NOQA_COMMENT_PATTERN: Pattern = Pattern.compile(

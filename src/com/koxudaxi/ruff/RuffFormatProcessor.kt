@@ -1,13 +1,12 @@
 package com.koxudaxi.ruff
 
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
+import com.intellij.openapi.project.Project
 
 
 class RuffFormatProcessor : RuffPostFormatProcessor() {
-    override fun isEnabled(element: PsiElement): Boolean {
-        val ruffConfigService = RuffConfigService.getInstance(element.project)
-        return ruffConfigService.runRuffOnReformatCode && ruffConfigService.useRuffFormat && RuffCacheService.hasFormatter(element.project)
+    override fun isEnabled(project: Project): Boolean {
+        val ruffConfigService = RuffConfigService.getInstance(project)
+        return ruffConfigService.runRuffOnReformatCode && ruffConfigService.useRuffFormat && RuffCacheService.hasFormatter(project)
     }
-    override fun process(pyFile: PsiFile): String? =  format(pyFile)
+    override fun process(sourceFile: SourceFile): String? =  format(sourceFile)
 }

@@ -1,6 +1,7 @@
 package com.koxudaxi.ruff
 
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -12,21 +13,23 @@ import com.jetbrains.python.psi.PyUtil
 abstract class RuffPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
-        if (!isEnabled(source)) return TextRange.EMPTY_RANGE
-        val pyFile = source.containingFile
-        if (!pyFile.isApplicableTo) return TextRange.EMPTY_RANGE
+        if (!isEnabled(source.project)) return TextRange.EMPTY_RANGE
+        if (!source.isApplicableTo) return TextRange.EMPTY_RANGE
 
+        val sourceFile = source.sourceFile
         val formatted = executeOnPooledThread(null) {
-            process(pyFile)
+            process(sourceFile)
         } ?: return TextRange.EMPTY_RANGE
-        val sourceDiffRange = diffRange(source.text, formatted) ?: return TextRange.EMPTY_RANGE
+        val sourceDiffRange = diffRange(sourceFile.text, formatted) ?: return TextRange.EMPTY_RANGE
 
-        val formattedDiffRange = diffRange(formatted, source.text) ?: return TextRange.EMPTY_RANGE
+        val formattedDiffRange = diffRange(formatted, sourceFile.text) ?: return TextRange.EMPTY_RANGE
         val formattedPart = formatted.substring(formattedDiffRange.startOffset, formattedDiffRange.endOffset)
 
         return PyUtil.updateDocumentUnblockedAndCommitted<TextRange>(
-            pyFile
+            source
         ) { document: Document ->
+            // Verify that the document has not been modified since the reformatting started
+            if (!sourceFile.hasSameContentAsDocument(document)) return@updateDocumentUnblockedAndCommitted TextRange.EMPTY_RANGE
             document.replaceString(
                 sourceDiffRange.startOffset,
                 sourceDiffRange.endOffset,
@@ -36,8 +39,8 @@ abstract class RuffPostFormatProcessor : PostFormatProcessor {
         } ?: TextRange.EMPTY_RANGE
     }
 
-    abstract fun isEnabled(element: PsiElement): Boolean
-    abstract fun process(pyFile: PsiFile): String?
+    abstract fun isEnabled(project: Project): Boolean
+    abstract fun process(sourceFile: SourceFile): String?
 
     private fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null

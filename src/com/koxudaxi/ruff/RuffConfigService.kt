@@ -1,6 +1,7 @@
 package com.koxudaxi.ruff
 
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
@@ -8,6 +9,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.SystemDependent
 
 @State(name = "RuffConfigService", storages = [Storage("ruff.xml")])
+@Service(Service.Level.PROJECT)
 class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var runRuffOnSave: Boolean = false
     var runRuffOnReformatCode: Boolean = true

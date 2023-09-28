@@ -14,6 +14,6 @@ class RuffFileDocumentManagerListener(val project: Project) : FileDocumentManage
         val psiFile = psiDocumentManager.getPsiFile(document) ?: return
         if (ruffConfigService.disableOnSaveOutsideOfProject && !psiFile.virtualFile.isInProjectDir(project)) return
         if (!psiFile.isApplicableTo) return
-        ruffFixService.fix(document, psiFile)
+        ruffFixService.fix(document, psiFile.sourceFile)
     }
 }

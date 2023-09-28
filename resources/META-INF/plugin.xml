@@ -9,9 +9,6 @@
     <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
-        <projectService
-                serviceImplementation="com.koxudaxi.ruff.RuffConfigService"/>
-        <projectService serviceImplementation="com.koxudaxi.ruff.RuffFixService"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
         <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFixProcessor"/>
         <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFormatProcessor"/>
