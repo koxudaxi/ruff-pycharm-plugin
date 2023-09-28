@@ -257,7 +257,7 @@ data class SourceFile(private val psiFile: PsiFile) {
     val name: String get() = psiFile.name
     val asStdin: ByteArray get() = text.toCharArray().toByteArrayAndClear()
 
-    fun hasSameContentAsDocument(document: Document): Boolean = text == document.charsSequence
+    fun hasSameContentAsDocument(document: Document): Boolean = document.charsSequence.contentEquals(text)
 }
 
 val PsiFile.sourceFile: SourceFile get() = SourceFile(this)
