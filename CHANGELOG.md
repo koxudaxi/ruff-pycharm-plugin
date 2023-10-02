@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Fix random illegalargumentexception [[#274](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/274)] 
+
 ## [0.0.22] - 2023-09-27
 
 - Fixed a bug that called ruff command infinitely [[#272](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/272)]
