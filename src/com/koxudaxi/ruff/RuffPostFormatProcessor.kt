@@ -42,15 +42,20 @@ abstract class RuffPostFormatProcessor : PostFormatProcessor {
     abstract fun isEnabled(project: Project): Boolean
     abstract fun process(sourceFile: SourceFile): String?
 
-    private fun diffRange(s1: String, s2: String): TextRange? {
+    internal fun diffRange(s1: String, s2: String): TextRange? {
         if (s1 == s2) return null
-        if (s2.isEmpty()) return TextRange(0, s1.length)
+        if (s1.isEmpty() || s2.isEmpty()) return TextRange(0, s1.length)
         val minLength = minOf(s1.length, s2.length)
         val start = s1.zip(s2).indexOfFirst { pair -> pair.first != pair.second }.let { if (it == -1) minLength else it }
 
         val relativeEnd = (1..minLength)
-            .indexOfFirst { s1[s1.length - it] != s2[s2.length - it] }.let { if (it == -1) minLength else it - 1}
+            .indexOfFirst { s1[s1.length - it] != s2[s2.length - it] }.let { if (it == -1) 0 else it - 1}
         val end = s1.length - relativeEnd
-        return TextRange(start, end)
+        return if (start > end) {
+            TextRange(start, start)
+        } else {
+            TextRange(start, end)
+        }
+
     }
 }
