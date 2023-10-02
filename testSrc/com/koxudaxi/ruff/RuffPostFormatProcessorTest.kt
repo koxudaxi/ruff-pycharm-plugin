@@ -20,27 +20,38 @@ class RuffPostFormatProcessorTest {
     }
 
     private val postFormatProcessor = RuffPostFormatProcessorBase()
-    private fun diffRange(s1: String, s2: String): TextRange? {
-        return postFormatProcessor.diffRange(s1, s2)
+    private fun diffRange(source: String, target: String): TextRange? {
+        return postFormatProcessor.diffRange(source, target)
     }
-    private fun testDiffRange(textRange: TextRange, s1: String, s2: String, expect: String) {
-        val diffTextRange = diffRange(s1, s2)
-        assertEquals(textRange, diffTextRange)
-        assertNotNull(diffTextRange)
-        val diff = diffTextRange.substring(s1)
-        assertEquals(expect, diff)
+
+    private fun doTestDiffRange(source: String, target: String, expectTextRange: TextRange, expectInserted: String) {
+        val sourceDiffRange = diffRange(source, target)
+        assertNotNull(sourceDiffRange)
+        assertEquals(expectTextRange, sourceDiffRange)
+        val targetDiffRange = diffRange(target, source)
+        assertNotNull(targetDiffRange)
+        val inserted = target.substring(targetDiffRange.startOffset, targetDiffRange.endOffset)
+        assertEquals(expectInserted, targetDiffRange.substring(target))
+        assertEquals(target, sourceDiffRange.replace(source, inserted))
     }
 
     @Test
-    fun diffRange() {
+    fun testDiffRange() {
         assertNull(diffRange("hello", "hello")) // no difference
-        testDiffRange(TextRange(0, 5), "hello", "", "hello") // complete difference
-        testDiffRange(TextRange(0, 0),"", "hello", "") // complete difference
-        testDiffRange(TextRange(4, 5),"hello", "hell", "o") // end difference
-        testDiffRange(TextRange(0, 1), "hello", "eello", "h") // start difference
-        testDiffRange(TextRange(3, 4), "hello", "heleo", "l") // middle difference
-        testDiffRange(TextRange(4, 5),"hello", "hellx", "o")
-        testDiffRange(TextRange(0, 5),"hello", "abcd", "hello")
-
+        doTestDiffRange("hello", "", TextRange(0, 5), "") // complete difference
+        doTestDiffRange("hello", "hell", TextRange(4, 5), "")  // difference at the end
+        doTestDiffRange("hell", "hello", TextRange(4, 4), "o")  // difference at the end
+        doTestDiffRange("hello", "jello", TextRange(0, 1), "j")  // difference at the start
+        doTestDiffRange("hello world", "hello world!", TextRange(11, 11), "!")  // difference at the end
+        doTestDiffRange("hello world!", "hello world", TextRange(11, 12), "")  // difference at the end
+        doTestDiffRange("hello world", "Hello world", TextRange(0, 1), "H")  // difference at the start
+        doTestDiffRange("hello world", "hEllo world", TextRange(1, 2), "E")  // difference in the middle
+        doTestDiffRange("import a\nimport b\nimport c\n", "import a\nimport c\n", TextRange(16, 25), "")
+        doTestDiffRange(
+            "import a\nimport c\n",
+            "import a\nimport b\nimport c\n",
+            TextRange(16, 16),
+            "b\nimport "
+        )  // difference in the middle
     }
 }
