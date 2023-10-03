@@ -1,11 +1,11 @@
 package com.koxudaxi.ruff
 
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
+import com.intellij.openapi.project.Project
 
 
 class RuffFixProcessor : RuffPostFormatProcessor() {
-    override fun isEnabled(element: PsiElement): Boolean =
-        RuffConfigService.getInstance(element.project).runRuffOnReformatCode
-    override fun process(pyFile: PsiFile): String? = fix(pyFile)
+    override fun isEnabled(project: Project): Boolean =
+        RuffConfigService.getInstance(project).runRuffOnReformatCode
+
+    override fun process(sourceFile: SourceFile): String? = fix(sourceFile)
 }
