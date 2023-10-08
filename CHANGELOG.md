@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support 2023.3 EAP [[#284](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/284)]
 
 ## [0.0.23] - 2023-10-03
 
