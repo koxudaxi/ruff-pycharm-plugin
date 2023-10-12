@@ -432,7 +432,7 @@ fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     val noFixResult = runRuff(sourceFile, sourceFile.project.NO_FIX_ARGS) ?: return null
 
     // check the file is excluded
-    if (noFixResult == "[]\n") return null
+    if (noFixResult.trim() == "[]") return null
     return fixResult
 }
 
