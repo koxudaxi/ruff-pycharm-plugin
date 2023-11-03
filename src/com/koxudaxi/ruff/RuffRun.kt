@@ -10,7 +10,10 @@ class RuffRun : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val psiFile = e.getData(PSI_FILE) ?: return
         if (!psiFile.isApplicableTo) return
-        RuffFixService.getInstance(psiFile.project).fix(psiFile)
+        val project = psiFile.project
+        val ruffConfigService = RuffConfigService.getInstance(psiFile.project)
+        val withFormat = ruffConfigService.useRuffFormat && RuffCacheService.hasFormatter(project)
+        RuffApplyService.getInstance(psiFile.project).apply(psiFile, withFormat)
     }
 
     init {
