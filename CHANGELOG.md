@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-- Fix `ruff format` on save [[#302(https://github.com/koxudaxi/ruff-pycharm-plugin/pull/302)]
+- Fix `ruff format` on save [[#302](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/302)]
 
 ## [0.0.24] - 2023-10-12
 
