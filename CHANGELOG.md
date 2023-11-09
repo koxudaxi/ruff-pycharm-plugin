@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix async version checking [[#306](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/306)]
 
 ## [0.0.25] - 2023-11-03
 

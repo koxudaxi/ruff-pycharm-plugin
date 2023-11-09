@@ -82,7 +82,13 @@ val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
-val Project.NO_FIX_ARGS get() = if (RuffCacheService.hasOutputFormat(this)) NO_FIX_OUTPUT_FORMAT_ARGS else NO_FIX_FORMAT_ARGS
+val Project.NO_FIX_ARGS: List<String>?
+    get() = when (RuffCacheService.hasOutputFormat(this)) {
+        true ->  NO_FIX_OUTPUT_FORMAT_ARGS
+        false -> NO_FIX_FORMAT_ARGS
+        else -> null
+    }
+
 
 private var wslSdkIsSupported: Boolean? = null
 val Sdk.wslIsSupported: Boolean
@@ -430,7 +436,8 @@ fun Document.getStartEndRange(startLocation: Location, endLocation: Location, of
 fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     if (fixResult == null) return null
     if (fixResult.isNotBlank()) return fixResult
-    val noFixResult = runRuff(sourceFile, sourceFile.project.NO_FIX_ARGS) ?: return null
+    val noFixArgs = sourceFile.project.NO_FIX_ARGS ?: return null
+    val noFixResult = runRuff(sourceFile, noFixArgs) ?: return null
 
     // check the file is excluded
     if (noFixResult.trim() == "[]") return null

@@ -54,15 +54,15 @@ class RuffCacheService(val project: Project) {
         return hasFormatter ?: false
     }
 
-    internal fun hasOutputFormat(): Boolean {
-        return hasOutputFormat ?: false
+    internal fun hasOutputFormat(): Boolean? {
+        return hasOutputFormat
     }
 
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
 
-        fun hasOutputFormat(project: Project): Boolean = getInstance(project).hasOutputFormat()
+        fun hasOutputFormat(project: Project): Boolean? = getInstance(project).hasOutputFormat()
 
 
         internal fun getInstance(project: Project): RuffCacheService {
