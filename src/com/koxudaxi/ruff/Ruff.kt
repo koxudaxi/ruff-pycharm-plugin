@@ -42,6 +42,7 @@ import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.io.IOError
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.regex.Pattern
@@ -58,7 +59,7 @@ val RUFF_LSP_COMMAND = when {
 }
 const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
 
-val ruffVersionCache: HashMap<String, RuffVersion> = hashMapOf()
+val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
 
 fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
 
