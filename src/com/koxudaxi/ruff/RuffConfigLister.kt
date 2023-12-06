@@ -15,6 +15,7 @@ class RuffConfigLister: EditorFactoryListener {
     private val changeListenerKey = Key.create<DocumentListener>("PyProjectToml.change.listener")
 
     override fun editorCreated(event: EditorFactoryEvent) {
+        if (!lspIsSupported) return
         val project = event.editor.project
         if (project == null || !isRuffConfigEditor(event.editor)) return
         val listener = object : DocumentListener {
@@ -39,6 +40,7 @@ class RuffConfigLister: EditorFactoryListener {
     }
 
     override fun editorReleased(event: EditorFactoryEvent) {
+        if (!lspIsSupported) return
         val listener = event.editor.getUserData(changeListenerKey) ?: return
         event.editor.document.removeDocumentListener(listener)
     }
