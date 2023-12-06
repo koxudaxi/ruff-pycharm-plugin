@@ -489,9 +489,6 @@ fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
     return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
 }
 
-val Document.virtualFile: VirtualFile?
-    get() = FileDocumentManager.getInstance().getFile(this)
-
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val RUFF_TOML: String = "ruff.toml"
 val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
