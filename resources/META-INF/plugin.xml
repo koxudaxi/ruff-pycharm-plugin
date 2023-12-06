@@ -19,7 +19,6 @@
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
-        <editorFactoryListener implementation="com.koxudaxi.ruff.RuffConfigLister"/>
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"
