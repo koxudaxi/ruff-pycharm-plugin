@@ -13,6 +13,9 @@ import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -485,3 +488,9 @@ fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
     val codes = matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
     return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
 }
+
+const val PY_PROJECT_TOML: String = "pyproject.toml"
+const val RUFF_TOML: String = "ruff.toml"
+val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
+val VirtualFile.isRuffConfig: Boolean
+    get() = name in RUFF_CONFIG

@@ -38,6 +38,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Detect `ruff` executable in Conda environment
 - [x] Detect `ruff` executable in WSL
 - [x] Support `ruff-lsp` with [LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate [Experimental]
+  - [x] Live Config Reload: Automatically updates from `pyproject.toml` and `ruff.toml` without restarting
 - [x] Support `ruff format` for ruff version `0.0.289` or later [Experimental]
 
 ### Support `ruff-lsp` for only PyCharm Pro/IDEA Ultimate

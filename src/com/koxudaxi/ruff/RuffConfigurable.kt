@@ -1,7 +1,9 @@
 package com.koxudaxi.ruff
 
+import RuffLspServerSupportProvider
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import com.intellij.platform.lsp.api.LspServerManager
 import javax.swing.JComponent
 
 
@@ -9,6 +11,7 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
     private val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
     private val configPanel: RuffConfigPanel = RuffConfigPanel(project)
     private val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
+    private val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
     override fun getDisplayName(): String {
         return "Ruff"
     }
@@ -47,9 +50,18 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.globalRuffLspExecutablePath = configPanel.globalRuffLspExecutablePath
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
-        ruffConfigService.useRuffLsp = configPanel.useRuffLsp
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
         ruffCacheService.setVersion()
+        if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
+            if (lspServerManager != null) {
+                if (configPanel.useRuffLsp) {
+                    lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
+                } else {
+                    lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
+                }
+            }
+            ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+        }
     }
 
     override fun disposeUIResources() {
