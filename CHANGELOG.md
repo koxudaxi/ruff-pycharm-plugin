@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.27] - 2023-12-07
+
 - Support live config reload for LSP [[#322](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/322)]
 
 ## [0.0.26] - 2023-11-10
@@ -139,7 +142,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.26...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...HEAD
+[0.0.27]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.26...v0.0.27
 [0.0.26]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.25...v0.0.26
 [0.0.25]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.24...v0.0.25
 [0.0.24]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.23...v0.0.24
