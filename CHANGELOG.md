@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support live config reload for LSP [[#322](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/322)]
 
 ## [0.0.26] - 2023-11-10
 
