@@ -11,6 +11,8 @@ import kotlinx.serialization.Serializable
 import java.io.File
 
 
+
+@Suppress("UnstableApiUsage")
 class RuffLspServerSupportProvider : LspServerSupportProvider {
     override fun fileOpened(
         project: Project,
@@ -28,7 +30,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))
     }
 
-    fun isInspectionEnabled(project: Project): Boolean {
+    private fun isInspectionEnabled(project: Project): Boolean {
         val inspectionProfileManager = ProjectInspectionProfileManager.getInstance(project)
 
         val toolWrapper = InspectionToolRegistrar.getInstance().createTools()
@@ -38,6 +40,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 }
 
 
+@Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
     ProjectWideLspServerDescriptor(project, "Ruff") {
 

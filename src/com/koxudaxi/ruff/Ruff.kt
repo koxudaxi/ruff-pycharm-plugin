@@ -13,9 +13,6 @@ import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -117,11 +114,14 @@ val lspIsSupported: Boolean
             return lspIsSupportedValue as Boolean
         }
         return try {
+                @Suppress("UnstableApiUsage")
                 LspServerSupportProvider
+                lspIsSupportedValue = true
                 true
             } catch (e: NoClassDefFoundError) {
+                lspIsSupportedValue = false
                 false
-            }.also { lspIsSupportedValue = it }
+            }
     }
 
 
