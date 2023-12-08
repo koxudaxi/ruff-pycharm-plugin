@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-- Support `.ruff.toml` for live config reload [[#323](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/323)]
+- Support `.ruff.toml` for live config reload [[#328](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/328)]
 
 ## [0.0.27] - 2023-12-07
 
