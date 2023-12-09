@@ -491,6 +491,7 @@ fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
 const val RUFF_TOML: String = "ruff.toml"
-val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
+const val RUFF_TOML_SUFFIX: String = ".ruff.toml"
+private val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
 val VirtualFile.isRuffConfig: Boolean
-    get() = name in RUFF_CONFIG
+    get() = name in RUFF_CONFIG || name.endsWith(RUFF_TOML_SUFFIX)
