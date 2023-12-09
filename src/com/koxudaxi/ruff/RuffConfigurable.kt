@@ -7,11 +7,10 @@ import com.intellij.platform.lsp.api.LspServerManager
 import javax.swing.JComponent
 
 
-class RuffConfigurable internal constructor(project: Project) : Configurable {
+class RuffConfigurable internal constructor(val project: Project) : Configurable {
     private val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
     private val configPanel: RuffConfigPanel = RuffConfigPanel(project)
     private val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
-    private val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
     override fun getDisplayName(): String {
         return "Ruff"
     }
@@ -53,10 +52,14 @@ class RuffConfigurable internal constructor(project: Project) : Configurable {
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
         ruffCacheService.setVersion()
         if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
+            @Suppress("UnstableApiUsage")
+            val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
             if (lspServerManager != null) {
                 if (configPanel.useRuffLsp) {
+                    @Suppress("UnstableApiUsage")
                     lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
                 } else {
+                    @Suppress("UnstableApiUsage")
                     lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
                 }
             }

@@ -33,6 +33,7 @@ class RuffProjectInitializer : ProjectActivity {
 
     private fun setUpPyProjectTomlLister(project: Project) {
         val ruffConfigService = RuffConfigService.getInstance(project)
+        @Suppress("UnstableApiUsage")
         val lspServerManager = LspServerManager.getInstance(project)
 
         VirtualFileManager.getInstance().addAsyncFileListener(

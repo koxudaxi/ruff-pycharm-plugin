@@ -26,7 +26,7 @@ class RuffExternalAnnotator :
         HighlightDisplayLevel.WARNING to HighlightSeverity.WARNING,
         HighlightDisplayLevel.WEAK_WARNING to HighlightSeverity.WEAK_WARNING,
     )
-    private val problemHighlightTypeLevels = mapOf<HighlightDisplayLevel, ProblemHighlightType>(
+    private val problemHighlightTypeLevels = mapOf(
         HighlightDisplayLevel.ERROR to ProblemHighlightType.ERROR,
         HighlightDisplayLevel.WARNING to ProblemHighlightType.WARNING,
         HighlightDisplayLevel.WEAK_WARNING to ProblemHighlightType.WEAK_WARNING,
