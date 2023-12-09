@@ -11,7 +11,8 @@ import com.intellij.refactoring.suggested.startOffset
 
 import com.intellij.webSymbols.utils.HtmlMarkdownUtils
 
-class RuffNoqaDocumentationTarget(val psiComment: PsiComment, private val originalElement: PsiComment?, private val offset: Int): DocumentationTarget {
+class RuffNoqaDocumentationTarget(private val psiComment: PsiComment, private val originalElement: PsiComment?, private val offset: Int): DocumentationTarget {
+    @Suppress("UnstableApiUsage")
     override fun computePresentation(): TargetPresentation {
         return targetPresentation(psiComment)
     }
@@ -40,6 +41,7 @@ class RuffNoqaDocumentationTarget(val psiComment: PsiComment, private val origin
         }
     }
 
+    @Suppress("UnstableApiUsage")
     override fun createPointer(): Pointer<out DocumentationTarget> {
         val elementPtr = psiComment.createSmartPointer()
         val originalElementPtr = originalElement?.createSmartPointer()
