@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix minimum PyCharm version [[#331](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/331)]
 
 ## [0.0.27] - 2023-12-07
 
