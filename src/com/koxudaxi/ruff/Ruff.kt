@@ -158,7 +158,10 @@ fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
             File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp))
         }
        (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
-           sdk.homeDirectory?.parent?.path?.let { findRuffExecutableInConda(it, lsp) }
+           when {
+               SystemInfo.isWindows -> sdk.homeDirectory?.parent // {python_dir}/python.exe
+               else -> sdk.homeDirectory?.parent?.parent // {python_dir}/bin/python
+           }?.path?.let { getRuffExecutableInConda(it, lsp) }
         else -> {
             val parent = sdk.homeDirectory?.parent?.path
             parent?.let {  File(it, getRuffCommand(lsp)) }}
@@ -166,8 +169,11 @@ fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
 }
 fun findRuffExecutableInUserSite(lsp: Boolean): File? = File(getUserSiteRuffPath(lsp)).takeIf { it.exists() }
 
+fun getRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File {
+   return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp))
+}
 fun findRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File? {
-    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp)).takeIf { it.exists() }
+    return getRuffExecutableInConda(condaHomeDir, lsp).takeIf { it.exists() }
 }
 fun findRuffExecutableInConda(lsp: Boolean): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null

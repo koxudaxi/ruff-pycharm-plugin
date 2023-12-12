@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix conda env in Linux and macOS [[#336](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/336)]
 - Support `.ruff.toml` for live config reload [[#328](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/328)]
 - Fix minimum PyCharm version [[#331](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/331)]
 
