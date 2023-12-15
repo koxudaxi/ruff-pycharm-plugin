@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.28] - 2023-12-15
+
 - Fix conda env in Linux and macOS [[#336](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/336)]
 - Support `.ruff.toml` for live config reload [[#328](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/328)]
 - Fix minimum PyCharm version [[#331](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/331)]
@@ -145,7 +148,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...HEAD
+[0.0.28]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...v0.0.28
 [0.0.27]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.26...v0.0.27
 [0.0.26]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.25...v0.0.26
 [0.0.25]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.24...v0.0.25
