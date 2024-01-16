@@ -396,6 +396,13 @@ inline fun <reified T> executeOnPooledThread(
     }
 }
 
+inline fun <reified T> runReadActionOnPooledThread(
+        defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
+): T = ApplicationManager.getApplication().runReadAction<T> {
+    executeOnPooledThread(defaultResult, timeoutSeconds, action)
+}
+
+
 inline fun executeOnPooledThread(crossinline action: () -> Unit) {
     ApplicationManager.getApplication().executeOnPooledThread {
         try {

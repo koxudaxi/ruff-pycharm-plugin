@@ -27,48 +27,43 @@ class RuffApplyService(val project: Project) {
     private fun write(document: Document, sourceFile: SourceFile, formatted: String) {
         runInEdt {
             runWriteAction {
-                CommandProcessor.getInstance().executeCommand(
-                    project,
-                    {
-                        if (!undoManager.isUndoInProgress && sourceFile.hasSameContentAsDocument(document)) {
-                            document.setText(formatted)
-                        }
-                    },
-                    "Run ruff",
-                    null,
-                    UndoConfirmationPolicy.DEFAULT,
-                    document
-                )
+                CommandProcessor.getInstance().runUndoTransparentAction {
+                    if (!undoManager.isUndoInProgress && sourceFile.hasSameContentAsDocument(document)) {
+                        document.setText(formatted)
+                    }
+                }
             }
         }
     }
 
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
-        ApplicationManager.getApplication().executeOnPooledThread {
+        val checkedFixed = runReadActionOnPooledThread(null) {
             val fixed = runRuff(sourceFile, FIX_ARGS)
-            val checkedFixed = checkFixResult(sourceFile, fixed)
+            checkFixResult(sourceFile, fixed)
 
-            if (!withFormat) {
-                if (checkedFixed is String) {
-                    write(document, sourceFile, checkedFixed)
-                }
-                return@executeOnPooledThread
-            }
+        }
 
-            val sourceByte = when {
-                checkedFixed is String -> checkedFixed.toCharArray().toByteArrayAndClear()
-                else -> sourceFile.asStdin
+        if (!withFormat) {
+            if (checkedFixed is String) {
+                write(document, sourceFile, checkedFixed)
             }
-            val formatted = generateCommandArgs(
+            return
+        }
+
+        val sourceByte = when {
+            checkedFixed is String -> checkedFixed.toCharArray().toByteArrayAndClear()
+            else -> sourceFile.asStdin
+        }
+        val formatCommandArgs = generateCommandArgs(
                 sourceFile.project,
                 sourceByte,
                 FORMAT_ARGS
-            )?.let { runRuff(it) }
-
-            checkFormatResult(sourceFile, formatted)?.let {
-                write(document, sourceFile, it)
-            }
-        }
+        )
+        val formatResult = runReadActionOnPooledThread(null) {
+            val formatted = formatCommandArgs?.let { runRuff(it) }
+            checkFormatResult(sourceFile, formatted)
+        } ?: return
+        write(document, sourceFile, formatResult)
     }
 
     companion object {
