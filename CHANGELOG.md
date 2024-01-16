@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support multiple module project [[#347](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/347)]
 
 ## [0.0.28] - 2023-12-15
 

@@ -17,6 +17,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
@@ -29,11 +30,8 @@ import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
-import com.jetbrains.python.sdk.PythonSdkAdditionalData
-import com.jetbrains.python.sdk.PythonSdkUtil
+import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
-import com.jetbrains.python.sdk.pythonSdk
-import com.jetbrains.python.sdk.showSdkExecutionException
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
@@ -46,6 +44,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.regex.Pattern
+import java.nio.file.Paths
+import kotlin.io.path.pathString
 
 val RUFF_COMMAND = when {
     SystemInfo.isWindows -> "ruff.exe"
@@ -418,10 +418,10 @@ fun VirtualFile.isInProjectDir(project: Project): Boolean =
     project.basePath?.let { canonicalPath?.startsWith(it) } ?: false
 
 fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
-    val canonicalPath = virtualFile.canonicalPath ?: return null
-    return project.basePath?.takeIf { canonicalPath.startsWith(it) }?.let {
-        canonicalPath.substring(it.length + 1)
-    }
+    val projectBasePath = project.basePath?.let { Paths.get(it) } ?: return null
+    val filePath = virtualFile.canonicalPath?.let { Paths.get(it) } ?: return null
+    if (!project.modules.any { module -> module.basePath?.let { filePath.startsWith(it) } == true }) return null
+    return projectBasePath.relativize(filePath).pathString
 }
 
 fun getStdinFileNameArgs(sourceFile: SourceFile) = sourceFile.virtualFile?.let {
