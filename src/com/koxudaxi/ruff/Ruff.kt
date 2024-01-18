@@ -265,8 +265,13 @@ fun runCommand(
     }
 }
 
-data class SourceFile(private val psiFile: PsiFile) {
-    val text: String by lazy { psiFile.text }
+data class SourceFile(private val psiFile: PsiFile, private val textRange: TextRange? = null) {
+    val text: String by lazy {
+        when {
+              textRange == null -> psiFile.text
+              else -> textRange.substring(psiFile.text)
+       }
+    }
     val project: Project get() = psiFile.project
     val virtualFile: VirtualFile? get() = psiFile.virtualFile
 
@@ -277,6 +282,8 @@ data class SourceFile(private val psiFile: PsiFile) {
 }
 
 val PsiFile.sourceFile: SourceFile get() = SourceFile(this)
+
+fun PsiFile.getSourceFile(textRange: TextRange): SourceFile = SourceFile(this, textRange)
 
 fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
         generateCommandArgs(sourceFile, args)?.let { runRuff(it) }

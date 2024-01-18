@@ -3,6 +3,7 @@
 ## [Unreleased]
 - Improve Application of Ruff Results to Python Files [[#349](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/349)]
 - Support multiple module project [[#347](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/347)]
+- Support "reformat code" partially [[#351](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/351)]
 
 ## [0.0.28] - 2023-12-15
 
