@@ -25,6 +25,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.psi.PsiComment
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
@@ -266,17 +267,18 @@ fun runCommand(
 }
 
 data class SourceFile(private val psiFile: PsiFile, private val textRange: TextRange? = null) {
-    val text: String by lazy {
-        when {
-              textRange == null -> psiFile.text
-              else -> textRange.substring(psiFile.text)
-       }
+    val text: String? by lazy {
+        val text = documentationManager.getDocument(psiFile)?.text ?: return@lazy null
+        if (textRange == null) return@lazy null
+        if (textRange.endOffset <= text.length) textRange.substring(text)
+        text.substring(textRange.startOffset, text.length)
     }
+    private val documentationManager: PsiDocumentManager get() = PsiDocumentManager.getInstance(project)
     val project: Project get() = psiFile.project
     val virtualFile: VirtualFile? get() = psiFile.virtualFile
 
     val name: String get() = psiFile.name
-    val asStdin: ByteArray get() = text.toCharArray().toByteArrayAndClear()
+    val asStdin: ByteArray? get() = text?.toCharArray()?.toByteArrayAndClear()
 
     fun hasSameContentAsDocument(document: Document): Boolean = document.charsSequence.contentEquals(text)
 }

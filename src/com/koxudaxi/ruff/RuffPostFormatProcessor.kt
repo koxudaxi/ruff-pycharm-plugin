@@ -13,30 +13,32 @@ import com.jetbrains.python.psi.PyUtil
 abstract class RuffPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
-        if (!isEnabled(source.project)) return TextRange.EMPTY_RANGE
-        if (!source.isApplicableTo) return TextRange.EMPTY_RANGE
+        if (!isEnabled(source.project)) return rangeToReformat
+        if (!source.isApplicableTo) return rangeToReformat
 
         val sourceFile = source.getSourceFile(rangeToReformat)
+        val text = sourceFile.text ?: return rangeToReformat
         val formatted = executeOnPooledThread(null) {
             process(sourceFile)
-        } ?: return TextRange.EMPTY_RANGE
-        val sourceDiffRange = diffRange(sourceFile.text, formatted) ?: return TextRange.EMPTY_RANGE
-
-        val formattedDiffRange = diffRange(formatted, sourceFile.text) ?: return TextRange.EMPTY_RANGE
-        val formattedPart = formatted.substring(formattedDiffRange.startOffset, formattedDiffRange.endOffset)
+        } ?: return rangeToReformat
+        if (text == formatted) return rangeToReformat
+        val sourceDiffRange = diffRange(text, formatted) ?: return rangeToReformat
 
         return PyUtil.updateDocumentUnblockedAndCommitted<TextRange>(
             source
         ) { document: Document ->
             // Verify that the document has not been modified since the reformatting started
-            if (!sourceFile.hasSameContentAsDocument(document)) return@updateDocumentUnblockedAndCommitted TextRange.EMPTY_RANGE
-            document.replaceString(
-                sourceDiffRange.startOffset,
-                sourceDiffRange.endOffset,
-                formattedPart
-            )
-            sourceDiffRange
-        } ?: TextRange.EMPTY_RANGE
+            if (!sourceFile.hasSameContentAsDocument(document)) return@updateDocumentUnblockedAndCommitted rangeToReformat
+
+            // document.replaceString(startOffset, endOffset, formattedPart) does not keep the line break point markers and caret position
+            document.setText(formatted)
+
+            val endOffset = rangeToReformat.startOffset + sourceDiffRange.length
+            when {
+                endOffset <= rangeToReformat.endOffset -> rangeToReformat
+                else -> TextRange.create(rangeToReformat.startOffset, endOffset)
+            }
+        } ?: rangeToReformat
     }
 
     abstract fun isEnabled(project: Project): Boolean
