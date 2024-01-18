@@ -16,7 +16,7 @@ abstract class RuffPostFormatProcessor : PostFormatProcessor {
         if (!isEnabled(source.project)) return TextRange.EMPTY_RANGE
         if (!source.isApplicableTo) return TextRange.EMPTY_RANGE
 
-        val sourceFile = source.sourceFile
+        val sourceFile = source.getSourceFile(rangeToReformat)
         val formatted = executeOnPooledThread(null) {
             process(sourceFile)
         } ?: return TextRange.EMPTY_RANGE
