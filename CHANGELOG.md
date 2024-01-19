@@ -5,6 +5,7 @@
 - Support multiple module project [[#347](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/347)]
 - Support "reformat code" partially [[#351](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/351)]
 - Improve format process [[#353](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/353)]
+- Fix UI freeze [[#355](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/355)]
 
 ## [0.0.28] - 2023-12-15
 
