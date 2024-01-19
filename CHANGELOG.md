@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.29] - 2024-01-19
+
 - Improve Application of Ruff Results to Python Files [[#349](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/349)]
 - Support multiple module project [[#347](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/347)]
 - Support "reformat code" partially [[#351](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/351)]
@@ -153,7 +156,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...HEAD
+[0.0.29]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...v0.0.29
 [0.0.28]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...v0.0.28
 [0.0.27]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.26...v0.0.27
 [0.0.26]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.25...v0.0.26
