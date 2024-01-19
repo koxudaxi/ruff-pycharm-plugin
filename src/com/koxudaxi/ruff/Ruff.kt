@@ -266,10 +266,13 @@ fun runCommand(
     }
 }
 
-data class SourceFile(private val psiFile: PsiFile, private val textRange: TextRange? = null) {
+data class SourceFile(private val psiFile: PsiFile, private val textRange: TextRange? = null,private val reloadText: Boolean = false) {
     val text: String? by lazy {
-        val text = documentationManager.getDocument(psiFile)?.text ?: return@lazy null
-        if (textRange == null) return@lazy null
+        val text = when (reloadText) {
+            true -> documentationManager.getDocument(psiFile)?.text
+            else -> psiFile.text
+        } ?: return@lazy null
+        if (textRange == null) return@lazy text
         if (textRange.endOffset <= text.length) textRange.substring(text)
         text.substring(textRange.startOffset, text.length)
     }
@@ -285,7 +288,7 @@ data class SourceFile(private val psiFile: PsiFile, private val textRange: TextR
 
 val PsiFile.sourceFile: SourceFile get() = SourceFile(this)
 
-fun PsiFile.getSourceFile(textRange: TextRange): SourceFile = SourceFile(this, textRange)
+fun PsiFile.getSourceFile(textRange: TextRange? = null, reloadText: Boolean = false): SourceFile = SourceFile(this, textRange, reloadText)
 
 fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
         generateCommandArgs(sourceFile, args)?.let { runRuff(it) }
