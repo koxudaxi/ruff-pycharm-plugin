@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- (🎁) sync changes from template [[#378](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/378)]
 - Support 241 EAP [[#372](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/372)]
 
 ## [0.0.29] - 2024-01-19
