@@ -127,15 +127,15 @@ val lspIsSupported: Boolean
 
 
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-    project.pythonSdk?.let {
-        findRuffExecutableInSDK(it, lsp)
-    }.let {
+    project.pythonSdk?.let { sdk ->
+        val ruffExe = findRuffExecutableInSDK(sdk, lsp) ?: return@let
+        val path = ruffExe.absolutePath.replace(sdk.homeDirectory!!.parent.presentableUrl, "\$PyInterpreterDirectory$")
         when {
-            lsp -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            lsp -> ruffConfigService.projectRuffExecutablePath = path
+            else -> ruffConfigService.projectRuffLspExecutablePath = path
         }
-        it
-    }?.let { return it }
+        return ruffExe
+    }
 
     when(lsp) {
         true -> ruffConfigService.globalRuffExecutablePath

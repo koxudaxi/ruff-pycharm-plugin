@@ -1,16 +1,17 @@
 package com.koxudaxi.ruff
 
 
+import com.intellij.ide.macro.MacrosDialog
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.ui.components.JBTextField
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.emptyText
+import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.fields.ExtendableTextField
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
-
 import javax.swing.JButton
 import javax.swing.JCheckBox
 import javax.swing.JLabel
@@ -29,7 +30,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var setAutodetectedRuffButton: JButton
     private lateinit var setAutodetectedRuffLspButton: JButton
     private lateinit var alwaysUseGlobalRuffCheckBox: JCheckBox
-    private lateinit var projectRuffExecutablePathField: JBTextField
+    private lateinit var projectRuffExecutablePathField: ExtendableTextField
 
     private lateinit var projectRuffLspLabel: JLabel
     private lateinit var projectRuffLspExecutablePathField: JBTextField
@@ -40,6 +41,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var useRuffFormatCheckBox: JCheckBox
     init {
         val ruffConfigService = getInstance(project)
+        MacrosDialog.addTextFieldExtension((projectRuffExecutablePathField))
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
         runRuffOnSaveCheckBox.isEnabled = true
         runRuffOnReformatCodeCheckBox.isSelected = ruffConfigService.runRuffOnReformatCode
