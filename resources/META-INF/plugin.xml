@@ -10,13 +10,14 @@
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
-        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFixProcessor"/>
-        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFormatProcessor"/>
+<!--        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFixProcessor"/>-->
+<!--        <postFormatProcessor implementation="com.koxudaxi.ruff.RuffFormatProcessor"/>-->
         <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
                          displayName="Ruff inspection"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="com.koxudaxi.ruff.RuffInspection"/>
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
+        <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatter"></formattingService>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
     </extensions>

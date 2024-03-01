@@ -198,7 +198,18 @@ fun runCommand(
     commandArgs.executable, commandArgs.project.basePath, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
+fun getGeneralCommandLine(executable: File, projectPath: String?, vararg args: String): GeneralCommandLine? {
+    if (!WslPath.isWslUncPath(executable.path)) {
+     return  getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+    }
 
+    val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+    val options = WSLCommandLineOptions()
+    options.setExecuteCommandInShell(false)
+    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
+    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+
+}
 fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
@@ -207,15 +218,8 @@ fun runCommand(
 ): String? {
 
     val indicator = ProgressManager.getInstance().progressIndicator
-    val handler = if (WslPath.isWslUncPath(executable.path)) {
-        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
-        val options = WSLCommandLineOptions()
-        options.setExecuteCommandInShell(false)
-        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
-        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
-    } else {
-        getGeneralCommandLine(listOf(executable.path) + args, projectPath)
-    }.let { CapturingProcessHandler(it) }
+    val handler = getGeneralCommandLine(executable, projectPath, *args)
+        ?.let { CapturingProcessHandler(it) } ?: return null
 
     val result = with(handler) {
         if (stdin is ByteArray) {
