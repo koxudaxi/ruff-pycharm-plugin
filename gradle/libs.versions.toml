@@ -1,0 +1,27 @@
+[versions]
+# libraries
+annotations = "24.1.0"
+tuweni = "2.3.1"
+ini4j = "0.5.4"
+kotlinxSerialization = "1.6.3"
+
+# plugins
+kotlin = "1.9.23"
+changelog = "2.2.0"
+gradleIntelliJPlugin = "1.17.2"
+qodana = "0.1.13"
+kover = "0.7.6"
+
+[libraries]
+annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+tuweni = { group = "org.apache.tuweni", name = "tuweni-toml", version.ref = "tuweni" }
+ini4j = { group = "org.ini4j", name = "ini4j", version.ref = "ini4j" }
+kotlinxSerialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+[plugins]
+changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
+gradleIntelliJPlugin = { id = "org.jetbrains.intellij", version.ref = "gradleIntelliJPlugin" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
