@@ -94,7 +94,7 @@ class RuffConfigPanel(project: Project) {
         useRuffLspCheckBox.addActionListener { updateLspExecutableFields() }
 
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
-        when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
+        when (val projectRuffExecutablePath = ruffConfigService.getProjectRuffExecutablePath(project.pythonSdk)?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
             else -> {
                 projectRuffExecutablePathField.text = ""
@@ -103,7 +103,7 @@ class RuffConfigPanel(project: Project) {
         }
 
 
-        when (val projectRuffLspExecutablePath = ruffConfigService.projectRuffLspExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, true)) {
+        when (val projectRuffLspExecutablePath = ruffConfigService.getProjectRuffLspExecutablePath(project.pythonSdk)?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, true)) {
             is String -> projectRuffLspExecutablePathField.text = projectRuffLspExecutablePath
             else -> {
                 projectRuffLspExecutablePathField.text = ""

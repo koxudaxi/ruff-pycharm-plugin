@@ -130,10 +130,9 @@ val lspIsSupported: Boolean
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
     project.pythonSdk?.let { sdk ->
         val ruffExe = findRuffExecutableInSDK(sdk, lsp) ?: return@let
-        val path =  RuffMacroService.getInstance(project).collapseProjectExecutablePath(ruffExe.absolutePath)
         when {
-            lsp -> ruffConfigService.projectRuffExecutablePath = path
-            else -> ruffConfigService.projectRuffLspExecutablePath = path
+            lsp -> ruffConfigService.setProjectRuffLspExecutablePath(ruffExe.absolutePath, sdk)
+            else -> ruffConfigService.setProjectRuffExecutablePath(ruffExe.absolutePath, sdk)
         }
         return ruffExe
     }
@@ -319,11 +318,9 @@ fun generateCommandArgs(
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
-            ruffConfigService.ruffExecutablePath?.let {
-                RuffMacroService.getInstance(project).expandProjectExecutablePath(it)
-            }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, false
-        ) ?: return null
+            ruffConfigService.getRuffExecutablePath(project.pythonSdk)?.let { File(it) }?.takeIf { it.exists() }
+                    ?: detectRuffExecutable(project, ruffConfigService, false)
+                    ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf("--config", it)
     }
