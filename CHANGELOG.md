@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.30] - 2024-02-26
+
 - (🎁) sync changes from template [[#378](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/378)]
 - Support 241 EAP [[#372](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/372)]
 
@@ -158,7 +161,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...HEAD
+[0.0.30]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...v0.0.30
 [0.0.29]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...v0.0.29
 [0.0.28]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...v0.0.28
 [0.0.27]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.26...v0.0.27
