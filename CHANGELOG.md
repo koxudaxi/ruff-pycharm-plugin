@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Ignore lsp restart error [[#398(https://github.com/koxudaxi/ruff-pycharm-plugin/pull/398)]
 
 ## [0.0.30] - 2024-02-26
 
