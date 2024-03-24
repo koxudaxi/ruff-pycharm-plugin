@@ -136,11 +136,7 @@ class RuffExternalAnnotator :
         if (range.startOffset == range.endOffset && range.endOffset == psiFile.textLength) {
             return psiFile.findElementAt(range.endOffset - 1)
         }
-        val foundElement = psiFile.findElementAt(range.startOffset)
-        if (foundElement is PsiWhiteSpace) {
-            return foundElement.prevSibling
-        }
-        return foundElement
+        return psiFile.findElementAt(range.startOffset)
     }
 
     data class RuffExternalAnnotatorInfo(
