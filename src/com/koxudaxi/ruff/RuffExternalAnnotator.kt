@@ -71,7 +71,6 @@ class RuffExternalAnnotator :
         val project = file.project
         val showRuleCode = annotationResult.showRuleCode
         val result = annotationResult.result
-        val trimOriginalLength = file.text.trimEnd().length
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
         val inspectionManager = InspectionManager.getInstance(file.project)
 
@@ -106,10 +105,9 @@ class RuffExternalAnnotator :
                 )
                 builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
             }
+            builder.range(range)
             if (range.startOffset == range.endOffset && (range.endOffset == file.textLength || file.text.substring(range.startOffset, range.endOffset + 1) == "\n")) {
-                builder.range(TextRange(range.startOffset - 1, range.endOffset))
-            } else {
-                builder.range(range)
+                builder.afterEndOfLine()
             }
             builder.create()
         }
