@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- add check args [[#405](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/405)]
 
 ## [0.0.31] - 2024-03-25
 
