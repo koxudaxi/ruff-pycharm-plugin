@@ -161,7 +161,7 @@
               <text value="ruff executable:"/>
             </properties>
           </component>
-          <component id="bc0c" class="com.intellij.ui.components.JBTextField" binding="projectRuffExecutablePathField">
+          <component id="bc0c" class="com.intellij.ui.components.fields.ExtendableTextField" binding="projectRuffExecutablePathField">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>

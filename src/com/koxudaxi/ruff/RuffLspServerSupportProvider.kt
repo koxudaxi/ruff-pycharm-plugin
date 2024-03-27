@@ -6,6 +6,7 @@ import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
+import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.*
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -24,7 +25,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
         val executable =
-            ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            ruffConfigService.getRuffLspExecutablePath(project.pythonSdk)?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
                 project, ruffConfigService, true
             ) ?: return
         serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))

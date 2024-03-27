@@ -12,8 +12,11 @@ class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
     @Suppress("UnstableApiUsage")
     private val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
     override fun packagesRefreshed(sdk: Sdk) {
-        ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
-        ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
+        findRuffExecutableInSDK(sdk, false)?.absolutePath?.let  {
+            ruffConfigService.setProjectRuffExecutablePath(it, sdk) }
+        findRuffExecutableInSDK(sdk, true)?.absolutePath?.let {
+            ruffConfigService.setProjectRuffLspExecutablePath(it, sdk)
+        }
         ruffCacheService.setVersion()
         if (lspServerManager != null && ruffConfigService.useRuffLsp) {
             try {
