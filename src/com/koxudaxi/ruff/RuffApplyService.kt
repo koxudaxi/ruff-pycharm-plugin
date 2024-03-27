@@ -38,7 +38,7 @@ class RuffApplyService(val project: Project) {
 
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
         val checkedFixed = runReadActionOnPooledThread(null) {
-            val fixed = runRuff(sourceFile, FIX_ARGS)
+            val fixed = runRuff(sourceFile, project.FIX_ARGS)
             checkFixResult(sourceFile, fixed)
 
         }
