@@ -13,8 +13,11 @@ class RuffVersion(private val major: Int, private val minor: Int = 0, private va
 
     val hasOutputFormat: Boolean get() = this >= SUPPORT_OUTPUT_FORMAT_VERSION
 
+    val hasCheck: Boolean get() = this >= SUPPORT_CHECK_VERSION
     companion object {
         val SUPPORT_FORMAT_VERSION = RuffVersion(0, 0, 289)
         val SUPPORT_OUTPUT_FORMAT_VERSION = RuffVersion(0, 0, 291)
+        val SUPPORT_CHECK_VERSION = RuffVersion(0, 3, 0)
+
     }
 }
