@@ -143,21 +143,21 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
-            lsp -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            lsp -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            else -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
         }
         it
     }?.let { return it }
 
     when(lsp) {
-        true -> ruffConfigService.globalRuffExecutablePath
-        false -> ruffConfigService.globalRuffLspExecutablePath
+        true -> ruffConfigService.globalRuffLspExecutablePath
+        false -> ruffConfigService.globalRuffExecutablePath
     }?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
     return findGlobalRuffExecutable(lsp).let {
         when(lsp) {
-            true -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
-            false -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
+            true -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
+            false -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
         }
         it
     }
