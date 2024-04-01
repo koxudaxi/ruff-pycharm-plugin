@@ -60,6 +60,7 @@ val RUFF_LSP_COMMAND = when {
     else -> "ruff-lsp"
 }
 const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
+const val PY_INTERPRETER_DIRECTORY_MACRO_NAME = "PY_INTERPRETER_DIRECTORY"
 
 val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
 
@@ -139,15 +140,14 @@ val lspIsSupported: Boolean
 
 
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-    project.pythonSdk?.let {
-        findRuffExecutableInSDK(it, lsp)
-    }.let {
+    project.pythonSdk?.let { sdk ->
+        val ruffExe = findRuffExecutableInSDK(sdk, lsp) ?: return@let
         when {
-            lsp -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            lsp -> ruffConfigService.setProjectRuffLspExecutablePath(ruffExe.absolutePath, sdk)
+            else -> ruffConfigService.setProjectRuffExecutablePath(ruffExe.absolutePath, sdk)
         }
-        it
-    }?.let { return it }
+        return ruffExe
+    }
 
     when(lsp) {
         true -> ruffConfigService.globalRuffExecutablePath
@@ -330,9 +330,9 @@ fun generateCommandArgs(
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
     val executable =
-        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, false
-        ) ?: return null
+            ruffConfigService.getRuffExecutablePath(project.pythonSdk)?.let { File(it) }?.takeIf { it.exists() }
+                    ?: detectRuffExecutable(project, ruffConfigService, false)
+                    ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf("--config", it)
     }
