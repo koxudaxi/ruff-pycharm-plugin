@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 - add check args [[#405](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/405)]
+- Fix ruff executable detection [[#409](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/409)]
 
 ## [0.0.31] - 2024-03-25
 
