@@ -1,6 +1,12 @@
 # Changelog
 
 ## [Unreleased]
+- add check args [[#405](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/405)]
+
+## [0.0.31] - 2024-03-25
+
+- Ignore lsp restart error [[#398](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/398)]
+- All inspections are displayed correctly [[#357](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/357)]
 
 ## [0.0.30] - 2024-02-26
 
@@ -161,7 +167,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.31...HEAD
+[0.0.31]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...v0.0.31
 [0.0.30]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...v0.0.30
 [0.0.29]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...v0.0.29
 [0.0.28]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.27...v0.0.28

@@ -14,6 +14,7 @@ import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.impl.PyFileImpl
@@ -70,12 +71,12 @@ class RuffExternalAnnotator :
         val project = file.project
         val showRuleCode = annotationResult.showRuleCode
         val result = annotationResult.result
-        val trimOriginalLength = file.text.trimEnd().length
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
         val inspectionManager = InspectionManager.getInstance(file.project)
 
         result.forEach {
             val range = document.getStartEndRange(it.location, it.endLocation, -1)
+            if (range.startOffset == 0 && range.endOffset == 0) return@forEach
             val psiElement = getPyElement(file, range) ?: return@forEach
             val builder = holder.newAnnotation(
                 annotationResult.highlightDisplayLevel,
@@ -104,10 +105,9 @@ class RuffExternalAnnotator :
                 )
                 builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
             }
-            if (isForFile(document, it, trimOriginalLength, range)) {
-                builder.fileLevel()
-            } else {
-                builder.range(psiElement)
+            builder.range(range)
+            if (range.startOffset == range.endOffset && (range.endOffset == file.textLength || file.text.substring(range.startOffset, range.endOffset + 1) == "\n")) {
+                builder.afterEndOfLine()
             }
             builder.create()
         }
@@ -124,14 +124,20 @@ class RuffExternalAnnotator :
         return false
     }
 
-    private fun getPyElement(psiFile: PsiFile, range: TextRange): PsiElement? =
-        PsiTreeUtil.findElementOfClassAtRange(
-            psiFile,
-            range.startOffset,
-            range.endOffset,
-            PsiElement::class.java
+    private fun getPyElement(psiFile: PsiFile, range: TextRange): PsiElement? {
+        val psiElement = PsiTreeUtil.findElementOfClassAtRange(
+        psiFile,
+        range.startOffset,
+        range.endOffset,
+        PsiElement::class.java
         )
 
+        if (psiElement != null) return psiElement
+        if (range.startOffset == range.endOffset && range.endOffset == psiFile.textLength) {
+            return psiFile.findElementAt(range.endOffset - 1)
+        }
+        return psiFile.findElementAt(range.startOffset)
+    }
 
     data class RuffExternalAnnotatorInfo(
         val showRuleCode: Boolean,

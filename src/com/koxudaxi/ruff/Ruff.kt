@@ -16,6 +16,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.progressStep
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
@@ -79,19 +80,30 @@ fun getUserSiteRuffPath(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separ
 val json = Json { ignoreUnknownKeys = true }
 
 val ARGS_BASE = listOf("--exit-zero", "--no-cache", "--force-exclude")
-val FIX_ARGS = ARGS_BASE + listOf("--fix")
+val FIX_ARGS_BASE = ARGS_BASE + listOf("--fix")
+val CHECK = listOf("check")
 val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
+val Project.FIX_ARGS: List<String>
+    get() = when {
+        RuffCacheService.hasCheck(this) == true -> CHECK + FIX_ARGS_BASE
+        else -> FIX_ARGS_BASE
+    }
+
 val Project.NO_FIX_ARGS: List<String>?
     get() = when (RuffCacheService.hasOutputFormat(this)) {
         true ->  NO_FIX_OUTPUT_FORMAT_ARGS
         false -> NO_FIX_FORMAT_ARGS
         else -> null
+    }?.let {
+        when (RuffCacheService.hasCheck(this)) {
+            true -> CHECK + it
+            false -> it
+            else -> it
+        }
     }
-
-
 private var wslSdkIsSupported: Boolean? = null
 val Sdk.wslIsSupported: Boolean
     get() {
@@ -487,7 +499,7 @@ fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
 }
 
 fun fix(sourceFile: SourceFile): String? {
-    val fixResult = runRuff(sourceFile, FIX_ARGS) ?: return null
+    val fixResult = runRuff(sourceFile, sourceFile.project.FIX_ARGS) ?: return null
     return checkFixResult(sourceFile, fixResult)
 }
 

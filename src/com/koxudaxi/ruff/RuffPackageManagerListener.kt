@@ -19,8 +19,11 @@ class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
         }
         ruffCacheService.setVersion()
         if (lspServerManager != null && ruffConfigService.useRuffLsp) {
-            @Suppress("UnstableApiUsage")
-            lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-        }
+            try {
+                @Suppress("UnstableApiUsage")
+                lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
+            } catch (_: Exception) {
+            }
+         }
     }
 }
