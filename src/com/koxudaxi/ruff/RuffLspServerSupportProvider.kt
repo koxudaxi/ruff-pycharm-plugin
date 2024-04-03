@@ -58,7 +58,7 @@ private class RuffLspServerDescriptor(project: Project, val executable: File, va
 
     override fun createInitializationOptions(): Any? {
         val config = ruffConfig.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
-        return InitOptions(Settings(listOf("--config", config.absolutePath)))
+        return InitOptions(Settings(listOf(CONFIG_ARG, config.absolutePath)))
     }
 
     override val lspGoToDefinitionSupport: Boolean = false

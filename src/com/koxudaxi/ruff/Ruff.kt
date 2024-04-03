@@ -61,6 +61,8 @@ val RUFF_LSP_COMMAND = when {
 }
 const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
 
+const val CONFIG_ARG = "--config"
+
 val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
 
 fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
@@ -207,7 +209,7 @@ val PsiFile.isApplicableTo: Boolean
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.project.basePath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
 
@@ -215,16 +217,23 @@ fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralC
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
 fun runCommand(
-    executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
+    executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
-
+    val projectPath = project?.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
     val handler = if (WslPath.isWslUncPath(executable.path)) {
         val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
-        val options = WSLCommandLineOptions()
-        options.setExecuteCommandInShell(false)
-        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
-        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+        val configArgIndex = args.indexOf(CONFIG_ARG)
+        val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+            val configPathIndex = configArgIndex + 1
+            val configPath = args[configPathIndex]
+            val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+            args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+        } else {
+            args
+        }
+        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
+        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, WSLCommandLineOptions())
     } else {
         getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }.let { CapturingProcessHandler(it) }
@@ -334,7 +343,7 @@ fun generateCommandArgs(
             project, ruffConfigService, false
         ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
-        args + listOf("--config", it)
+        args + listOf(CONFIG_ARG, it)
     }
     return CommandArgs(
         executable,
