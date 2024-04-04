@@ -35,7 +35,6 @@ import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
-import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
@@ -162,6 +161,8 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
         it
     }
 }
+
+val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
