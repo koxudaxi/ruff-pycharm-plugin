@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix wsl detection on 2024.1 [[#414](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/414)]
 
 ## [0.0.32] - 2024-04-01
 
