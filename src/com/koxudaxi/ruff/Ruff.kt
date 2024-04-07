@@ -35,7 +35,6 @@ import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
-import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
@@ -162,6 +161,9 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
         it
     }
 }
+
+val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
+
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
@@ -207,7 +209,7 @@ val PsiFile.isApplicableTo: Boolean
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.project.basePath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
 
@@ -215,16 +217,17 @@ fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralC
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
 fun runCommand(
-    executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
+    executable: File, project: Project, stdin: ByteArray?, vararg args: String
 ): String? {
-
+    val projectPath = project.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
     val handler = if (WslPath.isWslUncPath(executable.path)) {
         val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
         val options = WSLCommandLineOptions()
         options.setExecuteCommandInShell(false)
+        options.setLaunchWithWslExe(true)
         val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
-        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
+        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
     } else {
         getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }.let { CapturingProcessHandler(it) }
