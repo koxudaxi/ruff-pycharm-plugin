@@ -35,7 +35,6 @@ import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
-import com.jetbrains.python.wsl.isWsl
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.jetbrains.annotations.SystemDependent
@@ -60,6 +59,8 @@ val RUFF_LSP_COMMAND = when {
     else -> "ruff-lsp"
 }
 const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
+
+const val CONFIG_ARG = "--config"
 
 val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
 
@@ -143,25 +144,28 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
-            lsp -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            lsp -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
+            else -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
         }
         it
     }?.let { return it }
 
     when(lsp) {
-        true -> ruffConfigService.globalRuffExecutablePath
-        false -> ruffConfigService.globalRuffLspExecutablePath
+        true -> ruffConfigService.globalRuffLspExecutablePath
+        false -> ruffConfigService.globalRuffExecutablePath
     }?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
     return findGlobalRuffExecutable(lsp).let {
         when(lsp) {
-            true -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
-            false -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
+            true -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
+            false -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
         }
         it
     }
 }
+
+val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
+
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
@@ -207,30 +211,40 @@ val PsiFile.isApplicableTo: Boolean
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.project.basePath, commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
-fun getGeneralCommandLine(executable: File, projectPath: String?, vararg args: String): GeneralCommandLine? {
+fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
+    val projectPath = project?.basePath
     if (!WslPath.isWslUncPath(executable.path)) {
      return  getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }
 
     val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+    val configArgIndex = args.indexOf(CONFIG_ARG)
+    val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+        val configPathIndex = configArgIndex + 1
+        val configPath = args[configPathIndex]
+        val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+        args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+    } else {
+        args
+    }
+    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
     val options = WSLCommandLineOptions()
     options.setExecuteCommandInShell(false)
-    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + args, projectPath)
-    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, null, WSLCommandLineOptions())
-
+    options.setLaunchWithWslExe(true)
+    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
 }
 fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
 fun runCommand(
-    executable: File, projectPath: @SystemDependent String?, stdin: ByteArray?, vararg args: String
+    executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
-
+    val projectPath = project?.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
-    val handler = getGeneralCommandLine(executable, projectPath, *args)
+    val handler = getGeneralCommandLine(executable, project, *args)
         ?.let { CapturingProcessHandler(it) } ?: return null
 
     val result = with(handler) {
@@ -338,7 +352,7 @@ fun generateCommandArgs(
             project, ruffConfigService, false
         ) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
-        args + listOf("--config", it)
+        args + listOf(CONFIG_ARG, it)
     }
     return CommandArgs(
         executable,

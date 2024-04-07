@@ -32,7 +32,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
         val sourceFile = formattingContext.containingFile.sourceFile
         val commandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS) ?: return null
         try {
-            val commandLine = getGeneralCommandLine(commandArgs.executable, commandArgs.project.basePath, *commandArgs.args.toTypedArray())
+            val commandLine = getGeneralCommandLine(commandArgs.executable, commandArgs.project, *commandArgs.args.toTypedArray())
                     ?: return null
             val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
             with(handler) {

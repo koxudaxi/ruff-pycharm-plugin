@@ -1,7 +1,13 @@
 # Changelog
 
 ## [Unreleased]
+- Improve ruff config path in wsl [[#412](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/412)]
+- Fix wsl detection on 2024.1 [[#414](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/414)]
+
+## [0.0.32] - 2024-04-01
+
 - add check args [[#405](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/405)]
+- Fix ruff executable detection [[#409](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/409)]
 
 ## [0.0.31] - 2024-03-25
 
@@ -167,7 +173,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.31...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.32...HEAD
+[0.0.32]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.31...v0.0.32
 [0.0.31]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...v0.0.31
 [0.0.30]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...v0.0.30
 [0.0.29]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.28...v0.0.29
