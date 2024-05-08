@@ -19,6 +19,11 @@ version = properties("pluginVersion").get()
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://repository.jboss.org/nexus/content/repositories/snapshots") }
+    maven { url = uri("https://repository.jboss.org/nexus/content/groups/public") }
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-snapshots") }
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-releases") }
+    maven { url = uri("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies") }
 }
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
@@ -27,6 +32,14 @@ dependencies {
     compileOnly(libs.ini4j)
     compileOnly(libs.kotlinxSerialization)
     testImplementation(kotlin("test"))
+//    implementation("com.redhat.devtools:lsp4ij:0.10.0")
+    implementation("org.eclipse.lsp4mp:org.eclipse.lsp4mp.ls:0.10.0") {
+        exclude("org.eclipse.lsp4j")
+    }
+    // Exclude all lsp4j dependencies to use LSP4J from LSP4IJ
+    implementation("com.redhat.microprofile:com.redhat.qute.ls:0.17.0") {
+        exclude("org.eclipse.lsp4j")
+    }
 }
 
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.
@@ -46,6 +59,7 @@ intellij {
 
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
+    plugins.add(libs.plugins.lsp4ij)
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
@@ -107,7 +121,9 @@ tasks {
             }
         }
     }
-
+    runIde {
+        systemProperties["com.redhat.devtools.intellij.telemetry.mode"] = "disabled"
+    }
     // Configure UI tests plugin
     // Read more: https://github.com/JetBrains/intellij-ui-test-robot
     runIdeForUiTests {

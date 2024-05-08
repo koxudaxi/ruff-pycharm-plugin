@@ -19,6 +19,8 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         file: VirtualFile,
         serverStarter: LspServerSupportProvider.LspServerStarter
     ) {
+        // Debugging
+        return
         val ruffConfigService = RuffConfigService.getInstance(project)
         if (!ruffConfigService.useRuffLsp) return
         if (!isInspectionEnabled(project)) return
