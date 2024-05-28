@@ -36,6 +36,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
+                ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient ||
+                ruffConfigService.useLsp4ij != configPanel.useLsp4ij ||
                 ruffConfigService.useRuffFormat != configPanel.useRuffFormat
 
     }
@@ -52,19 +54,25 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
         ruffCacheService.setVersion()
         if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
-            @Suppress("UnstableApiUsage")
-            val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
-            if (lspServerManager != null) {
-                if (configPanel.useRuffLsp) {
-                    @Suppress("UnstableApiUsage")
-                    lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
-                } else {
-                    @Suppress("UnstableApiUsage")
-                    lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
-                }
-            }
-            ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+
         }
+        if (configPanel.ruffConfigPath != configPanel.ruffConfigPath) {}
+    }
+
+
+    private fun startIntellijLspClient() {
+        @Suppress("UnstableApiUsage")
+        val lspServerManager = if (intellijLspClientSupported) LspServerManager.getInstance(project) else null
+        if (lspServerManager != null) {
+            if (configPanel.useRuffLsp) {
+                @Suppress("UnstableApiUsage")
+                lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
+            } else {
+                @Suppress("UnstableApiUsage")
+                lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
+            }
+        }
+        ruffConfigService.useRuffLsp = configPanel.useRuffLsp
     }
 
     override fun disposeUIResources() {

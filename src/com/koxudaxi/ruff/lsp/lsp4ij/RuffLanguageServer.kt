@@ -1,8 +1,11 @@
-package com.koxudaxi.ruff
+package com.koxudaxi.ruff.lsp.lsp4ij
 
 import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.openapi.project.Project
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
+import com.koxudaxi.ruff.RuffConfigService
+import com.koxudaxi.ruff.RuffInspection
+import com.koxudaxi.ruff.detectRuffExecutable
 import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider
 import java.io.File
 
@@ -23,6 +26,7 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
 
     private fun createCommand(project: Project, ruffConfigService: RuffConfigService): List<String>? {
         if (!ruffConfigService.useRuffLsp) return null
+        if (!ruffConfigService.useLsp4ij) return null
         if (!isInspectionEnabled(project)) return null
         val executable =
                 ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() }
