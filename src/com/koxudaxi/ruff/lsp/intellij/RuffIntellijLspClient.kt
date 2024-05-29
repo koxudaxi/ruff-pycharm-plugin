@@ -9,13 +9,13 @@ import com.koxudaxi.ruff.lsp.RuffLspClient
 class RuffIntellijLspClient(val project: Project) : RuffLspClient {
     @Suppress("UnstableApiUsage")
     private val lspServerManager = if (intellijLspClientSupported) LspServerManager.getInstance(project) else null
-    override fun getRuffLspClientId(): String = RUFF_INTELLIJ_LSP_CLIENT_ID
 
     override fun start() {
         restart()
     }
 
     override fun stop() {
+        // TODO: stop server
 //        if (lspServerManager == null) return
 //        @Suppress("UnstableApiUsage")
 //        lspServerManager.stopServer(RuffLspServerSupportProvider::class.java)
@@ -27,6 +27,6 @@ class RuffIntellijLspClient(val project: Project) : RuffLspClient {
         lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
     }
     companion object {
-        const val RUFF_INTELLIJ_LSP_CLIENT_ID = "ruff-intellij-lsp-client"
+        const val RUFF_LSP_CLIENT_ID = "ruff-intellij-lsp-client"
     }
 }

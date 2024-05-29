@@ -4,6 +4,8 @@ import RuffLspServerSupportProvider
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
+import com.koxudaxi.ruff.lsp.RuffLspClientManager
+import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 import javax.swing.JComponent
 
 
@@ -54,7 +56,13 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
         ruffCacheService.setVersion()
         if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
+            val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
+            if (configPanel.useRuffLsp) {
+                ruffLspClientManager.startRuffLsp4IntellijClient()
+            } else {
+                ruffLspClientManager.stopAll()
+            }
         }
         if (configPanel.ruffConfigPath != configPanel.ruffConfigPath) {}
     }
