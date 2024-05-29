@@ -21,6 +21,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
     ) {
         val ruffConfigService = RuffConfigService.getInstance(project)
         if (!ruffConfigService.useRuffLsp) return
+        if (!ruffConfigService.useIntellijLspClient) return
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
         val executable =

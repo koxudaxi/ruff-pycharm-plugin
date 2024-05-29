@@ -11,6 +11,7 @@ changelog = "2.2.0"
 gradleIntelliJPlugin = "1.17.3"
 qodana = "0.1.13"
 kover = "0.7.6"
+lsp4ij = "0.0.1-20240508-011803@nightly"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -25,3 +26,4 @@ kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+lsp4ij = { id = "com.redhat.devtools.lsp4ij", version.ref = "lsp4ij"}

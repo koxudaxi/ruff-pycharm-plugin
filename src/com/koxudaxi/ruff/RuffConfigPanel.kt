@@ -10,11 +10,7 @@ import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
 import org.jetbrains.annotations.SystemDependent
 import java.io.File
-
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JPanel
+import javax.swing.*
 
 
 class RuffConfigPanel(project: Project) {
@@ -37,6 +33,8 @@ class RuffConfigPanel(project: Project) {
     private lateinit var clearRuffConfigPathButton: JButton
     private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox
     private lateinit var useRuffLspCheckBox: JCheckBox
+    private lateinit var useIntellijLspClientRadioButton: JRadioButton
+    private lateinit var useLsp4ijRadioButton: JRadioButton
     private lateinit var useRuffFormatCheckBox: JCheckBox
     init {
         val ruffConfigService = getInstance(project)
@@ -49,8 +47,10 @@ class RuffConfigPanel(project: Project) {
         alwaysUseGlobalRuffCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
         disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
-        useRuffLspCheckBox.isEnabled = lspIsSupported
         useRuffLspCheckBox.isSelected = ruffConfigService.useRuffLsp
+        useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
+        useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
+        useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
@@ -120,7 +120,7 @@ class RuffConfigPanel(project: Project) {
     }
 
     private fun updateLspExecutableFields() {
-        val enabled = lspIsSupported && useRuffLspCheckBox.isSelected
+        val enabled = intellijLspClientSupported && useRuffLspCheckBox.isSelected
         globalRuffLspExecutablePathField.isEnabled = enabled
         globalRuffLspLabel.isEnabled = enabled
         setAutodetectedRuffLspButton.isEnabled = enabled
@@ -133,7 +133,7 @@ class RuffConfigPanel(project: Project) {
         val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
         projectRuffExecutablePathField.isEnabled = enabled
         projectRuffLabel.isEnabled = enabled
-        if (lspIsSupported && useRuffLspCheckBox.isSelected) {
+        if (intellijLspClientSupported && useRuffLspCheckBox.isSelected) {
             projectRuffLspExecutablePathField.isEnabled = enabled
             projectRuffLspLabel.isEnabled = enabled
         }
@@ -178,7 +178,10 @@ class RuffConfigPanel(project: Project) {
         get() = disableOnSaveOutsideOfProjectCheckBox.isSelected
     val useRuffLsp: Boolean
         get() = useRuffLspCheckBox.isSelected
-
+    val useIntellijLspClient: Boolean
+        get() = useIntellijLspClientRadioButton.isSelected
+    val useLsp4ij: Boolean
+        get() = useLsp4ijRadioButton.isSelected
     val useRuffFormat: Boolean
         get() = useRuffFormatCheckBox.isSelected
 

@@ -16,7 +16,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.progressStep
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
@@ -37,7 +36,6 @@ import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.io.IOError
 import java.io.IOException
@@ -121,19 +119,19 @@ val Sdk.wslIsSupported: Boolean
         }.also { wslSdkIsSupported = it }
     }
 
-private var lspIsSupportedValue: Boolean? = null
-val lspIsSupported: Boolean
+private var intellijLspClientSupportedValue: Boolean? = null
+val intellijLspClientSupported: Boolean
     get() {
-        if (lspIsSupportedValue is Boolean) {
-            return lspIsSupportedValue as Boolean
+        if (intellijLspClientSupportedValue is Boolean) {
+            return intellijLspClientSupportedValue as Boolean
         }
         return try {
                 @Suppress("UnstableApiUsage")
                 LspServerSupportProvider
-                lspIsSupportedValue = true
+                intellijLspClientSupportedValue = true
                 true
             } catch (e: NoClassDefFoundError) {
-                lspIsSupportedValue = false
+                intellijLspClientSupportedValue = false
                 false
             }
     }

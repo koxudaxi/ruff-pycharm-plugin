@@ -46,6 +46,7 @@ intellij {
 
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
+    plugins.add(libs.plugins.lsp4ij)
 }
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
@@ -107,7 +108,9 @@ tasks {
             }
         }
     }
-
+    runIde {
+        systemProperties["com.redhat.devtools.intellij.telemetry.mode"] = "disabled"
+    }
     // Configure UI tests plugin
     // Read more: https://github.com/JetBrains/intellij-ui-test-robot
     runIdeForUiTests {
