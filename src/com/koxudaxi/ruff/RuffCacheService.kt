@@ -9,6 +9,7 @@ class RuffCacheService(val project: Project) {
     private var hasFormatter: Boolean? = null
     private var hasOutputFormat: Boolean? = null
     private var hasCheck: Boolean? = null
+    private var hasLsp: Boolean? = null
 
     fun getVersion(): RuffVersion? {
         return version
@@ -42,6 +43,7 @@ class RuffCacheService(val project: Project) {
         hasFormatter = version?.hasFormatter
         hasOutputFormat = version?.hasOutputFormat
         hasCheck = version?.hasCheck
+        hasLsp = version?.hasLsp
     }
 
     internal fun clearVersion() {
