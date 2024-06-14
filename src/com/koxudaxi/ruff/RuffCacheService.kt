@@ -14,11 +14,12 @@ class RuffCacheService(val project: Project) {
     fun getVersion(): RuffVersion? {
         return version
     }
-    private fun setVersionFromCommand() =
+    private inline fun setVersionFromCommand(crossinline action: () -> Unit) =
         executeOnPooledThread {
             val ruffVersion = runRuff(project, listOf("--version"), true)
                 ?.let { getOrPutVersionFromVersionCache(it) }
             setVersion(ruffVersion)
+            action()
         }
 
 
@@ -50,8 +51,8 @@ class RuffCacheService(val project: Project) {
         setVersion(null)
     }
 
-    internal fun setVersion() {
-        return setVersionFromCommand()
+    internal inline fun setVersion(crossinline action: () -> Unit) {
+        return setVersionFromCommand(action)
     }
 
     internal fun hasFormatter(): Boolean {
@@ -69,7 +70,6 @@ class RuffCacheService(val project: Project) {
     internal fun hasLsp(): Boolean? {
         return hasLsp
     }
-
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
@@ -77,6 +77,8 @@ class RuffCacheService(val project: Project) {
         fun hasOutputFormat(project: Project): Boolean? = getInstance(project).hasOutputFormat()
 
         fun hasCheck(project: Project): Boolean? = getInstance(project).hasCheck()
+
+        fun hasLsp(project: Project): Boolean? = getInstance(project).hasLsp()
 
         internal fun getInstance(project: Project): RuffCacheService {
             return project.getService(RuffCacheService::class.java)

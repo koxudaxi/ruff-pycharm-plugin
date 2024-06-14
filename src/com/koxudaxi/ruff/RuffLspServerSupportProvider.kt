@@ -2,6 +2,7 @@ import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.lsp.api.LspServerManager
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
@@ -20,17 +21,18 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         serverStarter: LspServerSupportProvider.LspServerStarter
     ) {
         val ruffConfigService = RuffConfigService.getInstance(project)
-        if (!ruffConfigService.useRuffLsp) return
+        if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
-
-        val executable = when {
-            ruffConfigService.useRuffServer && RuffCacheService(project).hasLsp() == true -> {
-                getRuffExecutable(project, ruffConfigService , false)
+        val ruffCacheService = RuffCacheService.getInstance(project)
+        if (ruffCacheService.getVersion() == null) return
+        val descriptor = when {
+            ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
+                getRuffExecutable(project, ruffConfigService , false)?.let { RuffServerServerDescriptor(project, it, ruffConfigService) }
             }
-            else -> getRuffExecutable(project, ruffConfigService, true)
+            else -> getRuffExecutable(project, ruffConfigService, true)?.let { RuffLspServerDescriptor(project, it, ruffConfigService) }
         } ?: return
-        serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))
+        serverStarter.ensureServerStarted(descriptor)
     }
 
     private fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
