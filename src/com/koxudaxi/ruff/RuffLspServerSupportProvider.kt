@@ -23,11 +23,21 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (!ruffConfigService.useRuffLsp) return
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
-        val executable =
-            ruffConfigService.ruffLspExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-                project, ruffConfigService, true
-            ) ?: return
+
+        val executable = when {
+            RuffCacheService(project).hasLsp() == true -> getRuffExecutable(project, ruffConfigService , false)
+            else -> getRuffExecutable(project, ruffConfigService, true)
+        } ?: return
         serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))
+    }
+
+    private fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+        return when {
+            lsp -> ruffConfigService.ruffLspExecutablePath
+            else -> ruffConfigService.ruffExecutablePath
+        }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project, ruffConfigService, lsp
+        )
     }
 
     private fun isInspectionEnabled(project: Project): Boolean {
@@ -39,13 +49,9 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
     }
 }
 
-
 @Suppress("UnstableApiUsage")
-private class RuffLspServerDescriptor(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
-    ProjectWideLspServerDescriptor(project, "Ruff") {
-
-    override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
-
+private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
+    RuffLspServerDescriptorBase(project, executable, ruffConfig) {
     private fun createBaseCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
 
     override fun createCommandLine(): GeneralCommandLine {
@@ -55,7 +61,15 @@ private class RuffLspServerDescriptor(project: Project, val executable: File, va
         }
         return commandLine
     }
+}
 
+
+@Suppress("UnstableApiUsage")
+abstract class RuffLspServerDescriptorBase(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
+    ProjectWideLspServerDescriptor(project, "Ruff") {
+
+    override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
+    abstract override fun createCommandLine(): GeneralCommandLine
     override fun createInitializationOptions(): Any? {
         val config = ruffConfig.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
         return InitOptions(Settings(listOf(CONFIG_ARG, config.absolutePath)))
@@ -65,6 +79,11 @@ private class RuffLspServerDescriptor(project: Project, val executable: File, va
     override val lspCompletionSupport: LspCompletionSupport? = null
 }
 
+@Suppress("UnstableApiUsage")
+private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
+    RuffLspServerDescriptorBase(project, executable, ruffConfig) {
+    override fun createCommandLine(): GeneralCommandLine  = GeneralCommandLine(listOf(executable.absolutePath) + LSP_PREVIEW_ARGS)
+}
 @Serializable
 data class Settings(
     val args: List<String>

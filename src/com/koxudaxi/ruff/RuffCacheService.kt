@@ -66,6 +66,10 @@ class RuffCacheService(val project: Project) {
         return hasCheck
     }
 
+    internal fun hasLsp(): Boolean? {
+        return hasLsp
+    }
+
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
