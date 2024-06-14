@@ -9,7 +9,28 @@
 See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more details.
 
 ## Sponsors
-[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=200&v=4)](https://github.com/JetBrainsOfficial)
+<table>
+  <tr>
+    <td valign="top" align="center">
+    <a href="https://github.com/JetBrainsOfficial">
+      <img src="https://avatars.githubusercontent.com/u/60931315?s=100&v=4" alt="JetBrains Logo" style="width: 100px;">
+      <p>JetBrains</p>
+    </a>
+    </td>
+  <td valign="top" align="center">
+    <a href="https://github.com/astral-sh">
+      <img src="https://avatars.githubusercontent.com/u/115962839?s=200&v=4" alt="Astral Logo" style="width: 100px;">
+      <p>Astral</p>
+    </a>
+  </td>
+  <td valign="top" align="center">
+    <a href="https://github.com/DataDog">
+      <img src="https://avatars.githubusercontent.com/u/365230?s=200&v=4" alt="Datadog, Inc. Logo" style="width: 100px;">
+      <p>Datadog, Inc.</p>
+    </a>
+  </td>
+  </tr>
+</table>
 
 
 ## Quick Installation
