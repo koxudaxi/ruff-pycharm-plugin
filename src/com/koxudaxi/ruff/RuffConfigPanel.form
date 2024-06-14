@@ -10,7 +10,7 @@
     </properties>
     <border type="none"/>
     <children>
-      <grid id="da542" layout-manager="GridLayoutManager" row-count="8" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="da542" layout-manager="GridLayoutManager" row-count="9" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -72,9 +72,17 @@
               <text value="Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate"/>
             </properties>
           </component>
-          <component id="d521d" class="javax.swing.JCheckBox" binding="useRuffFormatCheckBox">
+          <component id="36608" class="javax.swing.JCheckBox" binding="useRuffServerCheckBox">
             <constraints>
               <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Use `ruff server` for LSP feature"/>
+            </properties>
+          </component>
+          <component id="d521d" class="javax.swing.JCheckBox" binding="useRuffFormatCheckBox">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Use ruff format (Experimental) for version 0.0.289 or later"/>

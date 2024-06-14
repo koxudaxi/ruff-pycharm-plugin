@@ -36,8 +36,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
-                ruffConfigService.useRuffFormat != configPanel.useRuffFormat
-
+                ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
+                ruffConfigService.useRuffServer != configPanel.useRuffServer
     }
 
     override fun apply() {
@@ -50,6 +50,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
+        ruffConfigService.useRuffServer = configPanel.useRuffServer
         ruffCacheService.setVersion()
         if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
             @Suppress("UnstableApiUsage")

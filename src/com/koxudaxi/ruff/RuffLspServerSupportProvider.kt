@@ -25,7 +25,9 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (file.extension != "py") return
 
         val executable = when {
-            RuffCacheService(project).hasLsp() == true -> getRuffExecutable(project, ruffConfigService , false)
+            ruffConfigService.useRuffServer && RuffCacheService(project).hasLsp() == true -> {
+                getRuffExecutable(project, ruffConfigService , false)
+            }
             else -> getRuffExecutable(project, ruffConfigService, true)
         } ?: return
         serverStarter.ensureServerStarted(RuffLspServerDescriptor(project, executable, ruffConfigService))
