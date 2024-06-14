@@ -72,20 +72,20 @@
               <text value="Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate"/>
             </properties>
           </component>
-          <component id="36608" class="javax.swing.JCheckBox" binding="useRuffServerCheckBox">
-            <constraints>
-              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Use `ruff server` for LSP feature"/>
-            </properties>
-          </component>
           <component id="d521d" class="javax.swing.JCheckBox" binding="useRuffFormatCheckBox">
             <constraints>
               <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Use ruff format (Experimental) for version 0.0.289 or later"/>
+            </properties>
+          </component>
+          <component id="36608" class="javax.swing.JCheckBox" binding="useRuffServerCheckBox">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Use `ruff server` for LSP functionality (if ruff supports the server option, this is preferred over ruff-lsp)."/>
             </properties>
           </component>
         </children>

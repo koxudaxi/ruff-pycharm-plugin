@@ -54,8 +54,8 @@ class RuffConfigPanel(project: Project) {
         useRuffLspCheckBox.isSelected = ruffConfigService.useRuffLsp
         useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
-        useRuffServerCheckBox.isEnabled = false
-        useRuffServerCheckBox.isSelected = ruffConfigService.useRuffServer
+        useRuffServerCheckBox.isEnabled = ruffConfigService.useRuffFormat
+        useRuffServerCheckBox.isSelected = true
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
