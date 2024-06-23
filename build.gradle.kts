@@ -22,7 +22,6 @@ repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
-//        jetbrainsRuntime()
     }
 }
 
@@ -33,14 +32,12 @@ dependencies {
     compileOnly(libs.kotlinxSerialization)
     testImplementation(kotlin("test"))
     intellijPlatform {
-        pycharmProfessional("242.14146.24")
-        bundledPlugins("org.toml.lang", "Pythonid")
+        val type = properties("platformType")
+        val version = properties("platformVersion")
+        val plugins = properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
+        create(type, version)
+        bundledPlugins(plugins)
         instrumentationTools()
-//        val type = providers.gradleProperty("platformType")
-//        val version = providers.gradleProperty("platformVersion")
-//
-//        create(type, version)
-//        instrumentationTools()
 
     }
 }
@@ -50,25 +47,21 @@ intellijPlatform {
     instrumentCode = false
 }
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.
-//kotlin {
-//    jvmToolchain {
-//        languageVersion = JavaLanguageVersion.of(21)
-//        @Suppress("UnstableApiUsage")
-//        vendor = JvmVendorSpec.JETBRAINS
-//    }
-//}
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        @Suppress("UnstableApiUsage")
+        vendor = JvmVendorSpec.JETBRAINS
+    }
+}
 
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-//intellijPlatform {
-////    name.set(properties("pluginName"))
-////    pluginName.set(properties("pluginName"))
-////    version.set(properties("platformVersion"))
-////    type.set(properties("platformType"))
-//    val version = providers.gradleProperty("platformVersion")
-//    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-//    plugins.set(properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) })
-//    create(IntelliJPlatformType.PyCharmProfessional, version)
-//}
+intellijPlatform {
+    pluginConfiguration {
+        name = properties("pluginName")
+        version = properties("platformVersion")
+    }
+}
 
 // Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
