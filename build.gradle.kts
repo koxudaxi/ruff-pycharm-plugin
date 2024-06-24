@@ -1,5 +1,6 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 
 fun properties(key: String) = providers.gradleProperty(key)
@@ -22,6 +23,7 @@ repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
+        snapshots()
     }
 }
 
@@ -38,7 +40,7 @@ dependencies {
         create(type, version)
         bundledPlugins(plugins)
         instrumentationTools()
-
+        testFramework(TestFrameworkType.Platform.Bundled)
     }
 }
 
