@@ -41,6 +41,8 @@ dependencies {
         bundledPlugins(plugins)
         instrumentationTools()
         testFramework(TestFrameworkType.Platform.Bundled)
+        pluginVerifier()
+        zipSigner()
     }
 }
 
@@ -58,15 +60,54 @@ intellijPlatform {
     pluginConfiguration {
         name = properties("pluginName")
         version = properties("platformVersion")
+        ideaVersion {
+            sinceBuild = properties("pluginSinceBuild")
+            untilBuild = properties("pluginUntilBuild")
+
+        }
+        description =  providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+            val start = "<!-- Plugin description -->"
+            val end = "<!-- Plugin description end -->"
+
+            with (it.lines()) {
+                if (!containsAll(listOf(start, end))) {
+                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                }
+                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
+            }
+        }
+        changeNotes = properties("pluginVersion").map { pluginVersion ->
+            with(project.changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                        .withHeader(false)
+                        .withEmptySections(false),
+                    Changelog.OutputType.HTML,
+                )
+            }
+        }
+    }
+
+    verifyPlugin {
+        ides {
+            recommended()
+        }
+    }
+    signing {
+        certificateChain = environment("CERTIFICATE_CHAIN")
+        privateKey = environment("PRIVATE_KEY")
+        password = environment("PRIVATE_KEY_PASSWORD")
+    }
+    publishing {
+        token = environment("JETBRAINS_TOKEN")
+    }
+    changelog {
+        groups.empty()
+        repositoryUrl = properties("pluginRepositoryUrl")
     }
     instrumentCode = true
 }
 
-// Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-changelog {
-    groups.empty()
-    repositoryUrl = properties("pluginRepositoryUrl")
-}
 
 // Configure Gradle Qodana Plugin - read more: https://github.com/JetBrains/gradle-qodana-plugin
 qodana {
@@ -88,62 +129,6 @@ koverReport {
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
-    }
-
-    patchPluginXml {
-        version = properties("pluginVersion")
-        sinceBuild = properties("pluginSinceBuild")
-        untilBuild = properties("pluginUntilBuild")
-
-        // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        pluginDescription = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
-
-            with (it.lines()) {
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
-            }
-        }
-
-        val changelog = project.changelog // local variable for configuration cache compatibility
-        // Get the latest available change notes from the changelog file
-        changeNotes = properties("pluginVersion").map { pluginVersion ->
-            with(changelog) {
-                renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
-                    Changelog.OutputType.HTML,
-                )
-            }
-        }
-    }
-
-    // Configure UI tests plugin
-    // Read more: https://github.com/JetBrains/intellij-ui-test-robot
-//    runIdeForUiTests {
-//        systemProperty("robot-server.port", "8082")
-//        systemProperty("ide.mac.message.dialogs.as.sheets", "false")
-//        systemProperty("jb.privacy.policy.text", "<!--999.999-->")
-//        systemProperty("jb.consents.confirmation.enabled", "false")
-//    }
-
-    signPlugin {
-        certificateChain = environment("CERTIFICATE_CHAIN")
-        privateKey = environment("PRIVATE_KEY")
-        password = environment("PRIVATE_KEY_PASSWORD")
-    }
-
-    publishPlugin {
-        dependsOn("patchChangelog")
-        token = environment("JETBRAINS_TOKEN")
-        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-//        channels = properties("pluginVersion").map { listOf(it.split('-').getOrElse(1) { "default" }.split('.').first()) }
     }
 }
 
