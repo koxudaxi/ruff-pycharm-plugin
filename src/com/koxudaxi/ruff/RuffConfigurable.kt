@@ -36,8 +36,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
-                ruffConfigService.useRuffFormat != configPanel.useRuffFormat
-
+                ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
+                ruffConfigService.useRuffServer != configPanel.useRuffServer
     }
 
     override fun apply() {
@@ -50,12 +50,14 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
-        ruffCacheService.setVersion()
-        if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
+        val configPanelUseRuffLsp = configPanel.useRuffLsp
+        val configPanelUseRuffServer = configPanel.useRuffServer
+        if (ruffConfigService.useRuffLsp != configPanelUseRuffLsp || ruffConfigService.useRuffServer != configPanelUseRuffServer) {
+            ruffCacheService.setVersion{
             @Suppress("UnstableApiUsage")
             val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
             if (lspServerManager != null) {
-                if (configPanel.useRuffLsp) {
+                if (configPanelUseRuffLsp || configPanelUseRuffServer) {
                     @Suppress("UnstableApiUsage")
                     lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
                 } else {
@@ -63,8 +65,13 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                     lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
                 }
             }
-            ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+                }
+        } else {
+            ruffCacheService.setVersion{}
         }
+
+        ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+        ruffConfigService.useRuffServer = configPanel.useRuffServer
     }
 
     override fun disposeUIResources() {
