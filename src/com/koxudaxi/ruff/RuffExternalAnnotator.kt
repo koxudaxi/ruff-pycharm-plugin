@@ -39,7 +39,8 @@ class RuffExternalAnnotator :
         if (file !is PyFile) return null
         val project = file.project
         val config = RuffConfigService.getInstance(project)
-        if (config.useRuffLsp) return null
+        if (config.useRuffLsp && config.ruffLspExecutablePath is String) return null
+        if (config.useRuffServer && RuffCacheService.hasLsp(project) == true) return null
         if (!file.isApplicableTo) return null
         val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(project).currentProfile
         val key = HighlightDisplayKey.find(RuffInspection.INSPECTION_SHORT_NAME) ?: return null

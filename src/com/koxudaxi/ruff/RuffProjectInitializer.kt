@@ -21,7 +21,7 @@ class RuffProjectInitializer : ProjectActivity {
             try {
                 val ruffCacheService = RuffCacheService.getInstance(project)
                 if (ruffCacheService.getVersion() == null) {
-                    ruffCacheService.setVersion()
+                    ruffCacheService.setVersion{}
                 }
                 if (lspIsSupported) {
                     setUpPyProjectTomlLister(project)
@@ -56,11 +56,8 @@ class RuffProjectInitializer : ProjectActivity {
                             ) return
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
-                                if (!ruffConfigService.useRuffLsp) return@invokeLater
+                                if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return@invokeLater
                                 lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-
-                                LspServerManager.getInstance(project)
-                                    .stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
                             }
                         } catch (_: AlreadyDisposedException) {
                         }

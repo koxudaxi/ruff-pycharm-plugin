@@ -14,13 +14,14 @@ class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
     override fun packagesRefreshed(sdk: Sdk) {
         ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
         ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
-        ruffCacheService.setVersion()
-        if (lspServerManager != null && ruffConfigService.useRuffLsp) {
+        ruffCacheService.setVersion{
+        if (lspServerManager != null && (ruffConfigService.useRuffLsp || ruffConfigService.useRuffServer)) {
             try {
                 @Suppress("UnstableApiUsage")
                 lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
             } catch (_: Exception) {
             }
          }
+        }
     }
 }

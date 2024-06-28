@@ -38,6 +38,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox
     private lateinit var useRuffLspCheckBox: JCheckBox
     private lateinit var useRuffFormatCheckBox: JCheckBox
+    private lateinit var useRuffServerCheckBox: JCheckBox
     init {
         val ruffConfigService = getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
@@ -53,6 +54,8 @@ class RuffConfigPanel(project: Project) {
         useRuffLspCheckBox.isSelected = ruffConfigService.useRuffLsp
         useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
+        useRuffServerCheckBox.isEnabled = true
+        useRuffServerCheckBox.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
@@ -178,7 +181,8 @@ class RuffConfigPanel(project: Project) {
         get() = disableOnSaveOutsideOfProjectCheckBox.isSelected
     val useRuffLsp: Boolean
         get() = useRuffLspCheckBox.isSelected
-
+    val useRuffServer: Boolean
+        get() = useRuffServerCheckBox.isSelected
     val useRuffFormat: Boolean
         get() = useRuffFormatCheckBox.isSelected
 
