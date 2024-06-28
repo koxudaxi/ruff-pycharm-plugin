@@ -14,7 +14,6 @@ import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.impl.PyFileImpl
