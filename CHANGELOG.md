@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support new LSP integration [[#454](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/454)]
 
 ## [0.0.33] - 2024-04-07
 
