@@ -6,7 +6,7 @@ ini4j = "0.5.4"
 kotlinxSerialization = "1.6.3"
 
 # plugins
-kotlin = "1.9.23"
+kotlin = "2.0.0"
 changelog = "2.2.0"
 gradleIntelliJPlugin = "1.17.3"
 qodana = "0.1.13"
