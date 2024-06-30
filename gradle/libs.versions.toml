@@ -3,7 +3,7 @@
 annotations = "24.1.0"
 tuweni = "2.3.1"
 ini4j = "0.5.4"
-kotlinxSerialization = "1.6.3"
+kotlinxSerialization = "1.7.0"
 
 # plugins
 kotlin = "1.9.23"
