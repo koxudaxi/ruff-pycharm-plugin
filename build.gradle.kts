@@ -36,11 +36,11 @@ dependencies {
     intellijPlatform {
         val type = properties("platformType")
         val version = properties("platformVersion")
-        val plugins = properties("platformPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        create(type, version)
-        bundledPlugins(plugins)
+        val bundledPlugins = properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
+        create(type, version, useInstaller = false)
+        bundledPlugins(bundledPlugins)
         instrumentationTools()
-        testFramework(TestFrameworkType.Platform.Bundled)
+        testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
         zipSigner()
     }
