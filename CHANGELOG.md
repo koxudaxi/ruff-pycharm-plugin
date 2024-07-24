@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support 242 EAP[[#461](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#461)]
 
 ## [0.0.34] - 2024-06-28
 
