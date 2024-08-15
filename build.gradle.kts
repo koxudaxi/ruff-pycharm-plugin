@@ -22,11 +22,14 @@ version = properties("pluginVersion").get()
 // Configure project's dependencies
 repositories {
     mavenCentral()
+//    maven { url = uri("https://repository.jboss.org/nexus/content/repositories/snapshots") }
+//    maven { url = uri("https://repository.jboss.org/nexus/content/groups/public") }
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-snapshots") }
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-releases") }
+//    maven { url = uri("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies") }
     intellijPlatform {
         defaultRepositories()
-//        snapshots()
-//        nightly()
-        marketplace()
+        nightly()
     }
 }
 
@@ -43,7 +46,7 @@ dependencies {
         create(type, version, useInstaller = false)
         bundledPlugins(bundledPlugins)
         val lsp4ij = libs.plugins.lsp4ij.get()
-        plugin(lsp4ij.pluginId, lsp4ij.version.requiredVersion)
+        plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}@nightly")
 
         instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
