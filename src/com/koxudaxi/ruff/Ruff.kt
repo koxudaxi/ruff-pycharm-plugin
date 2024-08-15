@@ -84,6 +84,7 @@ val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
+val LSP_PREVIEW_ARGS = listOf("server", "--preview")
 val Project.FIX_ARGS: List<String>
     get() = when {
         RuffCacheService.hasCheck(this) == true -> CHECK + FIX_ARGS_BASE

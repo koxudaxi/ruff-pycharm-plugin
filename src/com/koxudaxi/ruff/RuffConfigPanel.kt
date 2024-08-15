@@ -36,6 +36,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var useIntellijLspClientRadioButton: JRadioButton
     private lateinit var useLsp4ijRadioButton: JRadioButton
     private lateinit var useRuffFormatCheckBox: JCheckBox
+    private lateinit var useRuffServerCheckBox: JCheckBox
     init {
         val ruffConfigService = getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
@@ -53,6 +54,8 @@ class RuffConfigPanel(project: Project) {
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
+        useRuffServerCheckBox.isEnabled = true
+        useRuffServerCheckBox.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
@@ -120,7 +123,7 @@ class RuffConfigPanel(project: Project) {
     }
 
     private fun updateLspExecutableFields() {
-        val enabled = intellijLspClientSupported && useRuffLspCheckBox.isSelected
+        val enabled = lspIsSupported && useRuffLspCheckBox.isSelected
         globalRuffLspExecutablePathField.isEnabled = enabled
         globalRuffLspLabel.isEnabled = enabled
         setAutodetectedRuffLspButton.isEnabled = enabled
@@ -133,7 +136,7 @@ class RuffConfigPanel(project: Project) {
         val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
         projectRuffExecutablePathField.isEnabled = enabled
         projectRuffLabel.isEnabled = enabled
-        if (intellijLspClientSupported && useRuffLspCheckBox.isSelected) {
+        if (lspIsSupported && useRuffLspCheckBox.isSelected) {
             projectRuffLspExecutablePathField.isEnabled = enabled
             projectRuffLspLabel.isEnabled = enabled
         }
@@ -182,6 +185,8 @@ class RuffConfigPanel(project: Project) {
         get() = useIntellijLspClientRadioButton.isSelected
     val useLsp4ij: Boolean
         get() = useLsp4ijRadioButton.isSelected
+    val useRuffServer: Boolean
+        get() = useRuffServerCheckBox.isSelected
     val useRuffFormat: Boolean
         get() = useRuffFormatCheckBox.isSelected
 

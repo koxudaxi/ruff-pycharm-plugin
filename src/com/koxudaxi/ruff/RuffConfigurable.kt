@@ -5,7 +5,6 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
 import com.koxudaxi.ruff.lsp.RuffLspClientManager
-import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 import javax.swing.JComponent
 
 
@@ -42,6 +41,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.useLsp4ij != configPanel.useLsp4ij ||
                 ruffConfigService.useRuffFormat != configPanel.useRuffFormat
 
+                ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
+                ruffConfigService.useRuffServer != configPanel.useRuffServer
     }
 
     override fun apply() {
@@ -54,6 +55,28 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
+        val configPanelUseRuffLsp = configPanel.useRuffLsp
+        val configPanelUseRuffServer = configPanel.useRuffServer
+        if (ruffConfigService.useRuffLsp != configPanelUseRuffLsp || ruffConfigService.useRuffServer != configPanelUseRuffServer) {
+            ruffCacheService.setVersion{
+            @Suppress("UnstableApiUsage")
+            val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
+            if (lspServerManager != null) {
+                if (configPanelUseRuffLsp || configPanelUseRuffServer) {
+                    @Suppress("UnstableApiUsage")
+                    lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
+                } else {
+                    @Suppress("UnstableApiUsage")
+                    lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
+                }
+            }
+                }
+        } else {
+            ruffCacheService.setVersion{}
+        }
+
+        ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+        ruffConfigService.useRuffServer = configPanel.useRuffServer
         ruffCacheService.setVersion()
         if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
             val ruffLspClientManager = RuffLspClientManager.getInstance(project)

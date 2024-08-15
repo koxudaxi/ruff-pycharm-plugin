@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.0.35] - 2024-07-24
+
+- Support 242 EAP[[#461](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#461)]
+
+## [0.0.34] - 2024-06-28
+
+- Support new LSP integration [[#454](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/454)]
+
 ## [0.0.33] - 2024-04-07
 
 - Improve ruff config path in wsl [[#412](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/412)]
@@ -176,7 +184,9 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.33...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...HEAD
+[0.0.35]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.34...v0.0.35
+[0.0.34]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.33...v0.0.34
 [0.0.33]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.32...v0.0.33
 [0.0.32]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.31...v0.0.32
 [0.0.31]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...v0.0.31

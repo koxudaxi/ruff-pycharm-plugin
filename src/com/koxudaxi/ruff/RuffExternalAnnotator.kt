@@ -14,7 +14,6 @@ import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.psi.PyFile
 import com.jetbrains.python.psi.impl.PyFileImpl
@@ -39,7 +38,8 @@ class RuffExternalAnnotator :
         if (file !is PyFile) return null
         val project = file.project
         val config = RuffConfigService.getInstance(project)
-        if (config.useRuffLsp) return null
+        if (config.useRuffLsp && config.ruffLspExecutablePath is String) return null
+        if (config.useRuffServer && RuffCacheService.hasLsp(project) == true) return null
         if (!file.isApplicableTo) return null
         val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(project).currentProfile
         val key = HighlightDisplayKey.find(RuffInspection.INSPECTION_SHORT_NAME) ?: return null
