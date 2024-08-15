@@ -60,7 +60,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         if (ruffConfigService.useRuffLsp != configPanelUseRuffLsp || ruffConfigService.useRuffServer != configPanelUseRuffServer) {
             ruffCacheService.setVersion{
             @Suppress("UnstableApiUsage")
-            val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
+            val lspServerManager = if (intellijLspClientSupported) LspServerManager.getInstance(project) else null
             if (lspServerManager != null) {
                 if (configPanelUseRuffLsp || configPanelUseRuffServer) {
                     @Suppress("UnstableApiUsage")
@@ -77,14 +77,15 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
 
         ruffConfigService.useRuffLsp = configPanel.useRuffLsp
         ruffConfigService.useRuffServer = configPanel.useRuffServer
-        ruffCacheService.setVersion()
-        if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
-            val ruffLspClientManager = RuffLspClientManager.getInstance(project)
+        ruffCacheService.setVersion {
+            if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
+                val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
-            if (configPanel.useRuffLsp) {
-                ruffLspClientManager.startRuffLsp4IntellijClient()
-            } else {
-                ruffLspClientManager.stopAll()
+                if (configPanel.useRuffLsp) {
+                    ruffLspClientManager.startRuffLsp4IntellijClient()
+                } else {
+                    ruffLspClientManager.stopAll()
+                }
             }
         }
         if (configPanel.ruffConfigPath != configPanel.ruffConfigPath) {}

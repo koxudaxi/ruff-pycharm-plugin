@@ -123,7 +123,7 @@ class RuffConfigPanel(project: Project) {
     }
 
     private fun updateLspExecutableFields() {
-        val enabled = lspIsSupported && useRuffLspCheckBox.isSelected
+        val enabled = intellijLspClientSupported && useRuffLspCheckBox.isSelected
         globalRuffLspExecutablePathField.isEnabled = enabled
         globalRuffLspLabel.isEnabled = enabled
         setAutodetectedRuffLspButton.isEnabled = enabled
@@ -136,7 +136,7 @@ class RuffConfigPanel(project: Project) {
         val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
         projectRuffExecutablePathField.isEnabled = enabled
         projectRuffLabel.isEnabled = enabled
-        if (lspIsSupported && useRuffLspCheckBox.isSelected) {
+        if (intellijLspClientSupported && useRuffLspCheckBox.isSelected) {
             projectRuffLspExecutablePathField.isEnabled = enabled
             projectRuffLspLabel.isEnabled = enabled
         }

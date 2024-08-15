@@ -1,5 +1,8 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
+
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -7,7 +10,6 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
-    alias(libs.plugins.lsp4ij)
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
@@ -20,11 +22,11 @@ version = properties("pluginVersion").get()
 // Configure project's dependencies
 repositories {
     mavenCentral()
-    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-snapshots") }
-    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-releases") }
     intellijPlatform {
         defaultRepositories()
-        snapshots()
+//        snapshots()
+//        nightly()
+        marketplace()
     }
 }
 
@@ -40,6 +42,9 @@ dependencies {
         val bundledPlugins = properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
         create(type, version, useInstaller = false)
         bundledPlugins(bundledPlugins)
+        val lsp4ij = libs.plugins.lsp4ij.get()
+        plugin(lsp4ij.pluginId, lsp4ij.version.requiredVersion)
+
         instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
