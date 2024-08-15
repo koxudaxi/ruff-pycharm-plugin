@@ -11,7 +11,7 @@ changelog = "2.2.1"
 gradleIntelliJPlugin = "2.0.0-rc1"
 qodana = "0.1.13"
 kover = "0.7.6"
-lsp4ij = "0.0.1-20240508-011803@nightly"
+lsp4ij = "0.4.0-20240815-013110@nightly"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }

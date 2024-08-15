@@ -7,6 +7,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     alias(libs.plugins.kotlin) // Kotlin support
     alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
+    alias(libs.plugins.lsp4ij)
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
@@ -19,6 +20,8 @@ version = properties("pluginVersion").get()
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-snapshots") }
+    maven { url = uri("https://repo.eclipse.org/content/repositories/lsp4mp-releases") }
     intellijPlatform {
         defaultRepositories()
         snapshots()
