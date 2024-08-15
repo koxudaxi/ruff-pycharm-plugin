@@ -32,16 +32,16 @@
                 description="Run ruff with fix option">
         </action>
     </actions>
-<!--    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">-->
-<!--        <server id="ruffLanguageServer"-->
-<!--                name="Ruff Language Server"-->
-<!--                factoryClass="com.koxudaxi.ruff.lsp.lsp4ij.RuffLanguageServerFactory">-->
-<!--            <description><![CDATA[-->
-<!--         Ruff Language Server for LSP4IJ.-->
-<!--        ]]>-->
-<!--            </description>-->
-<!--        </server>-->
-<!--        <languageMapping language="Python"-->
-<!--                         serverId="ruffLanguageServer"/>-->
-<!--    </extensions>-->
+    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
+        <server id="ruffLanguageServer"
+                name="Ruff Language Server"
+                factoryClass="com.koxudaxi.ruff.lsp.lsp4ij.RuffLanguageServerFactory">
+            <description><![CDATA[
+         Ruff Language Server for LSP4IJ.
+        ]]>
+            </description>
+        </server>
+        <languageMapping language="Python"
+                         serverId="ruffLanguageServer"/>
+    </extensions>
 </idea-plugin>
