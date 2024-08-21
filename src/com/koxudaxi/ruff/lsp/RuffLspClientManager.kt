@@ -1,32 +1,64 @@
-package com.koxudaxi.ruff.lsp
-
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import com.koxudaxi.ruff.lsp.RuffLspClient
 import com.koxudaxi.ruff.lsp.intellij.RuffIntellijLspClient
 import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
-
+import kotlin.reflect.KClass
 
 @Service(Service.Level.PROJECT)
-class RuffLspClientManager(private val project: Project) {
-    private val ruffLsp4IntellijClient =  RuffLsp4IntellijClient(project)
-    private val ruffIntellijLspClient = RuffIntellijLspClient(project)
+class RuffLspClientManager(project: Project) {
 
-    fun startRuffLsp4IntellijClient() {
-        ruffLsp4IntellijClient.start()
-    }
-    fun stopRuffLsp4IntellijClient() {
-        ruffLsp4IntellijClient.stop()
-    }
-    fun startRuffIntellijLspClient() {
-        ruffIntellijLspClient.start()
-    }
-    fun stopRuffIntellijLspClient() {
-        ruffIntellijLspClient.stop()
+    private val clients: Map<KClass<out RuffLspClient>, RuffLspClient> = mapOf(
+        RuffLsp4IntellijClient::class to RuffLsp4IntellijClient(project),
+        RuffIntellijLspClient::class to RuffIntellijLspClient(project)
+    )
+
+    @Volatile
+    private var enabledClient: RuffLspClient? = null
+
+    fun hasClient(): Boolean {
+        return enabledClient != null
     }
 
-    fun stopAll() {
-        stopRuffIntellijLspClient()
-        stopRuffLsp4IntellijClient()
+    fun setClient(client: KClass<out RuffLspClient>, start: Boolean = true) {
+        ApplicationManager.getApplication().invokeLater {
+            val newClient = clients[client] ?: error("Client for key $client not found")
+            ApplicationManager.getApplication().runWriteAction {
+                if (enabledClient?.javaClass == client.java) {
+                    return@runWriteAction
+                }
+                enabledClient?.stop()
+                if (start) {
+                    newClient.start()
+                }
+                enabledClient = newClient
+            }
+        }
+    }
+
+    fun start() {
+        ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().runWriteAction {
+                enabledClient?.start()
+            }
+        }
+    }
+
+    fun stop() {
+        ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().runWriteAction {
+                enabledClient?.stop()
+            }
+        }
+    }
+
+    fun restart() {
+        ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().runWriteAction {
+                enabledClient?.restart()
+            }
+        }
     }
 
     companion object {
@@ -34,6 +66,4 @@ class RuffLspClientManager(private val project: Project) {
             return project.getService(RuffLspClientManager::class.java)
         }
     }
-
-
 }

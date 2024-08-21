@@ -1,11 +1,9 @@
-import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.LspCompletionSupport
-import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.koxudaxi.ruff.*
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -21,7 +19,6 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
     ) {
         val ruffConfigService = RuffConfigService.getInstance(project)
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
-        if (!ruffConfigService.useRuffLsp) return
         if (!ruffConfigService.useIntellijLspClient) return
         if (!isInspectionEnabled(project)) return
         if (file.extension != "py") return
@@ -34,23 +31,6 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
             else -> getRuffExecutable(project, ruffConfigService, true)?.let { RuffLspServerDescriptor(project, it, ruffConfigService) }
         } ?: return
         serverStarter.ensureServerStarted(descriptor)
-    }
-
-    private fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-        return when {
-            lsp -> ruffConfigService.ruffLspExecutablePath
-            else -> ruffConfigService.ruffExecutablePath
-        }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, lsp
-        )
-    }
-
-    private fun isInspectionEnabled(project: Project): Boolean {
-        val inspectionProfileManager = ProjectInspectionProfileManager.getInstance(project)
-
-        val toolWrapper = InspectionToolRegistrar.getInstance().createTools()
-            .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME } ?: return false
-        return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
     }
 }
 
@@ -76,8 +56,8 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
     override fun createInitializationOptions(): Any? {
-        val config = ruffConfig.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
-        return InitOptions(Settings(listOf(CONFIG_ARG, config.absolutePath)))
+        val configArgs = getConfigArgs(ruffConfig) ?: return null
+        return InitOptions(Settings(configArgs))
     }
 
     override val lspGoToDefinitionSupport: Boolean = false

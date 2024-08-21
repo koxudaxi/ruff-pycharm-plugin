@@ -33,14 +33,14 @@
         </action>
     </actions>
     <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
-        <server id="ruffLanguageServer"
-                name="Ruff Language Server"
-                factoryClass="com.koxudaxi.ruff.lsp.lsp4ij.RuffLanguageServerFactory">
-            <description><![CDATA[
-         Ruff Language Server for LSP4IJ.
-        ]]>
-            </description>
-        </server>
+<!--        <server id="ruffLanguageServer"-->
+<!--                name="Ruff Language Server"-->
+<!--                factoryClass="com.koxudaxi.ruff.lsp.lsp4ij.RuffLanguageServerFactory">-->
+<!--            <description><![CDATA[-->
+<!--         Ruff Language Server for LSP4IJ.-->
+<!--        ]]>-->
+<!--            </description>-->
+<!--        </server>-->
         <languageMapping language="Python"
                          serverId="ruffLanguageServer"/>
     </extensions>

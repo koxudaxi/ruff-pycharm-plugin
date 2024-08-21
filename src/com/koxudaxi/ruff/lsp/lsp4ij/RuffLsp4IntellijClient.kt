@@ -2,26 +2,36 @@ package com.koxudaxi.ruff.lsp.lsp4ij
 
 import com.intellij.openapi.project.Project
 import com.koxudaxi.ruff.lsp.RuffLspClient
+import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
 
 class RuffLsp4IntellijClient(val project: Project): RuffLspClient {
-    private val lspServer get() = RuffLanguageServerFactory().createConnectionProvider(project)
+    private var provider: StreamConnectionProvider? = null
     override fun start() {
-        lspServer.start()
+        provider?.let {
+            if (!it.isAlive) {
+                it.start()
+            }
+        } ?: run {
+            val newProvider = RuffLanguageServerFactory().createConnectionProvider(project)
+            newProvider.start()
+            provider = newProvider
+        }
     }
 
     override fun stop() {
-        if (lspServer.isAlive) {
-            lspServer.stop()
+        provider?.let {
+            if (it.isAlive) {
+                it.stop()
+            }
         }
     }
 
     override fun restart() {
-        if (lspServer.isAlive) {
-            lspServer.stop()
+        provider?.let {
+            if (it.isAlive) {
+                it.stop()
+            }
         }
-        lspServer.start()
-    }
-    companion object {
-        const val RUFF_LSP_CLIENT_ID = "ruff-lsp4-intellij-client"
+        start()
     }
 }

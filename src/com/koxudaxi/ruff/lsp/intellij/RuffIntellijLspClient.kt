@@ -15,18 +15,14 @@ class RuffIntellijLspClient(val project: Project) : RuffLspClient {
     }
 
     override fun stop() {
-        // TODO: stop server
-//        if (lspServerManager == null) return
-//        @Suppress("UnstableApiUsage")
-//        lspServerManager.stopServer(RuffLspServerSupportProvider::class.java)
+        if (lspServerManager == null) return
+        @Suppress("UnstableApiUsage")
+        lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
     }
 
     override fun restart() {
         if (lspServerManager == null) return
         @Suppress("UnstableApiUsage")
         lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-    }
-    companion object {
-        const val RUFF_LSP_CLIENT_ID = "ruff-intellij-lsp-client"
     }
 }

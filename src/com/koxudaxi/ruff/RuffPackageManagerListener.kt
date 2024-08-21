@@ -1,36 +1,39 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
+import RuffLspClientManager
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.platform.lsp.api.LspServerManager
 import com.jetbrains.python.packaging.PyPackageManager
+import com.koxudaxi.ruff.lsp.intellij.RuffIntellijLspClient
+import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 
 class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
     private val ruffConfigService = RuffConfigService.getInstance(project)
     private val ruffCacheService = RuffCacheService.getInstance(project)
+    private val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
-    @Suppress("UnstableApiUsage")
-    private val lspServerManager = if (intellijLspClientSupported) LspServerManager.getInstance(project) else null
     override fun packagesRefreshed(sdk: Sdk) {
         ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
         ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
+        if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         ruffCacheService.setVersion {
-            if (!ruffConfigService.useRuffLsp) return@setVersion
-            if (lspServerManager != null && ruffConfigService.useIntellijLspClient) {
-                ruffCacheService.setVersion {
-                    if (lspServerManager != null && (ruffConfigService.useRuffLsp || ruffConfigService.useRuffServer)) {
-                        try {
-                            @Suppress("UnstableApiUsage")
-                            lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-                        } catch (_: Exception) {
+            ApplicationManager.getApplication().invokeLater {
+                ApplicationManager.getApplication().runWriteAction {
+                    when {
+                        ruffLspClientManager.hasClient() -> ruffLspClientManager.restart()
+                        else -> {
+                            val clientClass = when {
+                                ruffConfigService.useLsp4ij -> RuffLsp4IntellijClient::class
+                                else -> RuffIntellijLspClient::class
+                            }
+                            ruffLspClientManager.setClient(clientClass)
                         }
                     }
-                    if (ruffConfigService.useLsp4ij) {
-                        // TODO: Restart lsp4ij
-                    }
+
                 }
             }
+
         }
     }
 }
