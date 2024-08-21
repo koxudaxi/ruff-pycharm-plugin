@@ -12,6 +12,7 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
 
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
         return RuffLanguageServer(project)
+
     }
 
     //If you need to provide client specific features

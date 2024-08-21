@@ -2,36 +2,38 @@ package com.koxudaxi.ruff.lsp.lsp4ij
 
 import com.intellij.openapi.project.Project
 import com.koxudaxi.ruff.lsp.RuffLspClient
-import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
+import com.redhat.devtools.lsp4ij.LanguageServerManager
+import com.redhat.devtools.lsp4ij.ServerStatus
 
-class RuffLsp4IntellijClient(val project: Project): RuffLspClient {
-    private var provider: StreamConnectionProvider? = null
+class RuffLsp4IntellijClient(project: Project) : RuffLspClient {
+    private val languageServerManager: LanguageServerManager = LanguageServerManager.getInstance(project)
+    private val isRunning: Boolean
+        get() {
+            val status = languageServerManager.getServerStatus(LANGUAGE_SERVER_ID)
+            return status == ServerStatus.started || status == ServerStatus.starting
+        }
+
     override fun start() {
-        provider?.let {
-            if (!it.isAlive) {
-                it.start()
-            }
-        } ?: run {
-            val newProvider = RuffLanguageServerFactory().createConnectionProvider(project)
-            newProvider.start()
-            provider = newProvider
+        if (!isRunning) {
+            languageServerManager.start(LANGUAGE_SERVER_ID)
         }
     }
 
+
     override fun stop() {
-        provider?.let {
-            if (it.isAlive) {
-                it.stop()
-            }
+        if (isRunning) {
+            languageServerManager.stop(LANGUAGE_SERVER_ID)
         }
     }
 
     override fun restart() {
-        provider?.let {
-            if (it.isAlive) {
-                it.stop()
-            }
+        if (isRunning) {
+            languageServerManager.stop(LANGUAGE_SERVER_ID)
         }
-        start()
+        languageServerManager.start(LANGUAGE_SERVER_ID)
+    }
+    companion object {
+        const val LANGUAGE_SERVER_ID = "ruffLanguageServer"
+
     }
 }
