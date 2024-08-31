@@ -9,10 +9,13 @@ import kotlin.reflect.KClass
 @Service(Service.Level.PROJECT)
 class RuffLspClientManager(project: Project) {
 
-    private val clients: Map<KClass<out RuffLspClient>, RuffLspClient> = mapOf(
-        RuffLsp4IntellijClient::class to RuffLsp4IntellijClient(project),
-        RuffIntellijLspClient::class to RuffIntellijLspClient(project)
-    )
+    private val clients: Map<KClass<out RuffLspClient>, RuffLspClient>? = when {
+        project.isDefault -> null
+        else -> mapOf(
+            RuffLsp4IntellijClient::class to RuffLsp4IntellijClient(project),
+            RuffIntellijLspClient::class to RuffIntellijLspClient(project)
+        )
+    }
 
     @Volatile
     private var enabledClient: RuffLspClient? = null
@@ -22,6 +25,7 @@ class RuffLspClientManager(project: Project) {
     }
 
     fun setClient(client: KClass<out RuffLspClient>, start: Boolean = true) {
+        if (clients == null) return
         ApplicationManager.getApplication().invokeLater {
             val newClient = clients[client] ?: error("Client for key $client not found")
             ApplicationManager.getApplication().runWriteAction {

@@ -80,7 +80,7 @@
             <properties/>
             <border type="none" title="Language Server Protocol (LSP)"/>
             <children>
-              <grid id="1f570" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="1f570" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="1" use-parent-layout="false"/>
@@ -88,34 +88,33 @@
                 <properties/>
                 <border type="none" title="LSP Server"/>
                 <children>
-                  <component id="36608" class="javax.swing.JCheckBox" binding="useRuffServerCheckBox">
+                  <component id="93dcd" class="javax.swing.JRadioButton" binding="useRuffServerRadioButton">
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="Use `ruff server` for LSP functionality (if ruff supports the server option, this is preferred over ruff-lsp)."/>
+                      <actionCommand value="`ruff server` command"/>
+                      <label value="`ruff server` command"/>
+                      <text value="`ruff server` command"/>
                     </properties>
                   </component>
-                  <hspacer id="94103">
+                  <hspacer id="12e9e">
                     <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </hspacer>
-                  <component id="1c73c" class="javax.swing.JCheckBox" binding="useRuffLspCheckBox">
+                  <component id="89976" class="javax.swing.JRadioButton" binding="useRuffLspRadioButton">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
-                      <text value="Use ruff-lsp"/>
+                      <actionCommand value="`ruff-lsp` command"/>
+                      <label value="`ruff-lsp` command"/>
+                      <text value="`ruff-lsp` command"/>
                     </properties>
                   </component>
                 </children>
               </grid>
-              <hspacer id="206a7">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
               <vspacer id="aaf9">
                 <constraints>
                   <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -302,6 +301,10 @@
     <group name="lspClient">
       <member id="59c8d"/>
       <member id="5d92e"/>
+    </group>
+    <group name="lspServer">
+      <member id="93dcd"/>
+      <member id="89976"/>
     </group>
   </buttonGroups>
 </form>
