@@ -3,7 +3,7 @@
 # - Run 'test' and 'verifyPlugin' tasks.
 # - Run Qodana inspections.
 # - Run the 'buildPlugin' task and prepare artifact for further tests.
-# - Run the 'runPluginVerifier' task.
+# - Run the 'verifyPlugin' task.
 # - Create a draft release.
 #
 # The workflow is triggered on push and pull_request events.
@@ -107,7 +107,7 @@ jobs:
           path: ./build/distributions/content/*/*
 
       - name: Setup Python
-        uses: actions/setup-python@v5.1.1
+        uses: actions/setup-python@v5.2.0
         with:
           python-version: '3.11'
 
@@ -193,7 +193,7 @@ jobs:
 
       # Run Qodana inspections
       - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2024.1.9
+        uses: JetBrains/qodana-action@v2024.1.2
         with:
           cache-default-branch-only: true
 

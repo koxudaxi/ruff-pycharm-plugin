@@ -1,15 +1,17 @@
 package com.koxudaxi.ruff
 
 import com.intellij.codeInsight.navigation.targetPresentation
+import com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter
 import com.intellij.model.Pointer
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.util.Computable
 import com.intellij.platform.backend.documentation.DocumentationResult
 import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.psi.PsiComment
-import com.intellij.refactoring.suggested.createSmartPointer
-import com.intellij.refactoring.suggested.startOffset
+import com.intellij.psi.createSmartPointer
+import com.intellij.psi.util.startOffset
 
-import com.intellij.webSymbols.utils.HtmlMarkdownUtils
 
 class RuffNoqaDocumentationTarget(private val psiComment: PsiComment, private val originalElement: PsiComment?, private val offset: Int): DocumentationTarget {
     @Suppress("UnstableApiUsage")
@@ -32,12 +34,14 @@ class RuffNoqaDocumentationTarget(private val psiComment: PsiComment, private va
     override fun computeDocumentation(): DocumentationResult? {
         val noqaCode = getNoqaCode(psiComment, offset) ?: return null
         return DocumentationResult.asyncDocumentation {
-            val markdown = runRuff(psiComment.project, listOf("--explain", noqaCode), true) ?: return@asyncDocumentation null
-            val html = HtmlMarkdownUtils.toHtml(markdown, true) ?: return@asyncDocumentation null
-            val downscaledHtml = replaceHtmlTags.fold(html) { acc, (from, to) ->
-                acc.replace(from, to)
-            }
-            DocumentationResult.documentation(downscaledHtml)
+            val markdown = runRuff(psiComment.project, psiComment.project.RULE_ARGS + noqaCode, true) ?: return@asyncDocumentation null
+            ApplicationManager.getApplication().runReadAction(Computable {
+                val html = DocMarkdownToHtmlConverter.convert(psiComment.project, markdown) ?: return@Computable null
+                val downscaledHtml = replaceHtmlTags.fold(html) { acc, (from, to) ->
+                    acc.replace(from, to)
+                }
+                DocumentationResult.documentation(downscaledHtml)
+            })
         }
     }
 

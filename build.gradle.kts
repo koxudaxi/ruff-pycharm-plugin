@@ -3,6 +3,7 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
 
+
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
 
@@ -23,7 +24,6 @@ repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
-        snapshots()
     }
 }
 
@@ -39,6 +39,9 @@ dependencies {
         val bundledPlugins = properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
         create(type, version, useInstaller = false)
         bundledPlugins(bundledPlugins)
+        val lsp4ij = libs.plugins.lsp4ij.get()
+        plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
+
         instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
