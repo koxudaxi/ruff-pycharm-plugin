@@ -94,11 +94,6 @@ class RuffConfigPanel(project: Project) {
 
         setAutodetectedRuffLspButton.addActionListener { setAutodetectedRuffLsp() }
 
-        fun updateLspClientCheckBoxes() {
-            val useLspClient = useRuffLspRadioButton.isSelected || useRuffServerRadioButton.isSelected
-            useIntellijLspClientRadioButton.isEnabled = useLspClient
-            useLsp4ijRadioButton.isEnabled = useLspClient
-        }
 
         useRuffLspRadioButton.addActionListener {
             updateLspClientCheckBoxes()
@@ -110,20 +105,9 @@ class RuffConfigPanel(project: Project) {
         }
 
         enableLspCheckBox.addActionListener {
-            if (enableLspCheckBox.isSelected) {
-                useLsp4ijRadioButton.isEnabled = true
-                useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
-                useRuffLspRadioButton.isEnabled = true
-                useRuffServerRadioButton.isEnabled = true
-            } else {
-                updateLspClientCheckBoxes()
-                updateLspExecutableFields()
-                useLsp4ijRadioButton.isEnabled = false
-                useIntellijLspClientRadioButton.isEnabled = false
-                useRuffLspRadioButton.isEnabled = false
-                useRuffServerRadioButton.isEnabled = false
-            }
+            updateLspFields()
         }
+        updateLspFields()
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
         when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
@@ -151,7 +135,26 @@ class RuffConfigPanel(project: Project) {
             ruffConfigPathField.text = ""
         }
     }
-
+    private fun updateLspClientCheckBoxes() {
+        val useLspClient = useRuffLspRadioButton.isSelected || useRuffServerRadioButton.isSelected
+        useIntellijLspClientRadioButton.isEnabled = useLspClient
+        useLsp4ijRadioButton.isEnabled = useLspClient
+    }
+    private fun updateLspFields() {
+        if (enableLspCheckBox.isSelected) {
+            useLsp4ijRadioButton.isEnabled = true
+            useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
+            useRuffLspRadioButton.isEnabled = true
+            useRuffServerRadioButton.isEnabled = true
+        } else {
+            updateLspClientCheckBoxes()
+            updateLspExecutableFields()
+            useLsp4ijRadioButton.isEnabled = false
+            useIntellijLspClientRadioButton.isEnabled = false
+            useRuffLspRadioButton.isEnabled = false
+            useRuffServerRadioButton.isEnabled = false
+        }
+    }
     private fun updateLspExecutableFields() {
         val enabled = intellijLspClientSupported && useRuffLspRadioButton.isSelected
         globalRuffLspExecutablePathField.isEnabled = enabled
