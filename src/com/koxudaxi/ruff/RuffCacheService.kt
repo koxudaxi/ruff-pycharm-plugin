@@ -10,6 +10,7 @@ class RuffCacheService(val project: Project) {
     private var hasOutputFormat: Boolean? = null
     private var hasCheck: Boolean? = null
     private var hasLsp: Boolean? = null
+    private var hasStableServer: Boolean? = null
 
     fun getVersion(): RuffVersion? {
         return version
@@ -45,6 +46,7 @@ class RuffCacheService(val project: Project) {
         hasOutputFormat = version?.hasOutputFormat
         hasCheck = version?.hasCheck
         hasLsp = version?.hasLsp
+        hasStableServer = version?.hasStableServer
     }
 
     internal fun clearVersion() {
@@ -70,6 +72,10 @@ class RuffCacheService(val project: Project) {
     internal fun hasLsp(): Boolean? {
         return hasLsp
     }
+
+    internal fun hasStableServer(): Boolean? {
+        return hasStableServer
+    }
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
@@ -79,6 +85,8 @@ class RuffCacheService(val project: Project) {
         fun hasCheck(project: Project): Boolean? = getInstance(project).hasCheck()
 
         fun hasLsp(project: Project): Boolean? = getInstance(project).hasLsp()
+
+        fun hasStableServer(project: Project): Boolean? = getInstance(project).hasStableServer()
 
         internal fun getInstance(project: Project): RuffCacheService {
             return project.getService(RuffCacheService::class.java)
