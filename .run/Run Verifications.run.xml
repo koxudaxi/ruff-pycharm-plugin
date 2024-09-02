@@ -11,7 +11,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="runPluginVerifier" />
+          <option value="verifyPlugin" />
         </list>
       </option>
       <option name="vmOptions" value="" />

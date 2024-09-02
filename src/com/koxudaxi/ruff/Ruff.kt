@@ -1,5 +1,6 @@
 package com.koxudaxi.ruff
 
+import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.RunCanceledByUserException
@@ -16,7 +17,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.progressStep
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
@@ -25,6 +25,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
+import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -37,7 +38,6 @@ import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.io.IOError
 import java.io.IOException
@@ -134,19 +134,19 @@ val Sdk.wslIsSupported: Boolean
         }.also { wslSdkIsSupported = it }
     }
 
-private var lspIsSupportedValue: Boolean? = null
-val lspIsSupported: Boolean
+private var intellijLspClientSupportedValue: Boolean? = null
+val intellijLspClientSupported: Boolean
     get() {
-        if (lspIsSupportedValue is Boolean) {
-            return lspIsSupportedValue as Boolean
+        if (intellijLspClientSupportedValue is Boolean) {
+            return intellijLspClientSupportedValue as Boolean
         }
         return try {
                 @Suppress("UnstableApiUsage")
                 LspServerSupportProvider
-                lspIsSupportedValue = true
+                intellijLspClientSupportedValue = true
                 true
             } catch (e: NoClassDefFoundError) {
-                lspIsSupportedValue = false
+                intellijLspClientSupportedValue = false
                 false
             }
     }
@@ -221,6 +221,27 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
+fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+    return when {
+        lsp -> ruffConfigService.ruffLspExecutablePath
+        else -> ruffConfigService.ruffExecutablePath
+    }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+        project, ruffConfigService, lsp
+    )
+}
+
+fun getConfigArgs(ruffConfigService: RuffConfigService): List<String>? {
+    val config = ruffConfigService.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
+    return listOf(CONFIG_ARG, config.absolutePath)
+}
+
+fun isInspectionEnabled(project: Project): Boolean {
+    val inspectionProfileManager = ProjectInspectionProfileManager.getInstance(project)
+
+    val toolWrapper = InspectionToolRegistrar.getInstance().createTools()
+        .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME } ?: return false
+    return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
+}
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(

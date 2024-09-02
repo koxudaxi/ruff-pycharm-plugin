@@ -23,7 +23,7 @@ class RuffProjectInitializer : ProjectActivity {
                 if (ruffCacheService.getVersion() == null) {
                     ruffCacheService.setVersion{}
                 }
-                if (lspIsSupported) {
+                if (intellijLspClientSupported) {
                     setUpPyProjectTomlLister(project)
                 }
             } catch (_: AlreadyDisposedException) {
@@ -56,6 +56,15 @@ class RuffProjectInitializer : ProjectActivity {
                             ) return
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
+                                if (!ruffConfigService.enableLsp) return@invokeLater
+                                if (!ruffConfigService.useRuffLsp) return@invokeLater
+                                if (ruffConfigService.useIntellijLspClient) {
+                                    @Suppress("UnstableApiUsage")
+                                    lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
+                                    @Suppress("UnstableApiUsage")
+                                    LspServerManager.getInstance(project)
+                                        .stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
+                                }
                                 if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return@invokeLater
                                 lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
                             }
