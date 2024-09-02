@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support LSP4IJ, which is a third-party LSP server integration [[#437](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#437)]
 
 ## [0.0.35] - 2024-07-24
 
