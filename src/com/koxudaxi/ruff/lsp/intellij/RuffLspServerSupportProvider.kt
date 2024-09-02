@@ -52,7 +52,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
     private fun createBaseCommandLine(): GeneralCommandLine? =
-        getGeneralCommandLine(executable, project, *project.LSP_ARGS.toTypedArray())
+        getGeneralCommandLine(executable, project)
 
     override fun createCommandLine(): GeneralCommandLine {
         val commandLine = createBaseCommandLine() ?: return GeneralCommandLine()
@@ -70,10 +70,7 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
-    override fun createInitializationOptions(): Any? {
-        val configArgs = getConfigArgs(ruffConfig) ?: return null
-        return InitOptions(Settings(configArgs))
-    }
+
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
@@ -82,7 +79,11 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 @Suppress("UnstableApiUsage")
 private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    override fun createCommandLine(): GeneralCommandLine = getGeneralCommandLine(executable, project, *project.LSP_ARGS.toTypedArray()) ?: GeneralCommandLine()
+
+    override fun createCommandLine(): GeneralCommandLine {
+        val args = project.LSP_ARGS + (getConfigArgs(ruffConfig) ?: listOf())
+        return getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: GeneralCommandLine()
+    }
 }
 @Serializable
 data class Settings(

@@ -28,18 +28,17 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
 
         val ruffCacheService = RuffCacheService.getInstance(project)
         if (ruffCacheService.getVersion() == null) return null
-        val executable =
-            when {
+
+        return when {
                 ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
-                    getRuffExecutable(project, ruffConfigService, false)
+                    val executable = getRuffExecutable(project, ruffConfigService, false) ?: return null
+                    listOf(executable.absolutePath) +  project.LSP_ARGS + (getConfigArgs(ruffConfigService) ?: listOf())
                 }
+                else -> {
+                    val executable = getRuffExecutable(project, ruffConfigService, true) ?: return null
+                    listOf(executable.absolutePath)
+                }
+            }
 
-                else -> getRuffExecutable(project, ruffConfigService, true)
-            } ?: return null
-        val executableCommandArgs = listOf(executable.absolutePath) + project.LSP_ARGS
-
-        return getConfigArgs(ruffConfigService)?.let {
-            executableCommandArgs + it
-        } ?: executableCommandArgs
     }
 }
