@@ -93,6 +93,12 @@ val Project.LSP_ARGS: List<String>
         RuffCacheService.hasStableServer(this) == true -> LSP_ARGS_BASE
         else -> LSP_ARGS_BASE + PREVIEW_ARGS
     }
+val Project.RULE_ARGS: List<String>
+    get() = when {
+        RuffCacheService.hasCheck(this) == true -> listOf("rule")
+        else -> listOf("--explain")
+    }
+
 val Project.FIX_ARGS: List<String>
     get() = when {
         RuffCacheService.hasCheck(this) == true -> CHECK + FIX_ARGS_BASE
