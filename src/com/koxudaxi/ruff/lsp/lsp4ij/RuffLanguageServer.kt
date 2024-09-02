@@ -34,7 +34,7 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
 
                 else -> getRuffExecutable(project, ruffConfigService, true)
             } ?: return null
-        val executableCommandArgs = listOf(executable.absolutePath) + LSP_PREVIEW_ARGS
+        val executableCommandArgs = listOf(executable.absolutePath) + project.LSP_ARGS
 
         return getConfigArgs(ruffConfigService)?.let {
             executableCommandArgs + it
