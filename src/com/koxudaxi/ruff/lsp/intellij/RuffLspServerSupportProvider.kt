@@ -27,9 +27,22 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
             ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
-                getRuffExecutable(project, ruffConfigService , false)?.let { RuffServerServerDescriptor(project, it, ruffConfigService) }
+                getRuffExecutable(project, ruffConfigService, false)?.let {
+                    RuffServerServerDescriptor(
+                        project,
+                        it,
+                        ruffConfigService
+                    )
+                }
             }
-            else -> getRuffExecutable(project, ruffConfigService, true)?.let { RuffLspServerDescriptor(project, it, ruffConfigService) }
+
+            else -> getRuffExecutable(project, ruffConfigService, true)?.let {
+                RuffLspServerDescriptor(
+                    project,
+                    it,
+                    ruffConfigService
+                )
+            }
         } ?: return
         serverStarter.ensureServerStarted(descriptor)
     }
@@ -38,11 +51,11 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 @Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    private fun createBaseCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
+    private fun createBaseCommandLine(): GeneralCommandLine? =
+        getGeneralCommandLine(executable, project, *project.LSP_ARGS.toTypedArray())
 
     override fun createCommandLine(): GeneralCommandLine {
-        val commandLine = createBaseCommandLine()
-        commandLine.withWorkDirectory(project.basePath)
+        val commandLine = createBaseCommandLine() ?: return GeneralCommandLine()
         if (ruffConfig.useRuffFormat) {
             return commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
         }
@@ -69,7 +82,7 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 @Suppress("UnstableApiUsage")
 private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    override fun createCommandLine(): GeneralCommandLine  = GeneralCommandLine(listOf(executable.absolutePath) + project.LSP_ARGS)
+    override fun createCommandLine(): GeneralCommandLine = getGeneralCommandLine(executable, project, *project.LSP_ARGS.toTypedArray()) ?: GeneralCommandLine()
 }
 @Serializable
 data class Settings(
