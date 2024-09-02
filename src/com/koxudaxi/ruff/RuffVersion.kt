@@ -16,11 +16,13 @@ class RuffVersion(private val major: Int, private val minor: Int = 0, private va
     val hasCheck: Boolean get() = this >= SUPPORT_CHECK_VERSION
 
     val hasLsp: Boolean get() = this >= SUPPORT_LSP_VERSION
+
+    val hasStableServer: Boolean get() = this >= SUPPORT_STABLE_SERVER_VERSION
     companion object {
         val SUPPORT_FORMAT_VERSION = RuffVersion(0, 0, 289)
         val SUPPORT_OUTPUT_FORMAT_VERSION = RuffVersion(0, 0, 291)
         val SUPPORT_CHECK_VERSION = RuffVersion(0, 3, 0)
         val SUPPORT_LSP_VERSION = RuffVersion(0, 4, 5)
-
+        val SUPPORT_STABLE_SERVER_VERSION = RuffVersion(0, 5, 3)
     }
 }

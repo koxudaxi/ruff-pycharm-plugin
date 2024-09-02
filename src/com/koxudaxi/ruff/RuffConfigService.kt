@@ -22,8 +22,11 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var ruffConfigPath: @SystemDependent String? = null
     var disableOnSaveOutsideOfProject: Boolean = true
     var useRuffLsp: Boolean = false
+    var useIntellijLspClient: Boolean = intellijLspClientSupported
+    var useLsp4ij: Boolean = !useIntellijLspClient
     var useRuffServer: Boolean = false
     var useRuffFormat: Boolean = false
+    var enableLsp: Boolean = true
 
     override fun getState(): RuffConfigService {
         return this
