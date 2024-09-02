@@ -67,7 +67,7 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 @Suppress("UnstableApiUsage")
 private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    override fun createCommandLine(): GeneralCommandLine  = GeneralCommandLine(listOf(executable.absolutePath) + LSP_PREVIEW_ARGS)
+    override fun createCommandLine(): GeneralCommandLine  = GeneralCommandLine(listOf(executable.absolutePath) + project.LSP_ARGS)
 }
 @Serializable
 data class Settings(
