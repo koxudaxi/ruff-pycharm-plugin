@@ -24,7 +24,6 @@ repositories {
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
-        nightly()
     }
 }
 
@@ -41,7 +40,7 @@ dependencies {
         create(type, version, useInstaller = false)
         bundledPlugins(bundledPlugins)
         val lsp4ij = libs.plugins.lsp4ij.get()
-        plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}@nightly")
+        plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
 
         instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
