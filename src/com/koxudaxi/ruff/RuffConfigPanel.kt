@@ -37,6 +37,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var useLsp4ijRadioButton: JRadioButton
     private lateinit var useRuffFormatCheckBox: JCheckBox
     private lateinit var useRuffServerRadioButton: JRadioButton
+    private lateinit var enableLspCheckBox: JCheckBox
     init {
         val ruffConfigService = getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
@@ -57,6 +58,7 @@ class RuffConfigPanel(project: Project) {
         useRuffServerRadioButton.isEnabled = true
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
+        enableLspCheckBox.isSelected = ruffConfigService.enableLsp
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
         }
@@ -107,6 +109,21 @@ class RuffConfigPanel(project: Project) {
             updateLspExecutableFields()
         }
 
+        enableLspCheckBox.addActionListener {
+            if (enableLspCheckBox.isSelected) {
+                useLsp4ijRadioButton.isEnabled = true
+                useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
+                useRuffLspRadioButton.isEnabled = true
+                useRuffServerRadioButton.isEnabled = true
+            } else {
+                updateLspClientCheckBoxes()
+                updateLspExecutableFields()
+                useLsp4ijRadioButton.isEnabled = false
+                useIntellijLspClientRadioButton.isEnabled = false
+                useRuffLspRadioButton.isEnabled = false
+                useRuffServerRadioButton.isEnabled = false
+            }
+        }
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
         when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
@@ -202,6 +219,8 @@ class RuffConfigPanel(project: Project) {
         get() = useRuffServerRadioButton.isSelected
     val useRuffFormat: Boolean
         get() = useRuffFormatCheckBox.isSelected
+    val enableLsp: Boolean
+        get() = enableLspCheckBox.isSelected
 
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND =  "Ruff executable not found"

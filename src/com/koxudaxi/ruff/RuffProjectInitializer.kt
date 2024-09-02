@@ -56,6 +56,7 @@ class RuffProjectInitializer : ProjectActivity {
                             ) return
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
+                                if (!ruffConfigService.enableLsp) return@invokeLater
                                 if (!ruffConfigService.useRuffLsp) return@invokeLater
                                 if (ruffConfigService.useIntellijLspClient) {
                                     @Suppress("UnstableApiUsage")

@@ -18,6 +18,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         serverStarter: LspServerSupportProvider.LspServerStarter
     ) {
         val ruffConfigService = RuffConfigService.getInstance(project)
+        if (!ruffConfigService.enableLsp) return
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         if (!ruffConfigService.useIntellijLspClient) return
         if (!isInspectionEnabled(project)) return

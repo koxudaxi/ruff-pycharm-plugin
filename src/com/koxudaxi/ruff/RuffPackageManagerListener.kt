@@ -16,7 +16,7 @@ class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
     override fun packagesRefreshed(sdk: Sdk) {
         ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
         ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
-        if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
+        if (!ruffConfigService.enableLsp) return
         ruffCacheService.setVersion {
             ApplicationManager.getApplication().invokeLater {
                 ApplicationManager.getApplication().runWriteAction {

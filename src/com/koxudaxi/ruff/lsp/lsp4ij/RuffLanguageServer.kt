@@ -21,6 +21,7 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
     }
 
     private fun createCommand(project: Project, ruffConfigService: RuffConfigService): List<String>? {
+        if (!ruffConfigService.enableLsp) return null
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return null
         if (!ruffConfigService.useLsp4ij) return null
         if (!isInspectionEnabled(project)) return null

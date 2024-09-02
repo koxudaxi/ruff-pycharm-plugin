@@ -40,7 +40,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient ||
                 ruffConfigService.useLsp4ij != configPanel.useLsp4ij ||
                 ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
-                ruffConfigService.useRuffServer != configPanel.useRuffServer
+                ruffConfigService.useRuffServer != configPanel.useRuffServer ||
+                ruffConfigService.enableLsp != configPanel.enableLsp
     }
 
     override fun apply() {
@@ -61,8 +62,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.useRuffServer = configPanel.useRuffServer
         ruffConfigService.useIntellijLspClient = configPanel.useIntellijLspClient
         ruffConfigService.useLsp4ij = configPanel.useLsp4ij
+        ruffConfigService.enableLsp = configPanel.enableLsp
         ruffCacheService.setVersion {
-            val startLsp = ruffConfigService.useRuffLsp || ruffConfigService.useRuffServer
+            val startLsp = ruffConfigService.enableLsp
             var started = false
             if (lspClientChanged) {
                 if (ruffConfigService.useLsp4ij) {

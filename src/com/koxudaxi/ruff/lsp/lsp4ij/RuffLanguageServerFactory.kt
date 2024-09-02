@@ -22,6 +22,7 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
 
     override fun isEnabled(project: Project): Boolean {
         val ruffConfigService = RuffConfigService.getInstance(project)
+        if (!ruffConfigService.enableLsp) return false
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return false
         if (!ruffConfigService.useLsp4ij) return false
         if (!isInspectionEnabled(project)) return false
