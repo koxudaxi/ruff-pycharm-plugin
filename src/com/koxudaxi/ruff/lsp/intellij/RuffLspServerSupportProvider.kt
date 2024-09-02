@@ -27,9 +27,22 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
             ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
-                getRuffExecutable(project, ruffConfigService , false)?.let { RuffServerServerDescriptor(project, it, ruffConfigService) }
+                getRuffExecutable(project, ruffConfigService, false)?.let {
+                    RuffServerServerDescriptor(
+                        project,
+                        it,
+                        ruffConfigService
+                    )
+                }
             }
-            else -> getRuffExecutable(project, ruffConfigService, true)?.let { RuffLspServerDescriptor(project, it, ruffConfigService) }
+
+            else -> getRuffExecutable(project, ruffConfigService, true)?.let {
+                RuffLspServerDescriptor(
+                    project,
+                    it,
+                    ruffConfigService
+                )
+            }
         } ?: return
         serverStarter.ensureServerStarted(descriptor)
     }
@@ -38,11 +51,11 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
 @Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    private fun createBaseCommandLine(): GeneralCommandLine = GeneralCommandLine(executable.absolutePath)
+    private fun createBaseCommandLine(): GeneralCommandLine? =
+        getGeneralCommandLine(executable, project)
 
     override fun createCommandLine(): GeneralCommandLine {
-        val commandLine = createBaseCommandLine()
-        commandLine.withWorkDirectory(project.basePath)
+        val commandLine = createBaseCommandLine() ?: return GeneralCommandLine()
         if (ruffConfig.useRuffFormat) {
             return commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
         }
@@ -57,10 +70,7 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
-    override fun createInitializationOptions(): Any? {
-        val configArgs = getConfigArgs(ruffConfig) ?: return null
-        return InitOptions(Settings(configArgs))
-    }
+
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
@@ -69,7 +79,11 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 @Suppress("UnstableApiUsage")
 private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
-    override fun createCommandLine(): GeneralCommandLine  = GeneralCommandLine(listOf(executable.absolutePath) + project.LSP_ARGS)
+
+    override fun createCommandLine(): GeneralCommandLine {
+        val args = project.LSP_ARGS + (getConfigArgs(ruffConfig) ?: listOf())
+        return getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: GeneralCommandLine()
+    }
 }
 @Serializable
 data class Settings(

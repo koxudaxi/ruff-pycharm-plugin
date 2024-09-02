@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix idea lsp server on wsl [[#486](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#486)]
 - Support LSP4IJ, which is a third-party LSP server integration [[#437](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#437)]
 - Use preview only for non-stable server versions (<0.5.3) [[#481](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#481)]
 - Use rule or --explain dependent on version. [[#479](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#479)]

@@ -249,33 +249,37 @@ fun runCommand(
 )
 
 
-fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
+private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
+
+fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
+    val projectPath = project?.basePath ?: return null
+    if (!WslPath.isWslUncPath(executable.path)) {
+        return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+    }
+    val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+    val configArgIndex = args.indexOf(CONFIG_ARG)
+    val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+        val configPathIndex = configArgIndex + 1
+        val configPath = args[configPathIndex]
+        val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+        args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+    } else {
+        args
+    }
+    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
+    val options = WSLCommandLineOptions()
+    options.setExecuteCommandInShell(false)
+    options.setLaunchWithWslExe(true)
+    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
+}
 
 fun runCommand(
     executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
-    val projectPath = project?.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
-    val handler = if (WslPath.isWslUncPath(executable.path)) {
-        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
-        val configArgIndex = args.indexOf(CONFIG_ARG)
-        val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
-            val configPathIndex = configArgIndex + 1
-            val configPath = args[configPathIndex]
-            val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
-            args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
-        } else {
-            args
-        }
-        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
-        val options = WSLCommandLineOptions()
-        options.setExecuteCommandInShell(false)
-        options.setLaunchWithWslExe(true)
-        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
-    } else {
-        getGeneralCommandLine(listOf(executable.path) + args, projectPath)
-    }.let { CapturingProcessHandler(it) }
+    val handler = getGeneralCommandLine(executable, project, *args)
+        ?.let { CapturingProcessHandler(it) } ?: return null
 
     val result = with(handler) {
         if (stdin is ByteArray) {
