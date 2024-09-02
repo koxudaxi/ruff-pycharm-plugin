@@ -30,15 +30,8 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
         if (!isInspectionEnabled(project)) return false
         val ruffCacheService = RuffCacheService.getInstance(project)
         if (ruffCacheService.getVersion() == null) return false
-        if (ruffConfigService.useRuffServer)  {
-            if (ruffCacheService.hasLsp() != true) return false
-            val ruff = getRuffExecutable(project, ruffConfigService, false) ?: return false
-            if (WslPath.isWslUncPath(ruff.path)) return false
-        }
-        if (ruffConfigService.useRuffLsp) {
-            val ruffLsp = getRuffExecutable(project, ruffConfigService, true) ?: return false
-            if (WslPath.isWslUncPath(ruffLsp.path)) return false
-        }
+        if (ruffConfigService.useRuffServer && ruffCacheService.hasLsp() != true) return false
+        if (ruffConfigService.useRuffLsp && getRuffExecutable(project, ruffConfigService, true) == null ) return false
         return true
     }
 
