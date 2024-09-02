@@ -41,6 +41,7 @@ private class RuffLspServerDescriptor(project: Project, executable: File, ruffCo
 
     override fun createCommandLine(): GeneralCommandLine {
         val commandLine = createBaseCommandLine()
+        commandLine.withWorkDirectory(project.basePath)
         if (ruffConfig.useRuffFormat) {
             return commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
         }

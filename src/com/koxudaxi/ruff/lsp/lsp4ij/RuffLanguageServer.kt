@@ -13,6 +13,7 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
             if (ruffConfigService.useRuffFormat) {
                 super.setUserEnvironmentVariables(mapOf("RUFF_EXPERIMENTAL_FORMATTER" to "1"))
             }
+            super.setWorkingDirectory(project.basePath)
             super.setCommands(commands)
         }
 
