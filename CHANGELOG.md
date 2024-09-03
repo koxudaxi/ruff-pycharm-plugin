@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.36] - 2024-09-03
+
 - Fix idea lsp server on wsl [[#486](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#486)]
 - Support LSP4IJ, which is a third-party LSP server integration [[#437](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#437)]
 - Use preview only for non-stable server versions (<0.5.3) [[#481](https://github.com/koxudaxi/pydantic-pycharm-plugin/pull/#481)]
@@ -188,7 +191,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...HEAD
+[0.0.36]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...v0.0.36
 [0.0.35]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.34...v0.0.35
 [0.0.34]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.33...v0.0.34
 [0.0.33]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.32...v0.0.33
