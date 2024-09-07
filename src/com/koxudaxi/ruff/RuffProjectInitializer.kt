@@ -34,7 +34,7 @@ class RuffProjectInitializer : ProjectActivity {
     private fun setUpPyProjectTomlLister(project: Project) {
         val ruffConfigService = RuffConfigService.getInstance(project)
         @Suppress("UnstableApiUsage")
-        val lspServerManager = LspServerManager.getInstance(project)
+        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
         VirtualFileManager.getInstance().addAsyncFileListener(
             { events ->
@@ -57,16 +57,12 @@ class RuffProjectInitializer : ProjectActivity {
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
                                 if (!ruffConfigService.enableLsp) return@invokeLater
-                                if (!ruffConfigService.useRuffLsp) return@invokeLater
-                                if (ruffConfigService.useIntellijLspClient) {
-                                    @Suppress("UnstableApiUsage")
-                                    lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-                                    @Suppress("UnstableApiUsage")
-                                    LspServerManager.getInstance(project)
-                                        .stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
+                                if (!ruffLspClientManager.hasClient()) return@invokeLater
+                                if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) {
+                                    ruffLspClientManager.stop()
+                                } else {
+                                    ruffLspClientManager.restart()
                                 }
-                                if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return@invokeLater
-                                lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
                             }
                         } catch (_: AlreadyDisposedException) {
                         }
