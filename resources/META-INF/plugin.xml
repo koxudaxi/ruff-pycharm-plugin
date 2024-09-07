@@ -6,7 +6,7 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.redhat.devtools.lsp4ij</depends>
+    <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
     <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
@@ -32,16 +32,4 @@
                 description="Run ruff with fix option">
         </action>
     </actions>
-    <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
-        <server id="ruffLanguageServer"
-                name="Ruff Language Server"
-                factoryClass="com.koxudaxi.ruff.lsp.lsp4ij.RuffLanguageServerFactory">
-            <description><![CDATA[
-         Ruff Language Server for LSP4IJ.
-        ]]>
-            </description>
-        </server>
-        <languageMapping language="Python"
-                         serverId="ruffLanguageServer"/>
-    </extensions>
 </idea-plugin>
