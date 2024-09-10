@@ -167,6 +167,8 @@ val lsp4ijSupported: Boolean
         }
     }
 
+val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
+
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)

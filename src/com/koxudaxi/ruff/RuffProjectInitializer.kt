@@ -1,6 +1,5 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -9,7 +8,6 @@ import com.intellij.openapi.startup.ProjectActivity
 import com.intellij.openapi.vfs.AsyncFileListener
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.events.*
-import com.intellij.platform.lsp.api.LspServerManager
 import com.intellij.serviceContainer.AlreadyDisposedException
 
 class RuffProjectInitializer : ProjectActivity {
@@ -23,7 +21,7 @@ class RuffProjectInitializer : ProjectActivity {
                 if (ruffCacheService.getVersion() == null) {
                     ruffCacheService.setVersion{}
                 }
-                if (intellijLspClientSupported) {
+                if (lspSupported) {
                     setUpPyProjectTomlLister(project)
                 }
             } catch (_: AlreadyDisposedException) {
@@ -33,7 +31,6 @@ class RuffProjectInitializer : ProjectActivity {
 
     private fun setUpPyProjectTomlLister(project: Project) {
         val ruffConfigService = RuffConfigService.getInstance(project)
-        @Suppress("UnstableApiUsage")
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
         VirtualFileManager.getInstance().addAsyncFileListener(
@@ -56,9 +53,8 @@ class RuffProjectInitializer : ProjectActivity {
                             ) return
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
-                                if (!ruffConfigService.enableLsp) return@invokeLater
                                 if (!ruffLspClientManager.hasClient()) return@invokeLater
-                                if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) {
+                                if (!ruffConfigService.enableLsp) {
                                     ruffLspClientManager.stop()
                                 } else {
                                     ruffLspClientManager.restart()

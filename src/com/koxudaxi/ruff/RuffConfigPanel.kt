@@ -56,16 +56,16 @@ class RuffConfigPanel(project: Project) {
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
         disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
         useRuffLspRadioButton.isSelected = ruffConfigService.useRuffLsp
-        useRuffLspRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
+        useRuffLspRadioButton.isEnabled = lspSupported
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
         useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = lsp4ijSupported
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
-        useRuffServerRadioButton.isEnabled =  lsp4ijSupported || intellijLspClientSupported
+        useRuffServerRadioButton.isEnabled =  lspSupported
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
-        enableLspCheckBox.isEnabled = lsp4ijSupported || intellijLspClientSupported
+        enableLspCheckBox.isEnabled = lspSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
@@ -158,8 +158,8 @@ class RuffConfigPanel(project: Project) {
         if (enableLspCheckBox.isSelected) {
             useLsp4ijRadioButton.isEnabled = lsp4ijSupported
             useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
-            useRuffLspRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
-            useRuffServerRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
+            useRuffLspRadioButton.isEnabled = lspSupported
+            useRuffServerRadioButton.isEnabled = lspSupported
         } else {
             updateLspClientCheckBoxes()
             updateLspExecutableFields()

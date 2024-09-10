@@ -65,6 +65,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.useLsp4ij = configPanel.useLsp4ij
         ruffConfigService.enableLsp = configPanel.enableLsp
         ruffCacheService.setVersion {
+            if (!lspSupported) return@setVersion
             val startLsp = ruffConfigService.enableLsp
             var started = false
             if (lspClientChanged) {
