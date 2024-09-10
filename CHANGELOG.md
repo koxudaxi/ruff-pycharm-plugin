@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Update LSP4IJ references and version [[#496](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/496)]
 - LSP4IJ should be optional [[#494](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/494)]
 
 ## [0.0.36] - 2024-09-03
