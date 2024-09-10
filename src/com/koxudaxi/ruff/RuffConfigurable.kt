@@ -2,6 +2,7 @@ package com.koxudaxi.ruff
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import com.koxudaxi.ruff.lsp.ClientType
 import com.koxudaxi.ruff.lsp.intellij.RuffIntellijLspClient
 import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 import javax.swing.JComponent
@@ -68,9 +69,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
             var started = false
             if (lspClientChanged) {
                 if (ruffConfigService.useLsp4ij) {
-                    ruffLspClientManager.setClient(RuffLsp4IntellijClient::class, startLsp)
+                    ruffLspClientManager.setClient(ClientType.LSP4IJ, startLsp)
                 } else {
-                    ruffLspClientManager.setClient(RuffIntellijLspClient::class, startLsp)
+                    ruffLspClientManager.setClient(ClientType.INTELLIJ, startLsp)
                 }
                 started = startLsp
             } else {

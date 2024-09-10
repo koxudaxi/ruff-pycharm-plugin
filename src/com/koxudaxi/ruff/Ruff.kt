@@ -158,7 +158,7 @@ val lsp4ijSupported: Boolean
             return lsp4ijSupportedValue as Boolean
         }
         return try {
-            com.redhat.devtools.lsp4ij.server.StreamConnectionProvider::class.java
+            com.redhat.devtools.lsp4ij.LanguageServerManager.StartOptions.DEFAULT
             lsp4ijSupportedValue = true
             true
         } catch (e: NoClassDefFoundError) {

@@ -1,14 +1,18 @@
 package com.koxudaxi.ruff
 
 
+import com.intellij.ide.plugins.PluginManagerConfigurable
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.ui.components.JBTextField
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.emptyText
+import com.intellij.ui.components.JBTextField
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.RuffConfigService.Companion.getInstance
 import org.jetbrains.annotations.SystemDependent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.*
 
@@ -38,6 +42,8 @@ class RuffConfigPanel(project: Project) {
     private lateinit var useRuffFormatCheckBox: JCheckBox
     private lateinit var useRuffServerRadioButton: JRadioButton
     private lateinit var enableLspCheckBox: JCheckBox
+    private lateinit var lsp4ijLinkLabel: JLabel
+
     init {
         val ruffConfigService = getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
@@ -53,12 +59,19 @@ class RuffConfigPanel(project: Project) {
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
         useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
-        useRuffFormatCheckBox.isEnabled = true
+        useRuffFormatCheckBox.isEnabled = lsp4ijSupported
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         useRuffServerRadioButton.isEnabled = true
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
+        enableLspCheckBox.isEnabled = lsp4ijSupported || intellijLspClientSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
+        lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                ShowSettingsUtil.getInstance().showSettingsDialog(null, PluginManagerConfigurable::class.java,
+                    { c -> c.openMarketplaceTab("com.redhat.devtools.lsp4ij") })
+            }
+        })
         runRuffOnSaveCheckBox.addActionListener {
             disableOnSaveOutsideOfProjectCheckBox.isEnabled = runRuffOnSaveCheckBox.isSelected
         }
@@ -137,12 +150,12 @@ class RuffConfigPanel(project: Project) {
     }
     private fun updateLspClientCheckBoxes() {
         val useLspClient = useRuffLspRadioButton.isSelected || useRuffServerRadioButton.isSelected
-        useIntellijLspClientRadioButton.isEnabled = useLspClient
-        useLsp4ijRadioButton.isEnabled = useLspClient
+        useIntellijLspClientRadioButton.isEnabled = useLspClient && intellijLspClientSupported
+        useLsp4ijRadioButton.isEnabled = useLspClient && lsp4ijSupported
     }
     private fun updateLspFields() {
         if (enableLspCheckBox.isSelected) {
-            useLsp4ijRadioButton.isEnabled = true
+            useLsp4ijRadioButton.isEnabled = lsp4ijSupported
             useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
             useRuffLspRadioButton.isEnabled = true
             useRuffServerRadioButton.isEnabled = true
