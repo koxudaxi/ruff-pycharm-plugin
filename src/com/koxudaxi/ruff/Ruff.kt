@@ -151,6 +151,23 @@ val intellijLspClientSupported: Boolean
             }
     }
 
+private var lsp4ijSupportedValue: Boolean? = null
+val lsp4ijSupported: Boolean
+    get() {
+        if (lsp4ijSupportedValue is Boolean) {
+            return lsp4ijSupportedValue as Boolean
+        }
+        return try {
+            com.redhat.devtools.lsp4ij.LanguageServerManager.StartOptions.DEFAULT
+            lsp4ijSupportedValue = true
+            true
+        } catch (e: NoClassDefFoundError) {
+            lsp4ijSupportedValue = false
+            false
+        }
+    }
+
+val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
 
 fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
     project.pythonSdk?.let {
