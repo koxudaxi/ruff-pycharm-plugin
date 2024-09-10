@@ -57,37 +57,30 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         val ruffConfigPathChanged = configPanel.ruffConfigPath != configPanel.ruffConfigPath
         val useRuffLspChanged = ruffConfigService.useRuffLsp != configPanel.useRuffLsp
         val useRuffServerChanged = ruffConfigService.useRuffServer != configPanel.useRuffServer
-        val lspClientChanged = ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient
+        val lspClientChanged = (ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient) ||
+                (ruffConfigService.useLsp4ij != configPanel.useLsp4ij)
         ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.useRuffLsp = configPanel.useRuffLsp
         ruffConfigService.useRuffServer = configPanel.useRuffServer
         ruffConfigService.useIntellijLspClient = configPanel.useIntellijLspClient
         ruffConfigService.useLsp4ij = configPanel.useLsp4ij
+        val lspEnabledChanged = ruffConfigService.enableLsp != configPanel.enableLsp
         ruffConfigService.enableLsp = configPanel.enableLsp
         ruffCacheService.setVersion {
             if (!lspSupported) return@setVersion
             val startLsp = ruffConfigService.enableLsp
-            var started = false
-            if (lspClientChanged) {
+            if (lspClientChanged || (lspEnabledChanged && startLsp)) {
                 if (ruffConfigService.useLsp4ij) {
                     ruffLspClientManager.setClient(ClientType.LSP4IJ, startLsp)
                 } else {
                     ruffLspClientManager.setClient(ClientType.INTELLIJ, startLsp)
                 }
-                started = startLsp
-            } else {
-                if (useRuffLspChanged || useRuffServerChanged) {
-                    if (startLsp) {
-                        ruffLspClientManager.start()
-                        started = true
-                    } else {
-                        ruffLspClientManager.stop()
-                    }
-                }
-            }
-
-            if (!started && ruffConfigPathChanged && startLsp) {
+            } else if (lspEnabledChanged) {
+                ruffLspClientManager.stop()
+            } else if (useRuffLspChanged || useRuffServerChanged || ruffConfigPathChanged) {
+                if (startLsp) {
                     ruffLspClientManager.restart()
+                }
             }
             // TODO: support ruff global executable path changed pattern
         }

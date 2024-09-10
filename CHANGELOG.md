@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Update LSP client change logic in RuffConfigurable.kt [[#497](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/497)]
 - Update LSP4IJ references and version [[#496](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/496)]
 - LSP4IJ should be optional [[#494](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/494)]
 
