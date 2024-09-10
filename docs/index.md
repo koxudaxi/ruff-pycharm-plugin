@@ -61,7 +61,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Support Ruff LSP feature
   - LSP Client
     - [x] [Intellij LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate
-    - [x] [LSP4IJ by RedHat](https://github.com/redhat-developer/lsp4ij)
+    - [x] [LSP4IJ by RedHat](https://github.com/redhat-developer/lsp4ij) (Requires installation of the [LSP4IJ plugin](https://plugins.jetbrains.com/plugin/23257-lsp4ij))
   - LSP Server
     - [x] `ruff-lsp` integration
     - [x] `ruff server` integration
