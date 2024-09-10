@@ -56,12 +56,13 @@ class RuffConfigPanel(project: Project) {
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
         disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
         useRuffLspRadioButton.isSelected = ruffConfigService.useRuffLsp
+        useRuffLspRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
         useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = lsp4ijSupported
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
-        useRuffServerRadioButton.isEnabled = true
+        useRuffServerRadioButton.isEnabled =  lsp4ijSupported || intellijLspClientSupported
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         enableLspCheckBox.isEnabled = lsp4ijSupported || intellijLspClientSupported
@@ -157,8 +158,8 @@ class RuffConfigPanel(project: Project) {
         if (enableLspCheckBox.isSelected) {
             useLsp4ijRadioButton.isEnabled = lsp4ijSupported
             useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
-            useRuffLspRadioButton.isEnabled = true
-            useRuffServerRadioButton.isEnabled = true
+            useRuffLspRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
+            useRuffServerRadioButton.isEnabled = lsp4ijSupported || intellijLspClientSupported
         } else {
             updateLspClientCheckBoxes()
             updateLspExecutableFields()
