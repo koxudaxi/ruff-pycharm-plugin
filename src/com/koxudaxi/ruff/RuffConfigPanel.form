@@ -165,7 +165,8 @@
                 </constraints>
                 <properties>
                   <text value="&lt;html&gt;To use LSP4IJ, you need to install the plugin from &lt;a href=''&gt;the marketplace.&lt;/a&gt;&lt;/html&gt;"/>
-                  <toolTipText value="External Browser open https://plugins.jetbrains.com/plugin/23257-lsp4ij"/>
+                  <toolTipText value="Go to Marketplace and display LSP4IJ plugin."/>
+                  <verifyInputWhenFocusTarget value="false"/>
                 </properties>
               </component>
             </children>
