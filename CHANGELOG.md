@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.37] - 2024-09-10
+
 - Update LSP client change logic in RuffConfigurable.kt [[#497](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/497)]
 - Update LSP4IJ references and version [[#496](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/496)]
 - LSP4IJ should be optional [[#494](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/494)]
@@ -194,7 +197,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...HEAD
+[0.0.37]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...v0.0.37
 [0.0.36]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...v0.0.36
 [0.0.35]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.34...v0.0.35
 [0.0.34]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.33...v0.0.34
