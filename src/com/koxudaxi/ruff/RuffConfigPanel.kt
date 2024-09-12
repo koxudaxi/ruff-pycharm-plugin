@@ -60,7 +60,7 @@ class RuffConfigPanel(project: Project) {
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
         useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
-        useRuffFormatCheckBox.isEnabled = lsp4ijSupported
+        useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         useRuffServerRadioButton.isEnabled =  lspSupported
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer || !ruffConfigService.useRuffLsp
