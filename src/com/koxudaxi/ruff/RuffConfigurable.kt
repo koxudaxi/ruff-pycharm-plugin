@@ -3,16 +3,11 @@ package com.koxudaxi.ruff
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.koxudaxi.ruff.lsp.ClientType
-import com.koxudaxi.ruff.lsp.intellij.RuffIntellijLspClient
-import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 import javax.swing.JComponent
 
 
 class RuffConfigurable internal constructor(val project: Project) : Configurable {
-    private val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
     private val configPanel: RuffConfigPanel = RuffConfigPanel(project)
-    private val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
-    private val ruffLspClientManager = RuffLspClientManager.getInstance(project)
     override fun getDisplayName(): String {
         return "Ruff"
     }
@@ -29,6 +24,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
     override fun reset() {}
 
     override fun isModified(): Boolean {
+        val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
         return ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave ||
                 ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
@@ -46,6 +42,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
     }
 
     override fun apply() {
+        val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
+        val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
+        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
         ruffConfigService.runRuffOnSave = configPanel.runRuffOnSave
         ruffConfigService.runRuffOnReformatCode = configPanel.runRuffOnReformatCode
         ruffConfigService.showRuleCode = configPanel.showRuleCode

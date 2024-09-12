@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix: Isolate Ruff formatting to the active project [[#503](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/503)]
 
 ## [0.0.38] - 2024-09-12
 

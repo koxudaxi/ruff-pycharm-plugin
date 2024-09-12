@@ -20,10 +20,9 @@
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
+        <actionOnSave id="BlackFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
     </extensions>
     <projectListeners>
-        <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"
-                  topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
         <listener class="com.koxudaxi.ruff.RuffPackageManagerListener"
                   topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
     </projectListeners>
