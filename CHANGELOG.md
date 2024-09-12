@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix Ruff format checkbox [[#501](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/501)]
 - Improve lsp config [[#499](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/499)]
 
 ## [0.0.37] - 2024-09-10
