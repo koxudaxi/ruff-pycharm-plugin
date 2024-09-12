@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix: Isolate Ruff formatting to the active project [[#503](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/503)]
 - Improve lsp config [[#499](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/499)]
 
 ## [0.0.37] - 2024-09-10
