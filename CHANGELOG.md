@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.38] - 2024-09-12
+
 - Fix Ruff format checkbox [[#501](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/501)]
 - Improve lsp config [[#499](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/499)]
 
@@ -199,7 +202,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.38...HEAD
+[0.0.38]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...v0.0.38
 [0.0.37]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...v0.0.37
 [0.0.36]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...v0.0.36
 [0.0.35]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.34...v0.0.35
