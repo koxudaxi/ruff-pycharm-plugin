@@ -5,14 +5,16 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.jetbrains.python.packaging.PyPackageManager
+import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.lsp.ClientType
 
-class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
-    private val ruffConfigService = RuffConfigService.getInstance(project)
-    private val ruffCacheService = RuffCacheService.getInstance(project)
-    private val ruffLspClientManager = RuffLspClientManager.getInstance(project)
+class RuffPackageManagerListener(private val project: Project) : PyPackageManager.Listener {
 
     override fun packagesRefreshed(sdk: Sdk) {
+        if (project.pythonSdk != sdk) return
+        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffCacheService = RuffCacheService.getInstance(project)
+        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
         ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
         ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
         if (!lspSupported || !ruffConfigService.enableLsp) return

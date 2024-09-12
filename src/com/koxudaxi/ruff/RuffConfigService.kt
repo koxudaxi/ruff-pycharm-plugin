@@ -8,8 +8,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.SystemDependent
 
-@State(name = "RuffConfigService", storages = [Storage("ruff.xml")])
 @Service(Service.Level.PROJECT)
+@State(name = "RuffConfigService", storages = [Storage("ruff.xml")])
 class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var runRuffOnSave: Boolean = false
     var runRuffOnReformatCode: Boolean = true
