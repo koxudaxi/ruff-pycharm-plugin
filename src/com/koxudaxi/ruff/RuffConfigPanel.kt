@@ -63,13 +63,13 @@ class RuffConfigPanel(project: Project) {
         useRuffFormatCheckBox.isEnabled = lsp4ijSupported
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         useRuffServerRadioButton.isEnabled =  lspSupported
-        useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer
+        useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer || !ruffConfigService.useRuffLsp
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         enableLspCheckBox.isEnabled = lspSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
-                ShowSettingsUtil.getInstance().showSettingsDialog(null, PluginManagerConfigurable::class.java,
+                 ShowSettingsUtil.getInstance().showSettingsDialog(project, PluginManagerConfigurable::class.java,
                     { c -> c.openMarketplaceTab("com.redhat.devtools.lsp4ij") })
             }
         })
