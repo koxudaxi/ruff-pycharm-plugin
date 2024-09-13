@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.39] - 2024-09-12
+
 - Fix: Isolate Ruff formatting to the active project [[#503](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/503)]
 
 ## [0.0.38] - 2024-09-12
@@ -203,7 +206,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.38...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.39...HEAD
+[0.0.39]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.38...v0.0.39
 [0.0.38]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...v0.0.38
 [0.0.37]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...v0.0.37
 [0.0.36]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...v0.0.36
