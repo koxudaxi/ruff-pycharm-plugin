@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Remove projectRuffExecutablePath in config file [[#505](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/505)]
 
 ## [0.0.39] - 2024-09-12
 
