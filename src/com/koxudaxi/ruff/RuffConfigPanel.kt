@@ -46,6 +46,7 @@ class RuffConfigPanel(project: Project) {
 
     init {
         val ruffConfigService = getInstance(project)
+        val ruffCacheService = RuffCacheService.getInstance(project)
         runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
         runRuffOnSaveCheckBox.isEnabled = true
         runRuffOnReformatCodeCheckBox.isSelected = ruffConfigService.runRuffOnReformatCode
@@ -123,7 +124,7 @@ class RuffConfigPanel(project: Project) {
         }
         updateLspFields()
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
-        when (val projectRuffExecutablePath = ruffConfigService.projectRuffExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
+        when (val projectRuffExecutablePath = ruffCacheService.getProjectRuffExecutablePath()?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
             else -> {
                 projectRuffExecutablePathField.text = ""
@@ -132,7 +133,7 @@ class RuffConfigPanel(project: Project) {
         }
 
 
-        when (val projectRuffLspExecutablePath = ruffConfigService.projectRuffLspExecutablePath?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, true)) {
+        when (val projectRuffLspExecutablePath = ruffCacheService.getProjectRuffLspExecutablePath()?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, true)) {
             is String -> projectRuffLspExecutablePathField.text = projectRuffLspExecutablePath
             else -> {
                 projectRuffLspExecutablePathField.text = ""

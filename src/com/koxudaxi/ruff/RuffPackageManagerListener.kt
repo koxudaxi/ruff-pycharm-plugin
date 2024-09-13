@@ -15,8 +15,8 @@ class RuffPackageManagerListener(private val project: Project) : PyPackageManage
         val ruffConfigService = RuffConfigService.getInstance(project)
         val ruffCacheService = RuffCacheService.getInstance(project)
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
-        ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
-        ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
+        ruffCacheService.setProjectRuffExecutablePath(findRuffExecutableInSDK(sdk, false)?.absolutePath)
+        ruffCacheService.setProjectRuffLspExecutablePath(findRuffExecutableInSDK(sdk, true)?.absolutePath)
         if (!lspSupported || !ruffConfigService.enableLsp) return
         ruffCacheService.setVersion {
             ApplicationManager.getApplication().invokeLater {

@@ -31,7 +31,7 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
         val ruffCacheService = RuffCacheService.getInstance(project)
         if (ruffCacheService.getVersion() == null) return false
         if (ruffConfigService.useRuffServer && ruffCacheService.hasLsp() != true) return false
-        if (ruffConfigService.useRuffLsp && getRuffExecutable(project, ruffConfigService, true) == null ) return false
+        if (ruffConfigService.useRuffLsp && getRuffExecutable(project, ruffConfigService, true, ruffCacheService) == null ) return false
         return true
     }
 
