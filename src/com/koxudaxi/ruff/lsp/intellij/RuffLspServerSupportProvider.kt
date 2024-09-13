@@ -27,7 +27,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
             ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
-                getRuffExecutable(project, ruffConfigService, false)?.let {
+                getRuffExecutable(project, ruffConfigService, false, ruffCacheService)?.let {
                     RuffServerServerDescriptor(
                         project,
                         it,
@@ -36,7 +36,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
                 }
             }
 
-            else -> getRuffExecutable(project, ruffConfigService, true)?.let {
+            else -> getRuffExecutable(project, ruffConfigService, true, ruffCacheService)?.let {
                 RuffLspServerDescriptor(
                     project,
                     it,

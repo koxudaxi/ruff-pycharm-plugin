@@ -169,13 +169,13 @@ val lsp4ijSupported: Boolean
 
 val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
 
-fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
-            lsp -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            lsp -> ruffCacheService.setProjectRuffLspExecutablePath(it?.absolutePath)
+            else -> ruffCacheService.setProjectRuffExecutablePath(it?.absolutePath)
         }
         it
     }?.let { return it }
@@ -238,13 +238,21 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
-fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-    return when {
-        lsp -> ruffConfigService.ruffLspExecutablePath
-        else -> ruffConfigService.ruffExecutablePath
-    }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-        project, ruffConfigService, lsp
-    )
+fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
+    with(ruffConfigService) {
+        return when {
+            lsp -> when {
+                alwaysUseGlobalRuff -> globalRuffLspExecutablePath
+                else -> ruffCacheService.getProjectRuffLspExecutablePath() ?: globalRuffLspExecutablePath
+            }
+            else -> when {
+                alwaysUseGlobalRuff -> globalRuffExecutablePath
+                else -> ruffCacheService.getProjectRuffExecutablePath() ?: globalRuffExecutablePath
+            }
+        }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project, ruffConfigService, lsp, ruffCacheService
+        )
+    }
 }
 
 fun getConfigArgs(ruffConfigService: RuffConfigService): List<String>? {
@@ -398,10 +406,9 @@ fun generateCommandArgs(
     withoutConfig: Boolean = false
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
+    val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
-        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, false
-        ) ?: return null
+        getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf(CONFIG_ARG, it)
     }
