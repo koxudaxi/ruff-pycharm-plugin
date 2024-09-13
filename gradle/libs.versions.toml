@@ -7,10 +7,11 @@ kotlinxSerialization = "1.6.3"
 
 # plugins
 kotlin = "1.9.23"
-changelog = "2.2.0"
-gradleIntelliJPlugin = "1.17.3"
+changelog = "2.2.1"
+gradleIntelliJPlugin = "2.0.1"
 qodana = "0.1.13"
 kover = "0.7.6"
+lsp4ij = "0.5.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -20,8 +21,9 @@ kotlinxSerialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serial
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
-gradleIntelliJPlugin = { id = "org.jetbrains.intellij", version.ref = "gradleIntelliJPlugin" }
+gradleIntelliJPlugin = { id = "org.jetbrains.intellij.platform", version.ref = "gradleIntelliJPlugin" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+lsp4ij = { id = "com.redhat.devtools.lsp4ij", version.ref = "lsp4ij"}

@@ -9,7 +9,28 @@
 See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more details.
 
 ## Sponsors
-[![JetBrains](https://avatars.githubusercontent.com/u/60931315?s=200&v=4)](https://github.com/JetBrainsOfficial)
+<table>
+  <tr>
+    <td valign="top" align="center">
+    <a href="https://github.com/JetBrainsOfficial">
+      <img src="https://avatars.githubusercontent.com/u/60931315?s=100&v=4" alt="JetBrains Logo" style="width: 100px;">
+      <p>JetBrains</p>
+    </a>
+    </td>
+  <td valign="top" align="center">
+    <a href="https://github.com/astral-sh">
+      <img src="https://avatars.githubusercontent.com/u/115962839?s=200&v=4" alt="Astral Logo" style="width: 100px;">
+      <p>Astral</p>
+    </a>
+  </td>
+  <td valign="top" align="center">
+    <a href="https://github.com/DataDog">
+      <img src="https://avatars.githubusercontent.com/u/365230?s=200&v=4" alt="Datadog, Inc. Logo" style="width: 100px;">
+      <p>Datadog, Inc.</p>
+    </a>
+  </td>
+  </tr>
+</table>
 
 
 ## Quick Installation
@@ -37,7 +58,13 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Support `ruff` config file path as an option
 - [x] Detect `ruff` executable in Conda environment
 - [x] Detect `ruff` executable in WSL
-- [x] Support `ruff-lsp` with [LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate [Experimental]
+- [x] Support Ruff LSP feature
+  - LSP Client
+    - [x] [Intellij LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate
+    - [x] [LSP4IJ by RedHat](https://github.com/redhat-developer/lsp4ij) (Requires installation of the [LSP4IJ plugin](https://plugins.jetbrains.com/plugin/23257-lsp4ij))
+  - LSP Server
+    - [x] `ruff-lsp` integration
+    - [x] `ruff server` integration
   - [x] Live Config Reload: Automatically updates from `pyproject.toml` and `ruff.toml` without restarting
 - [x] Support `ruff format` for ruff version `0.0.289` or later [Experimental]
 

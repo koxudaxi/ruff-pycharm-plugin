@@ -9,15 +9,20 @@ class RuffCacheService(val project: Project) {
     private var hasFormatter: Boolean? = null
     private var hasOutputFormat: Boolean? = null
     private var hasCheck: Boolean? = null
+    private var hasLsp: Boolean? = null
+    private var hasStableServer: Boolean? = null
+    private var projectRuffExecutablePath: String? = null
+    private var projectRuffLspExecutablePath: String? = null
 
     fun getVersion(): RuffVersion? {
         return version
     }
-    private fun setVersionFromCommand() =
+    private inline fun setVersionFromCommand(crossinline action: () -> Unit) =
         executeOnPooledThread {
             val ruffVersion = runRuff(project, listOf("--version"), true)
                 ?.let { getOrPutVersionFromVersionCache(it) }
             setVersion(ruffVersion)
+            action()
         }
 
 
@@ -42,14 +47,16 @@ class RuffCacheService(val project: Project) {
         hasFormatter = version?.hasFormatter
         hasOutputFormat = version?.hasOutputFormat
         hasCheck = version?.hasCheck
+        hasLsp = version?.hasLsp
+        hasStableServer = version?.hasStableServer
     }
 
     internal fun clearVersion() {
         setVersion(null)
     }
 
-    internal fun setVersion() {
-        return setVersionFromCommand()
+    internal inline fun setVersion(crossinline action: () -> Unit) {
+        return setVersionFromCommand(action)
     }
 
     internal fun hasFormatter(): Boolean {
@@ -64,6 +71,32 @@ class RuffCacheService(val project: Project) {
         return hasCheck
     }
 
+    internal fun hasLsp(): Boolean? {
+        return hasLsp
+    }
+
+    internal fun hasStableServer(): Boolean? {
+        return hasStableServer
+    }
+
+    internal fun getProjectRuffExecutablePath(): String? {
+        return projectRuffExecutablePath
+    }
+
+    @Synchronized
+    internal fun setProjectRuffExecutablePath(path: String?) {
+        projectRuffExecutablePath = path
+    }
+
+    internal fun getProjectRuffLspExecutablePath(): String? {
+        return projectRuffLspExecutablePath
+    }
+
+    @Synchronized
+    internal fun setProjectRuffLspExecutablePath(path: String?) {
+        projectRuffLspExecutablePath = path
+    }
+
     internal
     companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
@@ -71,6 +104,10 @@ class RuffCacheService(val project: Project) {
         fun hasOutputFormat(project: Project): Boolean? = getInstance(project).hasOutputFormat()
 
         fun hasCheck(project: Project): Boolean? = getInstance(project).hasCheck()
+
+        fun hasLsp(project: Project): Boolean? = getInstance(project).hasLsp()
+
+        fun hasStableServer(project: Project): Boolean? = getInstance(project).hasStableServer()
 
         internal fun getInstance(project: Project): RuffCacheService {
             return project.getService(RuffCacheService::class.java)

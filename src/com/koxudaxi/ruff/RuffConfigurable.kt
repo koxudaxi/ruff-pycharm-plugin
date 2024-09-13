@@ -1,16 +1,13 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
-import com.intellij.platform.lsp.api.LspServerManager
+import com.koxudaxi.ruff.lsp.ClientType
 import javax.swing.JComponent
 
 
 class RuffConfigurable internal constructor(val project: Project) : Configurable {
-    private val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
     private val configPanel: RuffConfigPanel = RuffConfigPanel(project)
-    private val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
     override fun getDisplayName(): String {
         return "Ruff"
     }
@@ -27,6 +24,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
     override fun reset() {}
 
     override fun isModified(): Boolean {
+        val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
         return ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave ||
                 ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
@@ -36,34 +34,54 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
-                ruffConfigService.useRuffFormat != configPanel.useRuffFormat
-
+                ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient ||
+                ruffConfigService.useLsp4ij != configPanel.useLsp4ij ||
+                ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
+                ruffConfigService.useRuffServer != configPanel.useRuffServer ||
+                ruffConfigService.enableLsp != configPanel.enableLsp
     }
 
     override fun apply() {
+        val ruffConfigService: RuffConfigService = RuffConfigService.getInstance(project)
+        val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
+        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
         ruffConfigService.runRuffOnSave = configPanel.runRuffOnSave
         ruffConfigService.runRuffOnReformatCode = configPanel.runRuffOnReformatCode
         ruffConfigService.showRuleCode = configPanel.showRuleCode
         ruffConfigService.alwaysUseGlobalRuff = configPanel.alwaysUseGlobalRuff
         ruffConfigService.globalRuffExecutablePath = configPanel.globalRuffExecutablePath
         ruffConfigService.globalRuffLspExecutablePath = configPanel.globalRuffLspExecutablePath
-        ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
-        ruffCacheService.setVersion()
-        if (ruffConfigService.useRuffLsp != configPanel.useRuffLsp) {
-            @Suppress("UnstableApiUsage")
-            val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
-            if (lspServerManager != null) {
-                if (configPanel.useRuffLsp) {
-                    @Suppress("UnstableApiUsage")
-                    lspServerManager.startServersIfNeeded(RuffLspServerSupportProvider::class.java)
+        val ruffConfigPathChanged = configPanel.ruffConfigPath != configPanel.ruffConfigPath
+        val useRuffLspChanged = ruffConfigService.useRuffLsp != configPanel.useRuffLsp
+        val useRuffServerChanged = ruffConfigService.useRuffServer != configPanel.useRuffServer
+        val lspClientChanged = (ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient) ||
+                (ruffConfigService.useLsp4ij != configPanel.useLsp4ij)
+        ruffConfigService.ruffConfigPath = configPanel.ruffConfigPath
+        ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+        ruffConfigService.useRuffServer = configPanel.useRuffServer
+        ruffConfigService.useIntellijLspClient = configPanel.useIntellijLspClient
+        ruffConfigService.useLsp4ij = configPanel.useLsp4ij
+        val lspEnabledChanged = ruffConfigService.enableLsp != configPanel.enableLsp
+        ruffConfigService.enableLsp = configPanel.enableLsp
+        ruffCacheService.setVersion {
+            if (!lspSupported) return@setVersion
+            val startLsp = ruffConfigService.enableLsp
+            if (lspClientChanged || (lspEnabledChanged && startLsp)) {
+                if (ruffConfigService.useLsp4ij) {
+                    ruffLspClientManager.setClient(ClientType.LSP4IJ, startLsp)
                 } else {
-                    @Suppress("UnstableApiUsage")
-                    lspServerManager.stopServers(RuffLspServerSupportProvider::class.java)
+                    ruffLspClientManager.setClient(ClientType.INTELLIJ, startLsp)
+                }
+            } else if (lspEnabledChanged) {
+                ruffLspClientManager.stop()
+            } else if (useRuffLspChanged || useRuffServerChanged || ruffConfigPathChanged) {
+                if (startLsp) {
+                    ruffLspClientManager.restart()
                 }
             }
-            ruffConfigService.useRuffLsp = configPanel.useRuffLsp
+            // TODO: support ruff global executable path changed pattern
         }
     }
 

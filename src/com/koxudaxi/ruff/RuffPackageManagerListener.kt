@@ -1,26 +1,40 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
+import RuffLspClientManager
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.platform.lsp.api.LspServerManager
 import com.jetbrains.python.packaging.PyPackageManager
+import com.jetbrains.python.sdk.pythonSdk
+import com.koxudaxi.ruff.lsp.ClientType
 
-class RuffPackageManagerListener(project: Project) : PyPackageManager.Listener {
-    private val ruffConfigService = RuffConfigService.getInstance(project)
-    private val ruffCacheService = RuffCacheService.getInstance(project)
-    @Suppress("UnstableApiUsage")
-    private val lspServerManager = if (lspIsSupported) LspServerManager.getInstance(project) else null
+class RuffPackageManagerListener(private val project: Project) : PyPackageManager.Listener {
+
     override fun packagesRefreshed(sdk: Sdk) {
-        ruffConfigService.projectRuffExecutablePath = findRuffExecutableInSDK(sdk, false)?.absolutePath
-        ruffConfigService.projectRuffLspExecutablePath = findRuffExecutableInSDK(sdk, true)?.absolutePath
-        ruffCacheService.setVersion()
-        if (lspServerManager != null && ruffConfigService.useRuffLsp) {
-            try {
-                @Suppress("UnstableApiUsage")
-                lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
-            } catch (_: Exception) {
+        if (project.pythonSdk != sdk) return
+        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffCacheService = RuffCacheService.getInstance(project)
+        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
+        ruffCacheService.setProjectRuffExecutablePath(findRuffExecutableInSDK(sdk, false)?.absolutePath)
+        ruffCacheService.setProjectRuffLspExecutablePath(findRuffExecutableInSDK(sdk, true)?.absolutePath)
+        if (!lspSupported || !ruffConfigService.enableLsp) return
+        ruffCacheService.setVersion {
+            ApplicationManager.getApplication().invokeLater {
+                ApplicationManager.getApplication().runWriteAction {
+                    when {
+                        ruffLspClientManager.hasClient() -> ruffLspClientManager.restart()
+                        else -> {
+                            val clientType = when {
+                                ruffConfigService.useLsp4ij -> ClientType.LSP4IJ
+                                else -> ClientType.INTELLIJ
+                            }
+                            ruffLspClientManager.setClient(clientType)
+                        }
+                    }
+
+                }
             }
-         }
+
+        }
     }
 }

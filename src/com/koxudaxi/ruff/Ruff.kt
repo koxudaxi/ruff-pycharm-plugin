@@ -1,5 +1,6 @@
 package com.koxudaxi.ruff
 
+import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.RunCanceledByUserException
@@ -16,7 +17,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.progressStep
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
@@ -25,6 +25,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
+import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -37,7 +38,6 @@ import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.jetbrains.annotations.SystemDependent
 import java.io.File
 import java.io.IOError
 import java.io.IOException
@@ -86,6 +86,19 @@ val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
+val LSP_ARGS_BASE = listOf("server")
+val PREVIEW_ARGS = listOf("--preview")
+val Project.LSP_ARGS: List<String>
+    get() = when {
+        RuffCacheService.hasStableServer(this) == true -> LSP_ARGS_BASE
+        else -> LSP_ARGS_BASE + PREVIEW_ARGS
+    }
+val Project.RULE_ARGS: List<String>
+    get() = when {
+        RuffCacheService.hasCheck(this) == true -> listOf("rule")
+        else -> listOf("--explain")
+    }
+
 val Project.FIX_ARGS: List<String>
     get() = when {
         RuffCacheService.hasCheck(this) == true -> CHECK + FIX_ARGS_BASE
@@ -121,31 +134,48 @@ val Sdk.wslIsSupported: Boolean
         }.also { wslSdkIsSupported = it }
     }
 
-private var lspIsSupportedValue: Boolean? = null
-val lspIsSupported: Boolean
+private var intellijLspClientSupportedValue: Boolean? = null
+val intellijLspClientSupported: Boolean
     get() {
-        if (lspIsSupportedValue is Boolean) {
-            return lspIsSupportedValue as Boolean
+        if (intellijLspClientSupportedValue is Boolean) {
+            return intellijLspClientSupportedValue as Boolean
         }
         return try {
                 @Suppress("UnstableApiUsage")
                 LspServerSupportProvider
-                lspIsSupportedValue = true
+                intellijLspClientSupportedValue = true
                 true
             } catch (e: NoClassDefFoundError) {
-                lspIsSupportedValue = false
+                intellijLspClientSupportedValue = false
                 false
             }
     }
 
+private var lsp4ijSupportedValue: Boolean? = null
+val lsp4ijSupported: Boolean
+    get() {
+        if (lsp4ijSupportedValue is Boolean) {
+            return lsp4ijSupportedValue as Boolean
+        }
+        return try {
+            com.redhat.devtools.lsp4ij.LanguageServerManager.StartOptions.DEFAULT
+            lsp4ijSupportedValue = true
+            true
+        } catch (e: NoClassDefFoundError) {
+            lsp4ijSupportedValue = false
+            false
+        }
+    }
 
-fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
+
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
-            lsp -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            lsp -> ruffCacheService.setProjectRuffLspExecutablePath(it?.absolutePath)
+            else -> ruffCacheService.setProjectRuffExecutablePath(it?.absolutePath)
         }
         it
     }?.let { return it }
@@ -208,6 +238,35 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
+fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
+    with(ruffConfigService) {
+        return when {
+            lsp -> when {
+                alwaysUseGlobalRuff -> globalRuffLspExecutablePath
+                else -> ruffCacheService.getProjectRuffLspExecutablePath() ?: globalRuffLspExecutablePath
+            }
+            else -> when {
+                alwaysUseGlobalRuff -> globalRuffExecutablePath
+                else -> ruffCacheService.getProjectRuffExecutablePath() ?: globalRuffExecutablePath
+            }
+        }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project, ruffConfigService, lsp, ruffCacheService
+        )
+    }
+}
+
+fun getConfigArgs(ruffConfigService: RuffConfigService): List<String>? {
+    val config = ruffConfigService.ruffConfigPath?.let { File(it) }?.takeIf { it.exists() } ?: return null
+    return listOf(CONFIG_ARG, config.absolutePath)
+}
+
+fun isInspectionEnabled(project: Project): Boolean {
+    val inspectionProfileManager = ProjectInspectionProfileManager.getInstance(project)
+
+    val toolWrapper = InspectionToolRegistrar.getInstance().createTools()
+        .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME } ?: return false
+    return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
+}
 fun runCommand(
     commandArgs: CommandArgs
 ): String? = runCommand(
@@ -236,13 +295,34 @@ fun getGeneralCommandLine(executable: File, project: Project?, vararg args: Stri
     options.setLaunchWithWslExe(true)
     return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
 }
-fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
+private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
+
+fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
+    val projectPath = project?.basePath ?: return null
+    if (!WslPath.isWslUncPath(executable.path)) {
+        return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+    }
+    val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+    val configArgIndex = args.indexOf(CONFIG_ARG)
+    val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+        val configPathIndex = configArgIndex + 1
+        val configPath = args[configPathIndex]
+        val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+        args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+    } else {
+        args
+    }
+    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
+    val options = WSLCommandLineOptions()
+    options.setExecuteCommandInShell(false)
+    options.setLaunchWithWslExe(true)
+    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
+}
 
 fun runCommand(
     executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
-    val projectPath = project?.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
     val handler = getGeneralCommandLine(executable, project, *args)
         ?.let { CapturingProcessHandler(it) } ?: return null
@@ -347,10 +427,9 @@ fun generateCommandArgs(
     withoutConfig: Boolean = false
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
+    val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
-        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, false
-        ) ?: return null
+        getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf(CONFIG_ARG, it)
     }

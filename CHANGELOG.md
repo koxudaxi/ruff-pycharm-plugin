@@ -1,6 +1,40 @@
 # Changelog
 
 ## [Unreleased]
+- Remove projectRuffExecutablePath in config file [[#505](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/505)]
+
+## [0.0.39] - 2024-09-12
+
+- Fix: Isolate Ruff formatting to the active project [[#503](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/503)]
+
+## [0.0.38] - 2024-09-12
+
+- Fix Ruff format checkbox [[#501](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/501)]
+- Improve lsp config [[#499](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/499)]
+
+## [0.0.37] - 2024-09-10
+
+- Update LSP client change logic in RuffConfigurable.kt [[#497](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/497)]
+- Update LSP4IJ references and version [[#496](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/496)]
+- LSP4IJ should be optional [[#494](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/494)]
+
+## [0.0.36] - 2024-09-03
+
+- Fix idea lsp server on wsl [[#486](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/486)]
+- Support LSP4IJ, which is a third-party LSP server integration [[#437](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/437)]
+- Use preview only for non-stable server versions (<0.5.3) [[#481](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/481)]
+- Use rule or --explain dependent on version. [[#479](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/479)]
+
+## [0.0.35] - 2024-07-24
+
+- Support 242 EAP[[#461](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/461)]
+
+## [0.0.34] - 2024-06-28
+
+- Support new LSP integration [[#454](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/454)]
+
+## [0.0.33] - 2024-04-07
+
 - Improve ruff config path in wsl [[#412](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/412)]
 - Fix wsl detection on 2024.1 [[#414](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/414)]
 
@@ -173,7 +207,14 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.32...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.39...HEAD
+[0.0.39]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.38...v0.0.39
+[0.0.38]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...v0.0.38
+[0.0.37]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...v0.0.37
+[0.0.36]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.35...v0.0.36
+[0.0.35]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.34...v0.0.35
+[0.0.34]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.33...v0.0.34
+[0.0.33]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.32...v0.0.33
 [0.0.32]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.31...v0.0.32
 [0.0.31]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.30...v0.0.31
 [0.0.30]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.29...v0.0.30

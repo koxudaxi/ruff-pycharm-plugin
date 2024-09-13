@@ -64,22 +64,113 @@
               <text value="Exclude files outside of the project"/>
             </properties>
           </component>
-          <component id="1c73c" class="javax.swing.JCheckBox" binding="useRuffLspCheckBox">
-            <constraints>
-              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate"/>
-            </properties>
-          </component>
           <component id="d521d" class="javax.swing.JCheckBox" binding="useRuffFormatCheckBox">
             <constraints>
-              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Use ruff format (Experimental) for version 0.0.289 or later"/>
             </properties>
           </component>
+          <grid id="36978" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="none" title="Language Server Protocol (LSP)"/>
+            <children>
+              <grid id="1f570" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="1" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none" title="LSP Server"/>
+                <children>
+                  <component id="93dcd" class="javax.swing.JRadioButton" binding="useRuffServerRadioButton">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="`ruff server` command"/>
+                      <label value="`ruff server` command"/>
+                      <text value="`ruff server` command"/>
+                    </properties>
+                  </component>
+                  <hspacer id="12e9e">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <component id="89976" class="javax.swing.JRadioButton" binding="useRuffLspRadioButton">
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="`ruff-lsp` command"/>
+                      <label value="`ruff-lsp` command"/>
+                      <text value="`ruff-lsp` command"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <vspacer id="aaf9">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <grid id="7dbad" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="1" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none" title="LSP Client"/>
+                <children>
+                  <component id="5d92e" class="javax.swing.JRadioButton" binding="useIntellijLspClientRadioButton">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Intellij's LSP Client (only pro versions)"/>
+                    </properties>
+                  </component>
+                  <hspacer id="be0d7">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <component id="59c8d" class="javax.swing.JRadioButton" binding="useLsp4ijRadioButton">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="LSP4IJ by RedHat (LSP4IJ plugin required)"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <component id="df6ed" class="javax.swing.JCheckBox" binding="enableLspCheckBox">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="Enable Ruff LSP feature"/>
+                </properties>
+              </component>
+              <component id="bf388" class="javax.swing.JLabel" binding="lsp4ijLinkLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="1" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="&lt;html&gt;To use LSP4IJ, you need to install the plugin from &lt;a href=''&gt;the marketplace.&lt;/a&gt;&lt;/html&gt;"/>
+                  <toolTipText value="Go to Marketplace and display LSP4IJ plugin."/>
+                  <verifyInputWhenFocusTarget value="false"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
         </children>
       </grid>
       <vspacer id="a33f9">
@@ -224,4 +315,14 @@
       </hspacer>
     </children>
   </grid>
+  <buttonGroups>
+    <group name="lspClient">
+      <member id="59c8d"/>
+      <member id="5d92e"/>
+    </group>
+    <group name="lspServer">
+      <member id="93dcd"/>
+      <member id="89976"/>
+    </group>
+  </buttonGroups>
 </form>

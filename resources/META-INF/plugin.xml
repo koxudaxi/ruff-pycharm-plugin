@@ -6,6 +6,7 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
     <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
@@ -20,10 +21,9 @@
         <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatter"></formattingService>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
+        <actionOnSave id="BlackFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
     </extensions>
     <projectListeners>
-        <listener class="com.koxudaxi.ruff.RuffFileDocumentManagerListener"
-                  topic="com.intellij.openapi.fileEditor.FileDocumentManagerListener"/>
         <listener class="com.koxudaxi.ruff.RuffPackageManagerListener"
                   topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
     </projectListeners>
