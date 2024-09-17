@@ -3,9 +3,10 @@ package com.koxudaxi.ruff
 import com.intellij.openapi.project.Project
 
 
-class RuffFixProcessor : RuffPostFormatProcessor() {
+class RuffAsyncFixFormatter : RuffAsyncFormatterBase() {
     override fun isEnabled(project: Project): Boolean =
         RuffConfigService.getInstance(project).runRuffOnReformatCode
 
-    override fun process(sourceFile: SourceFile): String? = fix(sourceFile)
+    override fun getArgs(project: Project): List<String> = project.FIX_ARGS
+    override fun getName(): String = "Ruff Fix Formatter"
 }

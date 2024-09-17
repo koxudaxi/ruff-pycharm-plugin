@@ -151,14 +151,31 @@ val intellijLspClientSupported: Boolean
             }
     }
 
+private var lsp4ijSupportedValue: Boolean? = null
+val lsp4ijSupported: Boolean
+    get() {
+        if (lsp4ijSupportedValue is Boolean) {
+            return lsp4ijSupportedValue as Boolean
+        }
+        return try {
+            com.redhat.devtools.lsp4ij.LanguageServerManager.StartOptions.DEFAULT
+            lsp4ijSupportedValue = true
+            true
+        } catch (e: NoClassDefFoundError) {
+            lsp4ijSupportedValue = false
+            false
+        }
+    }
 
-fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
+val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
+
+fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
-            lsp -> ruffConfigService.projectRuffLspExecutablePath = it?.absolutePath
-            else -> ruffConfigService.projectRuffExecutablePath = it?.absolutePath
+            lsp -> ruffCacheService.setProjectRuffLspExecutablePath(it?.absolutePath)
+            else -> ruffCacheService.setProjectRuffExecutablePath(it?.absolutePath)
         }
         it
     }?.let { return it }
@@ -221,13 +238,21 @@ val PsiFile.isApplicableTo: Boolean
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
 
-fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean): File? {
-    return when {
-        lsp -> ruffConfigService.ruffLspExecutablePath
-        else -> ruffConfigService.ruffExecutablePath
-    }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-        project, ruffConfigService, lsp
-    )
+fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
+    with(ruffConfigService) {
+        return when {
+            lsp -> when {
+                alwaysUseGlobalRuff -> globalRuffLspExecutablePath
+                else -> ruffCacheService.getProjectRuffLspExecutablePath() ?: globalRuffLspExecutablePath
+            }
+            else -> when {
+                alwaysUseGlobalRuff -> globalRuffExecutablePath
+                else -> ruffCacheService.getProjectRuffExecutablePath() ?: globalRuffExecutablePath
+            }
+        }?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
+            project, ruffConfigService, lsp, ruffCacheService
+        )
+    }
 }
 
 fun getConfigArgs(ruffConfigService: RuffConfigService): List<String>? {
@@ -248,34 +273,38 @@ fun runCommand(
     commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
-
-fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
+private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
+
+fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
+    val projectPath = project?.basePath ?: return null
+    if (!WslPath.isWslUncPath(executable.path)) {
+        return  getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+    }
+
+    val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
+    val configArgIndex = args.indexOf(CONFIG_ARG)
+    val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+        val configPathIndex = configArgIndex + 1
+        val configPath = args[configPathIndex]
+        val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+        args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+    } else {
+        args
+    }
+    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
+    val options = WSLCommandLineOptions()
+    options.setExecuteCommandInShell(false)
+    options.setLaunchWithWslExe(true)
+    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
+}
 
 fun runCommand(
     executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
-    val projectPath = project?.basePath
     val indicator = ProgressManager.getInstance().progressIndicator
-    val handler = if (WslPath.isWslUncPath(executable.path)) {
-        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
-        val configArgIndex = args.indexOf(CONFIG_ARG)
-        val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
-            val configPathIndex = configArgIndex + 1
-            val configPath = args[configPathIndex]
-            val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
-            args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
-        } else {
-            args
-        }
-        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
-        val options = WSLCommandLineOptions()
-        options.setExecuteCommandInShell(false)
-        options.setLaunchWithWslExe(true)
-        windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
-    } else {
-        getGeneralCommandLine(listOf(executable.path) + args, projectPath)
-    }.let { CapturingProcessHandler(it) }
+    val handler = getGeneralCommandLine(executable, project, *args)
+        ?.let { CapturingProcessHandler(it) } ?: return null
 
     val result = with(handler) {
         if (stdin is ByteArray) {
@@ -377,10 +406,9 @@ fun generateCommandArgs(
     withoutConfig: Boolean = false
 ): CommandArgs? {
     val ruffConfigService = RuffConfigService.getInstance(project)
+    val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
-        ruffConfigService.ruffExecutablePath?.let { File(it) }?.takeIf { it.exists() } ?: detectRuffExecutable(
-            project, ruffConfigService, false
-        ) ?: return null
+        getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
     val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
         args + listOf(CONFIG_ARG, it)
     }

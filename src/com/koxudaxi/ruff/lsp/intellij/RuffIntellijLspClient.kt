@@ -4,6 +4,7 @@ import RuffLspServerSupportProvider
 import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
 import com.koxudaxi.ruff.intellijLspClientSupported
+import com.koxudaxi.ruff.lsp.ClientType
 import com.koxudaxi.ruff.lsp.RuffLspClient
 
 class RuffIntellijLspClient(val project: Project) : RuffLspClient {
@@ -24,5 +25,9 @@ class RuffIntellijLspClient(val project: Project) : RuffLspClient {
         if (lspServerManager == null) return
         @Suppress("UnstableApiUsage")
         lspServerManager.stopAndRestartIfNeeded(RuffLspServerSupportProvider::class.java)
+    }
+
+    override fun getClientType(): ClientType {
+        return ClientType.INTELLIJ
     }
 }
