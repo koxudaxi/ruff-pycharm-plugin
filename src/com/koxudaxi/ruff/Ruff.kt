@@ -273,15 +273,15 @@ fun runCommand(
     commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
-
 private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
     GeneralCommandLine(command).withWorkDirectory(projectPath).withCharset(Charsets.UTF_8)
 
 fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
     val projectPath = project?.basePath ?: return null
     if (!WslPath.isWslUncPath(executable.path)) {
-        return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+        return  getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }
+
     val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
     val configArgIndex = args.indexOf(CONFIG_ARG)
     val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
