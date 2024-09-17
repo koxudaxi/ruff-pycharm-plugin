@@ -8,14 +8,17 @@ import com.intellij.formatting.FormattingContext
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 import java.nio.charset.StandardCharsets
 import java.util.*
 
 
-class RuffAsyncFormatter : AsyncDocumentFormattingService() {
+abstract class RuffAsyncFormatterBase : AsyncDocumentFormattingService() {
+    abstract fun isEnabled(project: Project): Boolean
+    abstract fun getArgs(project: Project): List<String>
     private val FEATURES: MutableSet<FormattingService.Feature> = EnumSet.noneOf(
-            FormattingService.Feature::class.java
+        FormattingService.Feature::class.java
     )
 
     override fun getFeatures(): MutableSet<FormattingService.Feature> {
@@ -23,16 +26,17 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
     }
 
     override fun canFormat(file: PsiFile): Boolean {
-        return file.isApplicableTo
+        return isEnabled(file.project) && file.isApplicableTo
     }
 
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         val formattingContext: FormattingContext = request.context
         val ioFile = request.ioFile ?: return null
         val sourceFile = formattingContext.containingFile.sourceFile
-        val commandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS) ?: return null
+        val commandArgs = generateCommandArgs(sourceFile, getArgs(formattingContext.project)) ?: return null
         try {
-            val commandLine = getGeneralCommandLine(commandArgs.executable, commandArgs.project, *commandArgs.args.toTypedArray())
+            val commandLine =
+                getGeneralCommandLine(commandArgs.executable, commandArgs.project, *commandArgs.args.toTypedArray())
                     ?: return null
             val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
             with(handler) {
@@ -71,9 +75,5 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
 
     override fun getNotificationGroupId(): String {
         return "Ruff"
-    }
-
-    override fun getName(): String {
-        return "Ruff formatter"
     }
 }
