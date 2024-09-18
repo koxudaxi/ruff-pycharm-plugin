@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.40] - 2024-09-18
+
 - Migrate formatter to AsyncDocumentFormattingService [[#391](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/391)]
 - Remove projectRuffExecutablePath in config file [[#505](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/505)]
 
@@ -208,7 +211,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.39...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.40...HEAD
+[0.0.40]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.39...v0.0.40
 [0.0.39]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.38...v0.0.39
 [0.0.38]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.37...v0.0.38
 [0.0.37]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.36...v0.0.37
