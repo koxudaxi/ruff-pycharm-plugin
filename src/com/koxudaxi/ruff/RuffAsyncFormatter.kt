@@ -1,22 +1,15 @@
 package com.koxudaxi.ruff
 
-import com.intellij.execution.ExecutionException
-import com.intellij.execution.process.CapturingProcessAdapter
-import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessEvent
 import com.intellij.formatting.FormattingContext
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
-import com.intellij.openapi.project.Project
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.psi.PsiFile
-import java.nio.charset.StandardCharsets
 import java.util.*
 
 
-abstract class RuffAsyncFormatterBase : AsyncDocumentFormattingService() {
-    abstract fun isEnabled(project: Project): Boolean
-    abstract fun getArgs(project: Project): List<String>
+class RuffAsyncFormatter : AsyncDocumentFormattingService() {
     private val FEATURES: MutableSet<FormattingService.Feature> = EnumSet.noneOf(
         FormattingService.Feature::class.java
     )
@@ -26,54 +19,66 @@ abstract class RuffAsyncFormatterBase : AsyncDocumentFormattingService() {
     }
 
     override fun canFormat(file: PsiFile): Boolean {
-        return isEnabled(file.project) && file.isApplicableTo
+        return RuffConfigService.getInstance(file.project).runRuffOnReformatCode && file.isApplicableTo
     }
-
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         val formattingContext: FormattingContext = request.context
         val ioFile = request.ioFile ?: return null
-        val sourceFile = formattingContext.containingFile.sourceFile
-        val commandArgs = generateCommandArgs(sourceFile, getArgs(formattingContext.project)) ?: return null
-        try {
-            val commandLine =
-                getGeneralCommandLine(commandArgs.executable, commandArgs.project, *commandArgs.args.toTypedArray())
-                    ?: return null
-            val handler = OSProcessHandler(commandLine.withCharset(StandardCharsets.UTF_8))
-            with(handler) {
-                processInput.write(ioFile.readText().toByteArray())
-                processInput.close()
+        return object : FormattingTask {
+            private fun updateText(currentText: String, text: String?) {
+                when {
+                    text == null -> request.onTextReady(null)
+                    currentText == text -> request.onTextReady(null)
+                    else -> request.onTextReady(text)
+                }
             }
-            return object : FormattingTask {
-                override fun run() {
-                    handler.addProcessListener(object : CapturingProcessAdapter() {
-                        override fun processTerminated(event: ProcessEvent) {
-                            val exitCode = event.exitCode
-                            if (exitCode == 0) {
-                                request.onTextReady(output.stdout)
-                            } else {
-                                request.onError("Ruff Error", output.stderr)
-                            }
+            override fun run() {
+                runCatching {
+                    val sourceFile = formattingContext.containingFile.sourceFile
+                    val fixCommandArgs =
+                        generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS) ?: return@runCatching
+                    val currentText = ioFile.readText()
+                    val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray())
+                    if (fixCommandStdout == null) {
+                        request.onTextReady(null)
+                        return@runCatching
+                    }
+                    if (!RuffConfigService.getInstance(formattingContext.project).useRuffFormat) {
+                        updateText(currentText, fixCommandStdout)
+                        return@runCatching
+                    }
+                    val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS)
+                    if (formatCommandArgs == null) {
+                        updateText(currentText, fixCommandStdout)
+                        return@runCatching
+                    }
+                    val formatCommandStdout = runRuff(formatCommandArgs, fixCommandStdout.toByteArray())
+                    updateText(currentText, formatCommandStdout)
+
+                }.onFailure { exception ->
+                    when (exception) {
+                        is ProcessCanceledException -> { /* ignore */ }
+                        else -> {
+                            request.onError("Ruff Error", exception.localizedMessage)
                         }
-                    })
-                    handler.startNotify()
-                }
-
-                override fun cancel(): Boolean {
-                    handler.destroyProcess()
-                    return true
-                }
-
-                override fun isRunUnderProgress(): Boolean {
-                    return true
+                    }
                 }
             }
-        } catch (e: ExecutionException) {
-            e.message?.let { request.onError("Ruff Error", it) }
-            return null
+            override fun cancel(): Boolean {
+                return true
+            }
+
+            override fun isRunUnderProgress(): Boolean {
+                return true
+            }
         }
     }
 
     override fun getNotificationGroupId(): String {
         return "Ruff"
+    }
+
+    override fun getName(): String {
+        return "Ruff Formatter"
     }
 }
