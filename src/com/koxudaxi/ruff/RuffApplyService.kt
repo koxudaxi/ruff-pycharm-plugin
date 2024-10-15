@@ -35,7 +35,7 @@ class RuffApplyService(val project: Project) {
             }
         }
     }
-
+    val actionName = "Formatting with Ruff"
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
         val checkedFixed = runReadActionOnPooledThread(null) {
             val fixed = runRuff(sourceFile, project.FIX_ARGS)

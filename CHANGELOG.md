@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Improve RuffAsyncFormatter [[#518](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/518)]
 
 ## [0.0.40] - 2024-09-18
 

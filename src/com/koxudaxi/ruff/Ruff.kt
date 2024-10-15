@@ -268,9 +268,9 @@ fun isInspectionEnabled(project: Project): Boolean {
     return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
 }
 fun runCommand(
-    commandArgs: CommandArgs
+    commandArgs: CommandArgs, stdin: ByteArray? = null
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.project, commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable, commandArgs.project,  if (stdin is ByteArray) stdin else commandArgs.stdin, *commandArgs.args.toTypedArray()
 )
 
 private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
@@ -430,9 +430,9 @@ enum class NewArgument(val argument: String) {
 open class UnexpectedArgumentException(argument: String) : ExecutionException("Unexpected argument: $argument")
 class UnexpectedNewArgumentException(newArgument: NewArgument) : UnexpectedArgumentException(newArgument.argument)
 
-fun runRuff(commandArgs: CommandArgs): String? {
+fun runRuff(commandArgs: CommandArgs, stdin: ByteArray? = null): String? {
     return try {
-        runCommand(commandArgs)
+        runCommand(commandArgs, stdin)
     } catch (_: RunCanceledByUserException) {
         null
     } catch (_: TOMLParseException) {
