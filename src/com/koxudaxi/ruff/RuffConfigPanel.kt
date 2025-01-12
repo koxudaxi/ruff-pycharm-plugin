@@ -63,14 +63,15 @@ class RuffConfigPanel(project: Project) {
         useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = true
         useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
-        useRuffServerRadioButton.isEnabled =  lspSupported
+        useRuffServerRadioButton.isEnabled = lspSupported
         useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer || !ruffConfigService.useRuffLsp
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         enableLspCheckBox.isEnabled = lspSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
-                 ShowSettingsUtil.getInstance().showSettingsDialog(project, PluginManagerConfigurable::class.java,
+                ShowSettingsUtil.getInstance().showSettingsDialog(
+                    project, PluginManagerConfigurable::class.java,
                     { c -> c.openMarketplaceTab("com.redhat.devtools.lsp4ij") })
             }
         })
@@ -79,9 +80,10 @@ class RuffConfigPanel(project: Project) {
         }
 
         globalRuffExecutablePathField.apply {
-            addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
+            addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             if (textField is JBTextField) {
-                when (val globalRuffExecutablePath = ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() }) {
+                when (val globalRuffExecutablePath =
+                    ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() }) {
                     is String -> textField.text = globalRuffExecutablePath
                     else -> setAutodetectedRuff()
                 }
@@ -90,9 +92,10 @@ class RuffConfigPanel(project: Project) {
         }
 
         globalRuffLspExecutablePathField.apply {
-            addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
+            addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             if (textField is JBTextField) {
-                when (val globalRuffLspExecutablePath = ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() }) {
+                when (val globalRuffLspExecutablePath =
+                    ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() }) {
                     is String -> textField.text = globalRuffLspExecutablePath
                     else -> setAutodetectedRuffLsp()
                 }
@@ -124,7 +127,9 @@ class RuffConfigPanel(project: Project) {
         }
         updateLspFields()
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
-        when (val projectRuffExecutablePath = ruffCacheService.getProjectRuffExecutablePath()?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, false)) {
+        when (val projectRuffExecutablePath =
+            ruffCacheService.getProjectRuffExecutablePath()?.takeIf { File(it).exists() }
+                ?: getProjectRuffExecutablePath(project, false)) {
             is String -> projectRuffExecutablePathField.text = projectRuffExecutablePath
             else -> {
                 projectRuffExecutablePathField.text = ""
@@ -133,7 +138,9 @@ class RuffConfigPanel(project: Project) {
         }
 
 
-        when (val projectRuffLspExecutablePath = ruffCacheService.getProjectRuffLspExecutablePath()?.takeIf { File(it).exists() } ?: getProjectRuffExecutablePath(project, true)) {
+        when (val projectRuffLspExecutablePath =
+            ruffCacheService.getProjectRuffLspExecutablePath()?.takeIf { File(it).exists() }
+                ?: getProjectRuffExecutablePath(project, true)) {
             is String -> projectRuffLspExecutablePathField.text = projectRuffLspExecutablePath
             else -> {
                 projectRuffLspExecutablePathField.text = ""
@@ -142,7 +149,7 @@ class RuffConfigPanel(project: Project) {
         }
 
         ruffConfigPathField.apply {
-            addBrowseFolderListener(null, null, null, FileChooserDescriptorFactory.createSingleFileDescriptor())
+            addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             textField.isEditable = false
             textField.text = ruffConfigService.ruffConfigPath
         }
@@ -150,15 +157,17 @@ class RuffConfigPanel(project: Project) {
             ruffConfigPathField.text = ""
         }
     }
+
     private fun updateLspClientCheckBoxes() {
         val useLspClient = useRuffLspRadioButton.isSelected || useRuffServerRadioButton.isSelected
         useIntellijLspClientRadioButton.isEnabled = useLspClient && intellijLspClientSupported
         useLsp4ijRadioButton.isEnabled = useLspClient && lsp4ijSupported
     }
+
     private fun updateLspFields() {
         if (enableLspCheckBox.isSelected) {
             useLsp4ijRadioButton.isEnabled = lsp4ijSupported
-            useIntellijLspClientRadioButton.isEnabled =  intellijLspClientSupported
+            useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
             useRuffLspRadioButton.isEnabled = lspSupported
             useRuffServerRadioButton.isEnabled = lspSupported
         } else {
@@ -170,6 +179,7 @@ class RuffConfigPanel(project: Project) {
             useRuffServerRadioButton.isEnabled = false
         }
     }
+
     private fun updateLspExecutableFields() {
         val enabled = intellijLspClientSupported && useRuffLspRadioButton.isSelected
         globalRuffLspExecutablePathField.isEnabled = enabled
@@ -180,6 +190,7 @@ class RuffConfigPanel(project: Project) {
             projectRuffLspLabel.isEnabled = enabled
         }
     }
+
     private fun updateProjectExecutableFields() {
         val enabled = !alwaysUseGlobalRuffCheckBox.isSelected
         projectRuffExecutablePathField.isEnabled = enabled
@@ -189,6 +200,7 @@ class RuffConfigPanel(project: Project) {
             projectRuffLspLabel.isEnabled = enabled
         }
     }
+
     private fun setAutodetectedRuff() =
         when (val ruffExecutablePath = findGlobalRuffExecutable(false)?.absolutePath) {
             is String -> globalRuffExecutablePathField.text = ruffExecutablePath
@@ -208,8 +220,9 @@ class RuffConfigPanel(project: Project) {
         }
 
     private fun getProjectRuffExecutablePath(project: Project, lsp: Boolean): String? {
-     return project.pythonSdk?.let { findRuffExecutableInSDK(it, lsp) }?.absolutePath
+        return project.pythonSdk?.let { findRuffExecutableInSDK(it, lsp) }?.absolutePath
     }
+
     val runRuffOnSave: Boolean
         get() = runRuffOnSaveCheckBox.isSelected
     val runRuffOnReformatCode: Boolean
@@ -241,7 +254,7 @@ class RuffConfigPanel(project: Project) {
         get() = enableLspCheckBox.isSelected
 
     companion object {
-        const val RUFF_EXECUTABLE_NOT_FOUND =  "Ruff executable not found"
-        const val RUFF_LSP_EXECUTABLE_NOT_FOUND =  "Ruff-lsp executable not found"
+        const val RUFF_EXECUTABLE_NOT_FOUND = "Ruff executable not found"
+        const val RUFF_LSP_EXECUTABLE_NOT_FOUND = "Ruff-lsp executable not found"
     }
 }

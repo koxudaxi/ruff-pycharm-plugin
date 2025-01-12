@@ -36,13 +36,13 @@ dependencies {
     intellijPlatform {
         val type = properties("platformType")
         val version = properties("platformVersion")
-        val bundledPlugins = properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
+        val bundledPlugins =
+            properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
         create(type, version, useInstaller = false)
         bundledPlugins(bundledPlugins)
         val lsp4ij = libs.plugins.lsp4ij.get()
         plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
 
-        instrumentationTools()
         testFramework(TestFrameworkType.Bundled)
         pluginVerifier()
         zipSigner()
@@ -68,11 +68,11 @@ intellijPlatform {
             untilBuild = properties("pluginUntilBuild")
 
         }
-        description =  providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+        description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
             val end = "<!-- Plugin description end -->"
 
-            with (it.lines()) {
+            with(it.lines()) {
                 if (!containsAll(listOf(start, end))) {
                     throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
                 }
@@ -91,7 +91,7 @@ intellijPlatform {
         }
     }
 
-    verifyPlugin {
+    pluginVerification {
         ides {
             recommended()
         }
@@ -112,19 +112,18 @@ intellijPlatform {
 }
 
 
-// Configure Gradle Qodana Plugin - read more: https://github.com/JetBrains/gradle-qodana-plugin
+// Configure Gradle Qodana Plugin - read more: https://www.jetbrains.com/help/qodana/qodana-gradle-plugin.html#qodana+%7B+%7D+extension+configuration
 qodana {
     cachePath = provider { file(".qodana").canonicalPath }
-    reportPath = provider { file("build/reports/inspections").canonicalPath }
-    saveReport = true
-    showReport = environment("QODANA_SHOW_REPORT").map { it.toBoolean() }.getOrElse(false)
 }
 
 // Configure Gradle Kover Plugin - read more: https://github.com/Kotlin/kotlinx-kover#configuration
-koverReport {
-    defaults {
-        xml {
-            onCheck = true
+kover {
+    reports {
+        total {
+            xml {
+                onCheck = true
+            }
         }
     }
 }
