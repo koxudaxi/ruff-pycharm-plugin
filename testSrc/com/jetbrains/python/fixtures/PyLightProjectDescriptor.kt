@@ -15,7 +15,6 @@
  */
 package com.jetbrains.python.fixtures
 
-import com.intellij.testFramework.LightProjectDescriptor
 import com.intellij.openapi.projectRoots.Sdk
 import com.jetbrains.python.PythonMockSdk
 import com.intellij.openapi.vfs.VirtualFile
@@ -23,6 +22,7 @@ import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.roots.OrderRootType
+import com.intellij.testFramework.LightProjectDescriptor
 import com.jetbrains.python.psi.LanguageLevel
 
 /**

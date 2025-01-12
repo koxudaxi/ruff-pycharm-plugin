@@ -44,6 +44,7 @@ dependencies {
         plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
 
         testFramework(TestFrameworkType.Bundled)
+        testFramework(TestFrameworkType.Platform)
         pluginVerifier()
         zipSigner()
     }
