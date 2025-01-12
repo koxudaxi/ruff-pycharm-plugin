@@ -2,7 +2,7 @@
 # libraries
 tuweni = "2.3.1"
 ini4j = "0.5.4"
-kotlinxSerialization = "1.8.0"
+kotlinxSerialization = "1.7.3"
 
 # plugins
 kotlin = "2.1.0"
