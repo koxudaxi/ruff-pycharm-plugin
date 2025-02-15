@@ -22,6 +22,7 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var useRuffServer: Boolean = false
     var useRuffFormat: Boolean = false
     var enableLsp: Boolean = true
+    var enableRuffLogging: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this

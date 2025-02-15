@@ -43,6 +43,9 @@ class RuffConfigPanel(project: Project) {
     private lateinit var useRuffServerRadioButton: JRadioButton
     private lateinit var enableLspCheckBox: JCheckBox
     private lateinit var lsp4ijLinkLabel: JLabel
+    private lateinit var enableRuffLoggingCheckBox: JCheckBox
+
+
 
     init {
         val ruffConfigService = getInstance(project)
@@ -68,6 +71,8 @@ class RuffConfigPanel(project: Project) {
         disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         enableLspCheckBox.isEnabled = lspSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
+        enableRuffLoggingCheckBox.isSelected = ruffConfigService.enableRuffLogging
+
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 ShowSettingsUtil.getInstance().showSettingsDialog(
@@ -252,6 +257,8 @@ class RuffConfigPanel(project: Project) {
         get() = useRuffFormatCheckBox.isSelected
     val enableLsp: Boolean
         get() = enableLspCheckBox.isSelected
+    val enableRuffLogging: Boolean
+        get() = enableRuffLoggingCheckBox.isSelected
 
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND = "Ruff executable not found"
