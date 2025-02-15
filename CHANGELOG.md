@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- fix: improve ruff formatter [[#548](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/548)]
 - Add ruff logging console [[#547](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/547)]
 - Update dependency versions [[#538](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/538)]
 

@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile
 import java.util.*
 
 
-class RuffAsyncFormatter : AsyncDocumentFormattingService() {
+class RuffAsyncFormatterFix : AsyncDocumentFormattingService() {
     private val FEATURES: MutableSet<FormattingService.Feature> = EnumSet.noneOf(
         FormattingService.Feature::class.java
     )
@@ -43,17 +43,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         request.onTextReady(null)
                         return@runCatching
                     }
-                    if (!RuffConfigService.getInstance(formattingContext.project).useRuffFormat) {
-                        updateText(currentText, fixCommandStdout)
-                        return@runCatching
-                    }
-                    val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS)
-                    if (formatCommandArgs == null) {
-                        updateText(currentText, fixCommandStdout)
-                        return@runCatching
-                    }
-                    val formatCommandStdout = runRuff(formatCommandArgs, fixCommandStdout.toByteArray())
-                    updateText(currentText, formatCommandStdout)
+                    updateText(currentText, fixCommandStdout)
 
                 }.onFailure { exception ->
                     when (exception) {
@@ -79,6 +69,6 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
     }
 
     override fun getName(): String {
-        return "Ruff Formatter"
+        return "Ruff Formatter Fix"
     }
 }
