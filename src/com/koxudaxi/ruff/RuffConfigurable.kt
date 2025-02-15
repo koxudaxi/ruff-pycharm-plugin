@@ -2,6 +2,7 @@ package com.koxudaxi.ruff
 
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.ToolWindowManager
 import com.koxudaxi.ruff.lsp.ClientType
 import javax.swing.JComponent
 
@@ -38,7 +39,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.useLsp4ij != configPanel.useLsp4ij ||
                 ruffConfigService.useRuffFormat != configPanel.useRuffFormat ||
                 ruffConfigService.useRuffServer != configPanel.useRuffServer ||
-                ruffConfigService.enableLsp != configPanel.enableLsp
+                ruffConfigService.enableLsp != configPanel.enableLsp ||
+                ruffConfigService.enableRuffLogging != configPanel.enableRuffLogging
     }
 
     override fun apply() {
@@ -53,6 +55,17 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.globalRuffLspExecutablePath = configPanel.globalRuffLspExecutablePath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
+        if (ruffConfigService.enableRuffLogging != configPanel.enableRuffLogging) {
+            if (configPanel.enableRuffLogging) {
+                val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Ruff Logging")
+                toolWindow?.show(null)
+                RuffLoggingService.log(project, "Ruff logging has been enabled.")
+            } else {
+                RuffLoggingService.log(project, "Ruff logging has been disabled.")
+                RuffLoggingService.unregisterConsoleView(project)
+            }
+        }
+        ruffConfigService.enableRuffLogging = configPanel.enableRuffLogging
         val ruffConfigPathChanged = configPanel.ruffConfigPath != configPanel.ruffConfigPath
         val useRuffLspChanged = ruffConfigService.useRuffLsp != configPanel.useRuffLsp
         val useRuffServerChanged = ruffConfigService.useRuffServer != configPanel.useRuffServer

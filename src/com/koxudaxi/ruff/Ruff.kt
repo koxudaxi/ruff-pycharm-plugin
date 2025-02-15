@@ -8,6 +8,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.wsl.WSLCommandLineOptions
 import com.intellij.execution.wsl.WslPath
 import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
@@ -302,6 +303,8 @@ fun getGeneralCommandLine(executable: File, project: Project?, vararg args: Stri
 fun runCommand(
     executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
+    RuffLoggingService.log(project!!, "Executing: ${executable.path} ${args.joinToString(" ")}")
+
     val indicator = ProgressManager.getInstance().progressIndicator
     val handler = getGeneralCommandLine(executable, project, *args)
         ?.let { CapturingProcessHandler(it) } ?: return null
@@ -330,6 +333,10 @@ fun runCommand(
         }
     }
     return with(result) {
+        RuffLoggingService.log(project, "Command stdout: $stdout")
+        if (stderr.isNotBlank()) {
+            RuffLoggingService.log(project, "Command stderr: $stderr", ConsoleViewContentType.ERROR_OUTPUT)
+        }
         when {
             isCancelled -> throw RunCanceledByUserException()
 
