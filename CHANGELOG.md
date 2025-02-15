@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Add ruff logging console [[#547](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/547)]
 - Update dependency versions [[#538](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/538)]
 
 ## [0.0.42] - 2024-11-10
