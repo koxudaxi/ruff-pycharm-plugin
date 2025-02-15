@@ -57,17 +57,11 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
         if (ruffConfigService.enableRuffLogging != configPanel.enableRuffLogging) {
             if (configPanel.enableRuffLogging) {
-                // When logging is enabled:
-                // 1. Show the "Ruff Logging" tool window so that the ConsoleView is registered.
                 val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Ruff Logging")
                 toolWindow?.show(null)
-                // 2. Log a message indicating that logging has been enabled.
                 RuffLoggingService.log(project, "Ruff logging has been enabled.")
             } else {
-                // When logging is disabled:
-                // 1. Log a message indicating that logging is being disabled.
                 RuffLoggingService.log(project, "Ruff logging has been disabled.")
-                // 2. Unregister the ConsoleView so that logging stops.
                 RuffLoggingService.unregisterConsoleView(project)
             }
         }
