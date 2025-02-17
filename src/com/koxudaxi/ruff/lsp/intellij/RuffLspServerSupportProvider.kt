@@ -3,8 +3,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
-import com.intellij.platform.lsp.api.customization.LspCompletionSupport
+import com.intellij.platform.lsp.api.customization.*
 import com.koxudaxi.ruff.*
+import com.koxudaxi.ruff.lsp.intellij.supports.*
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -71,9 +72,16 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
 
+    override val lspHoverSupport: Boolean = true
+    override val lspCodeActionsSupport: LspCodeActionsSupport = RuffLspCodeActionsSupport()
+    override val lspFormattingSupport: LspFormattingSupport = RuffLspFormattingSupport()
+    override val lspCommandsSupport: LspCommandsSupport = LspCommandsSupport()
+    override val lspDiagnosticsSupport: LspDiagnosticsSupport = RuffLspDiagnosticsSupport()
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
+
+
 }
 
 @Suppress("UnstableApiUsage")

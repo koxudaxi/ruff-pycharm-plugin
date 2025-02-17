@@ -19,9 +19,9 @@ class RuffAsyncFormatterFormat : AsyncDocumentFormattingService() {
     }
 
     override fun canFormat(file: PsiFile): Boolean {
-        return RuffConfigService.getInstance(file.project).runRuffOnReformatCode &&
-                RuffConfigService.getInstance(file.project).useRuffFormat &&
-                file.isApplicableTo
+        val config = RuffConfigService.getInstance(file.project)
+        if (config.enableLsp && (config.useRuffLsp || config.useRuffServer)) return false
+        return config.runRuffOnReformatCode && config.useRuffFormat && file.isApplicableTo
     }
 
     override fun runAfter(): Class<out FormattingService> {
