@@ -37,7 +37,7 @@ class RuffExternalAnnotator :
     override fun collectInformation(file: PsiFile): RuffExternalAnnotatorInfo? {
         if (file !is PyFile) return null
         val project = file.project
-        val config = RuffConfigService.getInstance(project)
+        val config = project.configService
         if (lspSupported && config.enableLsp) {
             return null
             // May be too strict check

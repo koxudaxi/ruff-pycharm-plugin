@@ -18,7 +18,7 @@ class RuffLoggingToolWindowFactory : ToolWindowFactory {
 
         consoleView.print("Ruff Plugin Console Initialized\n", ConsoleViewContentType.NORMAL_OUTPUT)
         // Show current logging settings
-        RuffConfigService.getInstance(project).let {
+        project.configService.let {
             consoleView.print("Logging enabled: ${it.enableRuffLogging}\n", ConsoleViewContentType.NORMAL_OUTPUT)
         }
         RuffLoggingService.registerConsoleView(project, consoleView)

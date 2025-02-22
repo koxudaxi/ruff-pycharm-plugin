@@ -30,7 +30,7 @@ class RuffProjectInitializer : ProjectActivity {
     }
 
     private fun setUpPyProjectTomlLister(project: Project) {
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
 
         VirtualFileManager.getInstance().addAsyncFileListener(

@@ -412,7 +412,7 @@ fun generateCommandArgs(
     args: List<String>,
     withoutConfig: Boolean = false
 ): CommandArgs? {
-    val ruffConfigService = RuffConfigService.getInstance(project)
+    val ruffConfigService = project.configService
     val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
         getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
@@ -615,3 +615,4 @@ const val RUFF_TOML_SUFFIX: String = ".ruff.toml"
 private val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
 val VirtualFile.isRuffConfig: Boolean
     get() = name in RUFF_CONFIG || name.endsWith(RUFF_TOML_SUFFIX)
+val Project.configService: RuffConfigService get() = RuffConfigService.getInstance(this)

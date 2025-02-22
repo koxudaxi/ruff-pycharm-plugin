@@ -19,7 +19,7 @@ object RuffLoggingService {
 
     // Log a message to the ConsoleView for the specified project
     fun log(project: Project, message: String, contentType: ConsoleViewContentType = ConsoleViewContentType.NORMAL_OUTPUT) {
-        if (!RuffConfigService.getInstance(project).enableRuffLogging) {
+        if (!project.configService.enableRuffLogging) {
             return
         }
         consoleMap[project]?.print("$message\n", contentType)

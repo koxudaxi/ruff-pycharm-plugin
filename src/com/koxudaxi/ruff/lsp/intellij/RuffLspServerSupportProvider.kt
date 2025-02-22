@@ -6,6 +6,9 @@ import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.*
 import com.koxudaxi.ruff.*
 import com.koxudaxi.ruff.lsp.intellij.supports.*
+import com.koxudaxi.ruff.lsp.useCodeActionFeature
+import com.koxudaxi.ruff.lsp.useDiagnosticFeature
+import com.koxudaxi.ruff.lsp.useFormattingFeature
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -18,7 +21,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         file: VirtualFile,
         serverStarter: LspServerSupportProvider.LspServerStarter
     ) {
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         if (!ruffConfigService.enableLsp) return
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         if (!ruffConfigService.useIntellijLspClient) return
@@ -73,10 +76,10 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     abstract override fun createCommandLine(): GeneralCommandLine
 
     override val lspHoverSupport: Boolean = true
-    override val lspCodeActionsSupport: LspCodeActionsSupport = RuffLspCodeActionsSupport()
-    override val lspFormattingSupport: LspFormattingSupport = RuffLspFormattingSupport()
+    override val lspCodeActionsSupport: LspCodeActionsSupport? = if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
+    override val lspFormattingSupport: LspFormattingSupport? = if (project.useFormattingFeature) RuffLspFormattingSupport(project) else null
     override val lspCommandsSupport: LspCommandsSupport = LspCommandsSupport()
-    override val lspDiagnosticsSupport: LspDiagnosticsSupport = RuffLspDiagnosticsSupport()
+    override val lspDiagnosticsSupport: LspDiagnosticsSupport? = if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else null
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null

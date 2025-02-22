@@ -12,7 +12,7 @@ class RuffPackageManagerListener(private val project: Project) : PyPackageManage
 
     override fun packagesRefreshed(sdk: Sdk) {
         if (project.pythonSdk != sdk) return
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         val ruffCacheService = RuffCacheService.getInstance(project)
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
         ruffCacheService.setProjectRuffExecutablePath(findRuffExecutableInSDK(sdk, false)?.absolutePath)
