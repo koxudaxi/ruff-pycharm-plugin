@@ -20,7 +20,7 @@
         <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatterFix"/>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
-        <actionOnSave id="BlackFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
+        <actionOnSave id="RuffFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
         <toolWindow factoryClass="com.koxudaxi.ruff.RuffLoggingToolWindowFactory"
                     id="Ruff Logging"
                     anchor="bottom"

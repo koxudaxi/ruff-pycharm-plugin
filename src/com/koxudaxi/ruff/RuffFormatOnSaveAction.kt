@@ -18,7 +18,7 @@ class RuffActionOnSave : ActionOnSave() {
         for (document in documents) {
             val psiFile = psiDocumentManager.getPsiFile(document) ?: continue
             if (!psiFile.isApplicableTo) continue
-            if (ruffConfigService.disableOnSaveOutsideOfProject && !psiFile.virtualFile.isInProjectDir(project)) return
+            if (ruffConfigService.disableOnSaveOutsideOfProject && !psiFile.virtualFile.isInProjectDir(project)) continue
             ruffApplyService.apply(document, psiFile.sourceFile, withFormat)
         }
     }
