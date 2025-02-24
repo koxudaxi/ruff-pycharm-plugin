@@ -24,16 +24,19 @@ class RuffCacheService(val project: Project) {
 
     private val versionFutureRef = AtomicReference<CompletableFuture<RuffVersion?>>()
 
-    private inline fun setVersionFromCommand(crossinline action: () -> Unit) =
+    private inline fun setVersionFromCommand(crossinline action: () -> Unit) {
+        val projectRef = project
         executeOnPooledThread {
+            if (projectRef.isDisposed) return@executeOnPooledThread
             val fetchedVersion = fetchVersionFromCommand()
             setVersion(fetchedVersion)
-            if (fetchedVersion != null) {
+            if (fetchedVersion != null && !projectRef.isDisposed) {
                 action()
             } else {
                 RuffLoggingService.log(project, "Failed to fetch Ruff version, skipping post-version actions")
             }
         }
+    }
 
     private fun getOrPutVersionFromVersionCache(version: String): RuffVersion? {
         return ruffVersionCache.getOrPut(version) {
@@ -75,11 +78,15 @@ class RuffCacheService(val project: Project) {
     fun getOrPutVersion(): CompletableFuture<RuffVersion?> {
         lock.withLock {
             version?.let { return CompletableFuture.completedFuture(it) }
-            versionFutureRef.get()?.let { return it }
+            versionFutureRef.get()?.let {
+                if (!it.isDone && !it.isCancelled && !it.isCompletedExceptionally) {
+                    return it
+                }
+            }
         }
 
         val existingFuture = versionFutureRef.get()
-        if (existingFuture != null) {
+        if (existingFuture != null && !existingFuture.isDone && !existingFuture.isCancelled && !existingFuture.isCompletedExceptionally) {
             return existingFuture
         }
 
@@ -87,17 +94,24 @@ class RuffCacheService(val project: Project) {
             getApplication().executeOnPooledThread(runnable)
         }
 
+        val projectRef = project
         val newFuture = CompletableFuture.supplyAsync({
+            if (projectRef.isDisposed) return@supplyAsync null
             val newVersion = fetchVersionFromCommand()
-            lock.withLock {
-                version = newVersion
+            if (!projectRef.isDisposed) {
+                lock.withLock {
+                    version = newVersion
+                }
             }
             newVersion
         }, executor)
 
-        if (!versionFutureRef.compareAndSet(null, newFuture)) {
+        if (!versionFutureRef.compareAndSet(existingFuture, newFuture)) {
             val currentFuture = versionFutureRef.get()
-            return currentFuture ?: newFuture
+            if (currentFuture != null && !currentFuture.isDone && !currentFuture.isCancelled && !currentFuture.isCompletedExceptionally) {
+                return currentFuture
+            }
+            return newFuture
         }
 
         return newFuture
@@ -105,6 +119,7 @@ class RuffCacheService(val project: Project) {
 
     private fun fetchVersionFromCommand(): RuffVersion? {
         return try {
+            if (project.isDisposed) return null
             runRuff(project, listOf("--version"), true)
                 ?.let { getOrPutVersionFromVersionCache(it) }
         } catch (e: Exception) {

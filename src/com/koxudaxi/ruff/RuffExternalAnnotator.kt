@@ -37,6 +37,8 @@ class RuffExternalAnnotator :
     override fun collectInformation(file: PsiFile): RuffExternalAnnotatorInfo? {
         if (file !is PyFile) return null
         val project = file.project
+        if (project.isDisposed) return null
+
         val config = project.configService
         if (lspSupported && config.enableLsp) {
             return null
@@ -52,13 +54,17 @@ class RuffExternalAnnotator :
         val showRuleCode = config.showRuleCode
         val noFixArgs = project.NO_FIX_ARGS ?: return null
         val commandArgs = generateCommandArgs(file.sourceFile, noFixArgs) ?: return null
-        return RuffExternalAnnotatorInfo(showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
+        return RuffExternalAnnotatorInfo(file, showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 
     override fun doAnnotate(info: RuffExternalAnnotatorInfo?): RuffExternalAnnotatorResult? {
         if (info == null) return null
+        if (info.file.project.isDisposed) return null
+
         try {
             val response = runRuff(info.commandArgs) ?: return null
+            if (info.file.project.isDisposed) return null
+
             val result = parseJsonResponse(response)
             return RuffExternalAnnotatorResult(
                 info.showRuleCode,
@@ -74,6 +80,8 @@ class RuffExternalAnnotator :
     override fun apply(file: PsiFile, annotationResult: RuffExternalAnnotatorResult?, holder: AnnotationHolder) {
         if (annotationResult == null) return
         val project = file.project
+        if (project.isDisposed) return
+
         val showRuleCode = annotationResult.showRuleCode
         val result = annotationResult.result
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
@@ -81,11 +89,14 @@ class RuffExternalAnnotator :
 
         for (item in result) {
             try {
+                if (project.isDisposed) return
+
                 val range = document.getStartEndRange(item.location, item.endLocation, -1)
                 if (range.startOffset < 0 || range.endOffset < 0 || range.startOffset > range.endOffset ||
                     range.endOffset > document.textLength) {
                     continue
                 }
+
                 val psiElement = getPyElement(file, range) ?: continue
                 val builder = holder.newAnnotation(
                     annotationResult.highlightDisplayLevel,
@@ -124,7 +135,7 @@ class RuffExternalAnnotator :
                 }
                 builder.create()
             } catch (e: Exception) {
-                // Do nothing and continue with next item
+                // Silent error handling
             }
         }
 
@@ -164,6 +175,7 @@ class RuffExternalAnnotator :
     }
 
     data class RuffExternalAnnotatorInfo(
+        val file: PsiFile,
         val showRuleCode: Boolean,
         val highlightDisplayLevel: HighlightSeverity,
         val problemHighlightType: ProblemHighlightType,
