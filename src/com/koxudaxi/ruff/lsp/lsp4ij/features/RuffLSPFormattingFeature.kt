@@ -1,10 +1,8 @@
 package com.koxudaxi.ruff.lsp.lsp4ij.features
 
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.koxudaxi.ruff.RuffConfigService
-import com.koxudaxi.ruff.configService
 import com.koxudaxi.ruff.isApplicableTo
+import com.koxudaxi.ruff.lsp.useFormattingFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPFormattingFeature
 
 @Suppress("UnstableApiUsage")
@@ -13,5 +11,5 @@ class RuffLSPFormattingFeature : LSPFormattingFeature() {
         file.isApplicableTo
 
     override fun isEnabled(file: PsiFile): Boolean =
-        project.configService.formattingFeature
+        project.useFormattingFeature
 }

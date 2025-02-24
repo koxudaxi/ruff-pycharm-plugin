@@ -1,12 +1,9 @@
 package com.koxudaxi.ruff.lsp.lsp4ij.features
 
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.koxudaxi.ruff.RuffConfigService
-import com.koxudaxi.ruff.configService
 import com.koxudaxi.ruff.isApplicableTo
+import com.koxudaxi.ruff.lsp.useDiagnosticFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPDiagnosticFeature
-import com.redhat.devtools.lsp4ij.client.features.LSPHoverFeature
 
 @Suppress("UnstableApiUsage")
 class RuffLSPDiagnosticFeature : LSPDiagnosticFeature() {
@@ -14,5 +11,5 @@ class RuffLSPDiagnosticFeature : LSPDiagnosticFeature() {
         file.isApplicableTo
 
     override fun isEnabled(file: PsiFile): Boolean =
-    project.configService.diagnosticFeature
+    project.useDiagnosticFeature
 }

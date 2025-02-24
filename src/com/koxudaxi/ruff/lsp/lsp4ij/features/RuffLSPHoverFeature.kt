@@ -1,10 +1,8 @@
 package com.koxudaxi.ruff.lsp.lsp4ij.features
 
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
-import com.koxudaxi.ruff.RuffConfigService
-import com.koxudaxi.ruff.configService
 import com.koxudaxi.ruff.isApplicableTo
+import com.koxudaxi.ruff.lsp.useHoverFeature
 import com.redhat.devtools.lsp4ij.client.features.LSPHoverFeature
 
 @Suppress("UnstableApiUsage")
@@ -13,5 +11,5 @@ class RuffLSPHoverFeature : LSPHoverFeature() {
         file.isApplicableTo
 
     override fun isEnabled(file: PsiFile): Boolean =
-        project.configService.hoverFeature
+        project.useHoverFeature
 }

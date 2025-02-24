@@ -9,6 +9,7 @@ import com.koxudaxi.ruff.lsp.intellij.supports.*
 import com.koxudaxi.ruff.lsp.useCodeActionFeature
 import com.koxudaxi.ruff.lsp.useDiagnosticFeature
 import com.koxudaxi.ruff.lsp.useFormattingFeature
+import com.koxudaxi.ruff.lsp.useHoverFeature
 import kotlinx.serialization.Serializable
 import java.io.File
 
@@ -73,7 +74,7 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
 
-    override val lspHoverSupport: Boolean = true
+    override val lspHoverSupport: Boolean = project.useHoverFeature
     override val lspCodeActionsSupport: LspCodeActionsSupport? =
         if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
     override val lspFormattingSupport: LspFormattingSupport? =
