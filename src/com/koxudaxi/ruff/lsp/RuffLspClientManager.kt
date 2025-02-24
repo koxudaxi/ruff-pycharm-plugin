@@ -1,6 +1,9 @@
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.project.ProjectManagerListener
+import com.koxudaxi.ruff.RuffLoggingService
 import com.koxudaxi.ruff.intellijLspClientSupported
 import com.koxudaxi.ruff.lsp.ClientType
 import com.koxudaxi.ruff.lsp.RuffLspClient
@@ -20,6 +23,15 @@ class RuffLspClientManager(project: Project) {
 
     @Volatile
     private var enabledClient: RuffLspClient? = null
+
+    init {
+        project.messageBus.connect().subscribe(ProjectManager.TOPIC, object : ProjectManagerListener {
+            override fun projectClosing(project: Project) {
+                RuffLoggingService.log(project, "Stopping LSP clients due to project closing")
+                stop()
+            }
+        })
+    }
 
     fun hasClient(): Boolean {
         return enabledClient != null
@@ -60,6 +72,7 @@ class RuffLspClientManager(project: Project) {
         ApplicationManager.getApplication().invokeLater {
             ApplicationManager.getApplication().runWriteAction {
                 enabledClient?.stop()
+                enabledClient = null
             }
         }
     }

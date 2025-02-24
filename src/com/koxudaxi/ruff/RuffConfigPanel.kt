@@ -183,6 +183,10 @@ class RuffConfigPanel(project: Project) {
             useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
             useRuffLspRadioButton.isEnabled = lspSupported
             useRuffServerRadioButton.isEnabled = lspSupported
+            hoverFeatureCheckBox.isEnabled = true
+            codeActionFeatureCheckBox.isEnabled = true
+            formattingFeatureCheckBox.isEnabled = true
+            diagnosticFeatureCheckBox.isEnabled = true
         } else {
             updateLspClientCheckBoxes()
             updateLspExecutableFields()
@@ -190,6 +194,10 @@ class RuffConfigPanel(project: Project) {
             useIntellijLspClientRadioButton.isEnabled = false
             useRuffLspRadioButton.isEnabled = false
             useRuffServerRadioButton.isEnabled = false
+            hoverFeatureCheckBox.isEnabled = false
+            codeActionFeatureCheckBox.isEnabled = false
+            formattingFeatureCheckBox.isEnabled = false
+            diagnosticFeatureCheckBox.isEnabled = false
         }
     }
 
