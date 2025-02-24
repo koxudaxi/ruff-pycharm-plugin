@@ -1,7 +1,7 @@
 package com.koxudaxi.ruff
 
 import com.intellij.credentialStore.toByteArrayAndClear
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.CommandProcessor
@@ -57,14 +57,16 @@ class RuffApplyService(val project: Project) {
         try {
             val projectRef = project
 
-            val checkedFixed = runReadActionOnPooledThread(null) {
+            val checkedFixed = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null
+                RuffLoggingService.log(projectRef, "Applying Ruff fix to ${sourceFile.name}")
 
                 try {
                     val fixed = runRuff(sourceFile, projectRef.FIX_ARGS)
                     if (projectRef.isDisposed) return@runReadActionOnPooledThread null
                     checkFixResult(sourceFile, fixed)
                 } catch (e: Exception) {
+                    RuffLoggingService.log(projectRef, "Error applying fix: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
                     null
                 }
             }
@@ -90,8 +92,9 @@ class RuffApplyService(val project: Project) {
             ) ?: return
 
             if (projectRef.isDisposed) return
+            RuffLoggingService.log(projectRef, "Applying Ruff format to ${sourceFile.name}")
 
-            val formatResult = runReadActionOnPooledThread(null) {
+            val formatResult = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null
 
                 try {
@@ -99,6 +102,7 @@ class RuffApplyService(val project: Project) {
                     if (projectRef.isDisposed) return@runReadActionOnPooledThread null
                     checkFormatResult(sourceFile, formatted)
                 } catch (e: Exception) {
+                    RuffLoggingService.log(projectRef, "Error applying format: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
                     null
                 }
             }
@@ -109,7 +113,7 @@ class RuffApplyService(val project: Project) {
                 write(document, sourceFile, formatResult)
             }
         } catch (e: Exception) {
-            // Silent error handling
+            RuffLoggingService.log(project, "Unexpected error in apply: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
         }
     }
 

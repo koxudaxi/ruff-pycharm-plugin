@@ -5,23 +5,49 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.startup.ProjectActivity
+import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.vfs.AsyncFileListener
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.newvfs.events.*
 import com.intellij.serviceContainer.AlreadyDisposedException
+import com.koxudaxi.ruff.lsp.ClientType
 
 class RuffProjectInitializer : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) return
         if (project.isDisposed) return
+
         DumbService.getInstance(project).smartInvokeLater {
             try {
-                RuffCacheService.getInstance(project).getOrPutVersion()
-                if (lspSupported) {
-                    setUpPyProjectTomlLister(project)
+                if (project.isDisposed) return@smartInvokeLater
+
+                RuffCacheService.getInstance(project).getOrPutVersion().thenAccept { version ->
+                    if (project.isDisposed) return@thenAccept
+
+                    if (lspSupported) {
+                        val ruffConfigService = project.configService
+                        if (ruffConfigService.enableLsp) {
+                            ApplicationManager.getApplication().invokeLater {
+                                if (project.isDisposed) return@invokeLater
+
+                                val ruffLspClientManager = RuffLspClientManager.getInstance(project)
+                                if (ruffConfigService.useLsp4ij) {
+                                    ruffLspClientManager.setClient(ClientType.LSP4IJ, true)
+                                } else {
+                                    ruffLspClientManager.setClient(ClientType.INTELLIJ, true)
+                                }
+
+                                RuffLoggingService.log(project, "LSP client initialized during project startup")
+                            }
+                        }
+
+                        setUpPyProjectTomlLister(project)
+                    }
                 }
             } catch (_: AlreadyDisposedException) {
+            } catch (e: Exception) {
+                RuffLoggingService.log(project, "Error initializing Ruff: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
             }
         }
     }

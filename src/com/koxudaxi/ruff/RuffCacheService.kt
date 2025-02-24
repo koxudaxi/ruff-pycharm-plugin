@@ -41,14 +41,12 @@ class RuffCacheService(val project: Project) {
     private fun getOrPutVersionFromVersionCache(version: String): RuffVersion? {
         return ruffVersionCache.getOrPut(version) {
             try {
-                val versionList =
-                    version.trimEnd().split(" ").lastOrNull()?.split(".")?.map { it.toIntOrNull() ?: 0 } ?: return null
-                when {
-                    versionList.size == 1 -> RuffVersion(versionList[0])
-                    versionList.size == 2 -> RuffVersion(versionList[0], versionList[1])
-                    versionList.size >= 3 -> RuffVersion(versionList[0], versionList[1], versionList[2])
-                    else -> null
-                }
+                val versionRegex = Regex("""(\d+)\.(\d+)(?:\.(\d+))?""")
+                val match = versionRegex.find(version.trim()) ?: return null
+                val major = match.groupValues[1].toIntOrNull() ?: 0
+                val minor = match.groupValues[2].toIntOrNull() ?: 0
+                val patch = if (match.groupValues.size > 3 && match.groupValues[3].isNotEmpty()) match.groupValues[3].toIntOrNull() ?: 0 else 0
+                return RuffVersion(major, minor, patch)
             } catch (e: Exception) {
                 null
             }
@@ -85,11 +83,6 @@ class RuffCacheService(val project: Project) {
             }
         }
 
-        val existingFuture = versionFutureRef.get()
-        if (existingFuture != null && !existingFuture.isDone && !existingFuture.isCancelled && !existingFuture.isCompletedExceptionally) {
-            return existingFuture
-        }
-
         val executor = Executor { runnable ->
             getApplication().executeOnPooledThread(runnable)
         }
@@ -106,12 +99,12 @@ class RuffCacheService(val project: Project) {
             newVersion
         }, executor)
 
-        if (!versionFutureRef.compareAndSet(existingFuture, newFuture)) {
-            val currentFuture = versionFutureRef.get()
+        lock.withLock {
+            val currentFuture = versionFutureRef.getAndSet(newFuture)
             if (currentFuture != null && !currentFuture.isDone && !currentFuture.isCancelled && !currentFuture.isCompletedExceptionally) {
+                versionFutureRef.set(currentFuture)
                 return currentFuture
             }
-            return newFuture
         }
 
         return newFuture

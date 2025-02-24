@@ -313,21 +313,57 @@ fun getGeneralCommandLine(executable: File, project: Project?, vararg args: Stri
         return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }
 
-    val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
-    val configArgIndex = args.indexOf(CONFIG_ARG)
-    val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
-        val configPathIndex = configArgIndex + 1
-        val configPath = args[configPathIndex]
-        val windowsUncConfigPath = WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
-        args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
-    } else {
-        args
+    try {
+        val windowsUncPath = WslPath.parseWindowsUncPath(executable.path)
+        if (windowsUncPath == null) {
+            RuffLoggingService.log(
+                project,
+                "Failed to parse WSL path: ${executable.path}",
+                ConsoleViewContentType.ERROR_OUTPUT
+            )
+
+            return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+        }
+
+        val configArgIndex = args.indexOf(CONFIG_ARG)
+        val injectedArgs = if (configArgIndex != -1 && configArgIndex < args.size - 1) {
+            val configPathIndex = configArgIndex + 1
+            val configPath = args[configPathIndex]
+
+            val windowsUncConfigPath = try {
+                WslPath.parseWindowsUncPath(configPath)?.linuxPath ?: configPath
+            } catch (e: Exception) {
+                RuffLoggingService.log(
+                    project,
+                    "Error parsing config path: ${e.message}",
+                    ConsoleViewContentType.ERROR_OUTPUT
+                )
+                configPath
+            }
+
+            args.toMutableList().apply { this[configPathIndex] = windowsUncConfigPath }.toTypedArray()
+        } else {
+            args
+        }
+
+        val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs.toList(), projectPath)
+        val options = WSLCommandLineOptions()
+        options.setExecuteCommandInShell(false)
+        options.setLaunchWithWslExe(true)
+        return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
+    } catch (e: Exception) {
+        RuffLoggingService.log(project, "WSL command line error: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
+
+        try {
+            return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+        } catch (e2: Exception) {
+            RuffLoggingService.log(
+                project, "Failed to create fallback command line: ${e2.message}",
+                ConsoleViewContentType.ERROR_OUTPUT
+            )
+            return null
+        }
     }
-    val commandLine = getGeneralCommandLine(listOf(windowsUncPath.linuxPath) + injectedArgs, projectPath)
-    val options = WSLCommandLineOptions()
-    options.setExecuteCommandInShell(false)
-    options.setLaunchWithWslExe(true)
-    return windowsUncPath.distribution.patchCommandLine<GeneralCommandLine>(commandLine, project, options)
 }
 
 fun runCommand(
@@ -339,28 +375,32 @@ fun runCommand(
     val handler = getGeneralCommandLine(executable, project, *args)
         ?.let { CapturingProcessHandler(it) } ?: return null
 
-    val result = with(handler) {
-        if (stdin is ByteArray) {
-            with(processInput) {
-                try {
-                    write(stdin)
-                    close()
-                } catch (_: IOException) {
-                    throw RunCanceledByUserException()
-                } catch (_: IOError) {
-                    throw RunCanceledByUserException()
+    val result = try {
+        with(handler) {
+            if (stdin is ByteArray) {
+                with(processInput) {
+                    try {
+                        write(stdin)
+                        close()
+                    } catch (_: IOException) {
+                        throw RunCanceledByUserException()
+                    } catch (_: IOError) {
+                        throw RunCanceledByUserException()
+                    }
                 }
             }
-        }
 
-        when {
-            indicator != null -> {
-                addProcessListener(IndicatedProcessOutputListener(indicator))
-                runProcessWithProgressIndicator(indicator)
+            when {
+                indicator != null -> {
+                    addProcessListener(IndicatedProcessOutputListener(indicator))
+                    runProcessWithProgressIndicator(indicator)
+                }
+
+                else -> runProcess()
             }
-
-            else -> runProcess()
         }
+    } finally {
+        handler.destroyProcess()
     }
     return with(result) {
         RuffLoggingService.log(project, "Command stdout: $stdout")
@@ -524,9 +564,10 @@ inline fun <reified T> runRuffInBackground(
 }
 
 inline fun <reified T> executeOnPooledThread(
+    project: Project,
     defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
 ): T {
-    return try {
+    val future = try {
         ApplicationManager.getApplication().executeOnPooledThread<T> {
             try {
                 action.invoke()
@@ -535,16 +576,32 @@ inline fun <reified T> executeOnPooledThread(
             } catch (e: ProcessNotCreatedException) {
                 defaultResult
             }
-        }.get(timeoutSeconds, TimeUnit.SECONDS)
+        }
+    } catch (e: Exception) {
+        return defaultResult
+    }
+
+    return try {
+        future.get(timeoutSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
+        RuffLoggingService.log(
+            project,
+            "Task timed out after $timeoutSeconds seconds",
+            ConsoleViewContentType.ERROR_OUTPUT
+        )
+        future.cancel(true)
+        defaultResult
+    } catch (e: Exception) {
+        future.cancel(true)
         defaultResult
     }
 }
 
 inline fun <reified T> runReadActionOnPooledThread(
+    project: Project,
     defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
 ): T = ApplicationManager.getApplication().runReadAction<T> {
-    executeOnPooledThread(defaultResult, timeoutSeconds, action)
+    executeOnPooledThread(project, defaultResult, timeoutSeconds, action)
 }
 
 
