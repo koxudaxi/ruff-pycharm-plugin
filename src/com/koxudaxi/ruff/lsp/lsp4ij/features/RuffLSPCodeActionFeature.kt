@@ -1,0 +1,15 @@
+package com.koxudaxi.ruff.lsp.lsp4ij.features
+
+import com.intellij.psi.PsiFile
+import com.koxudaxi.ruff.isApplicableTo
+import com.koxudaxi.ruff.lsp.useCodeActionFeature
+import com.redhat.devtools.lsp4ij.client.features.LSPCodeActionFeature
+
+@Suppress("UnstableApiUsage")
+class RuffLSPCodeActionFeature : LSPCodeActionFeature() {
+    override fun isSupported(file: PsiFile): Boolean =
+        file.isApplicableTo
+
+    override fun isEnabled(file: PsiFile): Boolean =
+        project.useCodeActionFeature
+}

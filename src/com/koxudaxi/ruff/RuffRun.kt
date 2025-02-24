@@ -11,8 +11,7 @@ class RuffRun : AnAction() {
         val psiFile = e.getData(PSI_FILE) ?: return
         if (!psiFile.isApplicableTo) return
         val project = psiFile.project
-        val ruffConfigService = RuffConfigService.getInstance(psiFile.project)
-        val withFormat = ruffConfigService.useRuffFormat && RuffCacheService.hasFormatter(project)
+        val withFormat = project.configService.useRuffFormat && RuffCacheService.hasFormatter(project)
         RuffApplyService.getInstance(psiFile.project).apply(psiFile, withFormat)
     }
 

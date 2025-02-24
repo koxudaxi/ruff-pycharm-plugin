@@ -17,10 +17,7 @@ class RuffProjectInitializer : ProjectActivity {
         if (project.isDisposed) return
         DumbService.getInstance(project).smartInvokeLater {
             try {
-                val ruffCacheService = RuffCacheService.getInstance(project)
-                if (ruffCacheService.getVersion() == null) {
-                    ruffCacheService.setVersion{}
-                }
+                RuffCacheService.getInstance(project).getOrPutVersion()
                 if (lspSupported) {
                     setUpPyProjectTomlLister(project)
                 }
@@ -30,9 +27,6 @@ class RuffProjectInitializer : ProjectActivity {
     }
 
     private fun setUpPyProjectTomlLister(project: Project) {
-        val ruffConfigService = RuffConfigService.getInstance(project)
-        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
-
         VirtualFileManager.getInstance().addAsyncFileListener(
             { events ->
                 object : AsyncFileListener.ChangeApplier {
@@ -53,8 +47,9 @@ class RuffProjectInitializer : ProjectActivity {
                             ) return
                             ApplicationManager.getApplication().invokeLater {
                                 if (project.isDisposed) return@invokeLater
+                                val ruffLspClientManager = RuffLspClientManager.getInstance(project)
                                 if (!ruffLspClientManager.hasClient()) return@invokeLater
-                                if (!ruffConfigService.enableLsp) {
+                                if (!project.configService.enableLsp) {
                                     ruffLspClientManager.stop()
                                 } else {
                                     ruffLspClientManager.restart()

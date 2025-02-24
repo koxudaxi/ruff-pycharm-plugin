@@ -7,12 +7,11 @@ import com.intellij.psi.PsiDocumentManager
 
 class RuffActionOnSave : ActionOnSave() {
     override fun isEnabledForProject(project: Project): Boolean {
-        val ruffConfigService = RuffConfigService.getInstance(project)
-        return ruffConfigService.runRuffOnSave
+        return project.configService.runRuffOnSave
     }
     override fun processDocuments(project: Project, documents: Array<Document>) {
         val ruffApplyService = RuffApplyService.getInstance(project)
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         val ruffCacheService = RuffCacheService.getInstance(project)
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         val withFormat = ruffConfigService.useRuffFormat && ruffCacheService.hasFormatter()

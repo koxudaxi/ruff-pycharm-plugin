@@ -7,7 +7,7 @@ import com.redhat.devtools.lsp4ij.server.ProcessStreamConnectionProvider
 
 class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
     init {
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         val commands = createCommand(project, ruffConfigService)
         if (commands != null) {
             if (ruffConfigService.useRuffFormat) {
@@ -27,7 +27,6 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
         if (!isInspectionEnabled(project)) return null
 
         val ruffCacheService = RuffCacheService.getInstance(project)
-        if (ruffCacheService.getVersion() == null) return null
 
         val (ruffFile, args) = when {
                 ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {

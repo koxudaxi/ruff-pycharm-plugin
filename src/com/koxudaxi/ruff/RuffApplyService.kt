@@ -5,7 +5,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.CommandProcessor
-import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.command.undo.UndoManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Document
@@ -20,50 +19,98 @@ class RuffApplyService(val project: Project) {
     private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
 
     fun apply(psiFile: PsiFile, withFormat: Boolean) {
+        if (project.isDisposed) return
         val document = psiDocumentManager.getDocument(psiFile) ?: return
         apply(document, psiFile.sourceFile, withFormat)
     }
 
     private fun write(document: Document, sourceFile: SourceFile, formatted: String) {
+        if (formatted.isEmpty() || project.isDisposed) return
+
+        val projectRef = project
         runInEdt {
+            if (projectRef.isDisposed) return@runInEdt
+
             runWriteAction {
+                if (projectRef.isDisposed) return@runWriteAction
+
                 CommandProcessor.getInstance().runUndoTransparentAction {
-                    if (!undoManager.isUndoInProgress && sourceFile.hasSameContentAsDocument(document)) {
-                        document.setText(formatted)
+                    try {
+                        if (!undoManager.isUndoInProgress &&
+                            !projectRef.isDisposed &&
+                            sourceFile.hasSameContentAsDocument(document)) {
+                            document.setText(formatted)
+                        }
+                    } catch (e: Exception) {
+                        // Silent error handling
                     }
                 }
             }
         }
     }
+
     val actionName = "Formatting with Ruff"
+
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
-        val checkedFixed = runReadActionOnPooledThread(null) {
-            val fixed = runRuff(sourceFile, project.FIX_ARGS)
-            checkFixResult(sourceFile, fixed)
+        if (project.isDisposed) return
 
-        }
+        try {
+            val projectRef = project
 
-        if (!withFormat) {
-            if (checkedFixed is String) {
-                write(document, sourceFile, checkedFixed)
+            val checkedFixed = runReadActionOnPooledThread(null) {
+                if (projectRef.isDisposed) return@runReadActionOnPooledThread null
+
+                try {
+                    val fixed = runRuff(sourceFile, projectRef.FIX_ARGS)
+                    if (projectRef.isDisposed) return@runReadActionOnPooledThread null
+                    checkFixResult(sourceFile, fixed)
+                } catch (e: Exception) {
+                    null
+                }
             }
-            return
-        }
 
-        val sourceByte = when {
-            checkedFixed is String -> checkedFixed.toCharArray().toByteArrayAndClear()
-            else -> sourceFile.asStdin
-        }
-        val formatCommandArgs = generateCommandArgs(
+            if (projectRef.isDisposed) return
+
+            if (!withFormat) {
+                if (checkedFixed is String && checkedFixed.isNotEmpty()) {
+                    write(document, sourceFile, checkedFixed)
+                }
+                return
+            }
+
+            val sourceByte = when {
+                checkedFixed is String && checkedFixed.isNotEmpty() -> checkedFixed.toCharArray().toByteArrayAndClear()
+                else -> sourceFile.asStdin
+            } ?: return
+
+            val formatCommandArgs = generateCommandArgs(
                 sourceFile.project,
                 sourceByte,
                 FORMAT_ARGS
-        )
-        val formatResult = runReadActionOnPooledThread(null) {
-            val formatted = formatCommandArgs?.let { runRuff(it) }
-            checkFormatResult(sourceFile, formatted)
-        } ?: return
-        write(document, sourceFile, formatResult)
+            ) ?: return
+
+            if (projectRef.isDisposed) return
+
+            val formatResult = runReadActionOnPooledThread(null) {
+                if (projectRef.isDisposed) return@runReadActionOnPooledThread null
+
+                try {
+                    val formatted = formatCommandArgs.let { runRuff(it) }
+                    if (projectRef.isDisposed) return@runReadActionOnPooledThread null
+                    checkFormatResult(sourceFile, formatted)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            if (projectRef.isDisposed) return
+
+            if (formatResult is String && formatResult.isNotEmpty()) {
+                write(document, sourceFile, formatResult)
+            }
+        } catch (e: Exception) {
+            // Silent error handling
+        }
     }
 
     companion object {

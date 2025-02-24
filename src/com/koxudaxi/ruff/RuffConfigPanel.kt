@@ -44,6 +44,10 @@ class RuffConfigPanel(project: Project) {
     private lateinit var enableLspCheckBox: JCheckBox
     private lateinit var lsp4ijLinkLabel: JLabel
     private lateinit var enableRuffLoggingCheckBox: JCheckBox
+    private lateinit var codeActionFeatureCheckBox: JCheckBox
+    private lateinit var formattingFeatureCheckBox: JCheckBox
+    private lateinit var diagnosticFeatureCheckBox: JCheckBox
+    private lateinit var hoverFeatureCheckBox: JCheckBox
 
 
 
@@ -72,6 +76,10 @@ class RuffConfigPanel(project: Project) {
         enableLspCheckBox.isEnabled = lspSupported
         enableLspCheckBox.isSelected = ruffConfigService.enableLsp
         enableRuffLoggingCheckBox.isSelected = ruffConfigService.enableRuffLogging
+        codeActionFeatureCheckBox.isSelected = ruffConfigService.codeActionFeature
+        formattingFeatureCheckBox.isSelected = ruffConfigService.formattingFeature
+        diagnosticFeatureCheckBox.isSelected = ruffConfigService.diagnosticFeature
+        hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
 
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
@@ -259,7 +267,14 @@ class RuffConfigPanel(project: Project) {
         get() = enableLspCheckBox.isSelected
     val enableRuffLogging: Boolean
         get() = enableRuffLoggingCheckBox.isSelected
-
+    val codeActionFeature: Boolean
+        get() = codeActionFeatureCheckBox.isSelected
+    val formattingFeature: Boolean
+        get() = formattingFeatureCheckBox.isSelected
+    val diagnosticFeature: Boolean
+        get() = diagnosticFeatureCheckBox.isSelected
+    val hoverFeature: Boolean
+        get() = hoverFeatureCheckBox.isSelected
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND = "Ruff executable not found"
         const val RUFF_LSP_EXECUTABLE_NOT_FOUND = "Ruff-lsp executable not found"

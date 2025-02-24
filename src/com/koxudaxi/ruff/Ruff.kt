@@ -63,6 +63,8 @@ const val WSL_RUFF_LSP_COMMAND = "ruff-lsp"
 
 const val CONFIG_ARG = "--config"
 
+val SUPPORTED_FILE_EXTENSIONS = listOf("py", "pyi")
+
 val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
 
 fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
@@ -75,7 +77,8 @@ val SCRIPT_DIR = when {
     else -> "bin"
 }
 
-fun getUserSiteRuffPath(lsp: Boolean) = PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + getRuffCommand(lsp)
+fun getUserSiteRuffPath(lsp: Boolean) =
+    PythonSdkUtil.getUserSite() + File.separator + "bin" + File.separator + getRuffCommand(lsp)
 
 
 val json = Json { ignoreUnknownKeys = true }
@@ -108,7 +111,7 @@ val Project.FIX_ARGS: List<String>
 
 val Project.NO_FIX_ARGS: List<String>?
     get() = when (RuffCacheService.hasOutputFormat(this)) {
-        true ->  NO_FIX_OUTPUT_FORMAT_ARGS
+        true -> NO_FIX_OUTPUT_FORMAT_ARGS
         false -> NO_FIX_FORMAT_ARGS
         else -> null
     }?.let {
@@ -142,14 +145,14 @@ val intellijLspClientSupported: Boolean
             return intellijLspClientSupportedValue as Boolean
         }
         return try {
-                @Suppress("UnstableApiUsage")
-                LspServerSupportProvider
-                intellijLspClientSupportedValue = true
-                true
-            } catch (e: NoClassDefFoundError) {
-                intellijLspClientSupportedValue = false
-                false
-            }
+            @Suppress("UnstableApiUsage")
+            LspServerSupportProvider
+            intellijLspClientSupportedValue = true
+            true
+        } catch (e: NoClassDefFoundError) {
+            intellijLspClientSupportedValue = false
+            false
+        }
     }
 
 private var lsp4ijSupportedValue: Boolean? = null
@@ -170,7 +173,12 @@ val lsp4ijSupported: Boolean
 
 val lspSupported: Boolean get() = intellijLspClientSupported || lsp4ijSupported
 
-fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
+fun detectRuffExecutable(
+    project: Project,
+    ruffConfigService: RuffConfigService,
+    lsp: Boolean,
+    ruffCacheService: RuffCacheService
+): File? {
     project.pythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
@@ -181,13 +189,13 @@ fun detectRuffExecutable(project: Project, ruffConfigService: RuffConfigService,
         it
     }?.let { return it }
 
-    when(lsp) {
+    when (lsp) {
         true -> ruffConfigService.globalRuffLspExecutablePath
         false -> ruffConfigService.globalRuffExecutablePath
     }?.let { File(it) }?.takeIf { it.exists() }?.let { return it }
 
     return findGlobalRuffExecutable(lsp).let {
-        when(lsp) {
+        when (lsp) {
             true -> ruffConfigService.globalRuffLspExecutablePath = it?.absolutePath
             false -> ruffConfigService.globalRuffExecutablePath = it?.absolutePath
         }
@@ -201,28 +209,36 @@ fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
             val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
-            val distribution = (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution ?: return null
+            val distribution =
+                (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution
+                    ?: return null
             val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
             File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp))
         }
-       (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
-           when {
-               SystemInfo.isWindows -> sdk.homeDirectory?.parent // {python_dir}/python.exe
-               else -> sdk.homeDirectory?.parent?.parent // {python_dir}/bin/python
-           }?.path?.let { getRuffExecutableInConda(it, lsp) }
+
+        (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
+            when {
+                SystemInfo.isWindows -> sdk.homeDirectory?.parent // {python_dir}/python.exe
+                else -> sdk.homeDirectory?.parent?.parent // {python_dir}/bin/python
+            }?.path?.let { getRuffExecutableInConda(it, lsp) }
+
         else -> {
             val parent = sdk.homeDirectory?.parent?.path
-            parent?.let {  File(it, getRuffCommand(lsp)) }}
+            parent?.let { File(it, getRuffCommand(lsp)) }
+        }
     }?.takeIf { it.exists() }
 }
+
 fun findRuffExecutableInUserSite(lsp: Boolean): File? = File(getUserSiteRuffPath(lsp)).takeIf { it.exists() }
 
 fun getRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File {
-   return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp))
+    return File(condaHomeDir + File.separator + SCRIPT_DIR + File.separator, getRuffCommand(lsp))
 }
+
 fun findRuffExecutableInConda(condaHomeDir: String, lsp: Boolean): File? {
     return getRuffExecutableInConda(condaHomeDir, lsp).takeIf { it.exists() }
 }
+
 fun findRuffExecutableInConda(lsp: Boolean): File? {
     val condaExecutable = PyCondaPackageService.getCondaExecutable(null) ?: return null
     val condaDir = File(condaExecutable).parentFile.parent
@@ -230,7 +246,9 @@ fun findRuffExecutableInConda(lsp: Boolean): File? {
 }
 
 fun findGlobalRuffExecutable(lsp: Boolean): File? =
-    PathEnvironmentVariableUtil.findInPath(if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND) ?: findRuffExecutableInUserSite(lsp)
+    PathEnvironmentVariableUtil.findInPath(if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND) ?: findRuffExecutableInUserSite(
+        lsp
+    )
     ?: findRuffExecutableInConda(lsp)
 
 val PsiFile.isApplicableTo: Boolean
@@ -238,14 +256,22 @@ val PsiFile.isApplicableTo: Boolean
         InjectedLanguageManager.getInstance(project).isInjectedFragment(this) -> false
         else -> language.isKindOf(PythonLanguage.getInstance())
     }
+val VirtualFile.isApplicableTo: Boolean
+    get() = this.extension in SUPPORTED_FILE_EXTENSIONS
 
-fun getRuffExecutable(project: Project, ruffConfigService: RuffConfigService, lsp: Boolean, ruffCacheService: RuffCacheService): File? {
+fun getRuffExecutable(
+    project: Project,
+    ruffConfigService: RuffConfigService,
+    lsp: Boolean,
+    ruffCacheService: RuffCacheService
+): File? {
     with(ruffConfigService) {
         return when {
             lsp -> when {
                 alwaysUseGlobalRuff -> globalRuffLspExecutablePath
                 else -> ruffCacheService.getProjectRuffLspExecutablePath() ?: globalRuffLspExecutablePath
             }
+
             else -> when {
                 alwaysUseGlobalRuff -> globalRuffExecutablePath
                 else -> ruffCacheService.getProjectRuffExecutablePath() ?: globalRuffExecutablePath
@@ -268,10 +294,14 @@ fun isInspectionEnabled(project: Project): Boolean {
         .find { it.shortName == RuffInspection.INSPECTION_SHORT_NAME } ?: return false
     return inspectionProfileManager.currentProfile.isToolEnabled(toolWrapper.displayKey)
 }
+
 fun runCommand(
     commandArgs: CommandArgs, stdin: ByteArray? = null
 ): String? = runCommand(
-    commandArgs.executable, commandArgs.project,  if (stdin is ByteArray) stdin else commandArgs.stdin, *commandArgs.args.toTypedArray()
+    commandArgs.executable,
+    commandArgs.project,
+    if (stdin is ByteArray) stdin else commandArgs.stdin,
+    *commandArgs.args.toTypedArray()
 )
 
 private fun getGeneralCommandLine(command: List<String>, projectPath: String?): GeneralCommandLine =
@@ -280,7 +310,7 @@ private fun getGeneralCommandLine(command: List<String>, projectPath: String?): 
 fun getGeneralCommandLine(executable: File, project: Project?, vararg args: String): GeneralCommandLine? {
     val projectPath = project?.basePath ?: return null
     if (!WslPath.isWslUncPath(executable.path)) {
-        return  getGeneralCommandLine(listOf(executable.path) + args, projectPath)
+        return getGeneralCommandLine(listOf(executable.path) + args, projectPath)
     }
 
     val windowsUncPath = WslPath.parseWindowsUncPath(executable.path) ?: return null
@@ -345,12 +375,16 @@ fun runCommand(
                     stderr.startsWith("error: TOML parse error at line ", ignoreCase = false) -> {
                         throw TOMLParseException()
                     }
+
                     stderr.startsWith("error: unexpected argument '--output-format' found", ignoreCase = false) -> {
                         throw UnexpectedNewArgumentException(NewArgument.OUTPUT_FORMAT)
                     }
-                    Regex("(-|format):\\d+:\\d+: E902 No such file or directory \\(os error 2\\)\n").findAll(stdout).count() == 2-> {
+
+                    Regex("(-|format):\\d+:\\d+: E902 No such file or directory \\(os error 2\\)\n").findAll(stdout)
+                        .count() == 2 -> {
                         throw UnexpectedNewArgumentException(NewArgument.FORMAT)
                     }
+
                     else -> throw PyExecutionException(
                         "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
                     )
@@ -362,7 +396,11 @@ fun runCommand(
     }
 }
 
-data class SourceFile(private val psiFile: PsiFile, private val textRange: TextRange? = null,private val reloadText: Boolean = false) {
+data class SourceFile(
+    private val psiFile: PsiFile,
+    private val textRange: TextRange? = null,
+    private val reloadText: Boolean = false
+) {
     val text: String? by lazy {
         val text = when (reloadText) {
             true -> documentationManager.getDocument(psiFile)?.text
@@ -384,14 +422,14 @@ data class SourceFile(private val psiFile: PsiFile, private val textRange: TextR
 
 val PsiFile.sourceFile: SourceFile get() = SourceFile(this)
 
-fun PsiFile.getSourceFile(textRange: TextRange? = null, reloadText: Boolean = false): SourceFile = SourceFile(this, textRange, reloadText)
+fun PsiFile.getSourceFile(textRange: TextRange? = null, reloadText: Boolean = false): SourceFile =
+    SourceFile(this, textRange, reloadText)
 
 fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
-        generateCommandArgs(sourceFile, args)?.let { runRuff(it) }
+    generateCommandArgs(sourceFile, args)?.let { runRuff(it) }
 
 fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false): String? =
     generateCommandArgs(project, null, args, withoutConfig)?.let { runRuff(it) }
-
 
 
 data class CommandArgs(
@@ -412,7 +450,7 @@ fun generateCommandArgs(
     args: List<String>,
     withoutConfig: Boolean = false
 ): CommandArgs? {
-    val ruffConfigService = RuffConfigService.getInstance(project)
+    val ruffConfigService = project.configService
     val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
         getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
@@ -434,6 +472,7 @@ enum class NewArgument(val argument: String) {
     OUTPUT_FORMAT("--output-format"),
     FORMAT("--format")
 }
+
 open class UnexpectedArgumentException(argument: String) : ExecutionException("Unexpected argument: $argument")
 class UnexpectedNewArgumentException(newArgument: NewArgument) : UnexpectedArgumentException(newArgument.argument)
 
@@ -449,7 +488,6 @@ fun runRuff(commandArgs: CommandArgs, stdin: ByteArray? = null): String? {
         null
     }
 }
-
 
 
 inline fun <reified T> runRuffInBackground(
@@ -504,13 +542,13 @@ inline fun <reified T> executeOnPooledThread(
 }
 
 inline fun <reified T> runReadActionOnPooledThread(
-        defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
+    defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
 ): T = ApplicationManager.getApplication().runReadAction<T> {
     executeOnPooledThread(defaultResult, timeoutSeconds, action)
 }
 
 
-inline fun executeOnPooledThread(crossinline action: () -> Unit) {
+inline fun executeOnPooledThread(crossinline action: () -> Unit) =
     ApplicationManager.getApplication().executeOnPooledThread {
         try {
             action.invoke()
@@ -518,7 +556,7 @@ inline fun executeOnPooledThread(crossinline action: () -> Unit) {
         } catch (_: ProcessNotCreatedException) {
         }
     }
-}
+
 
 fun parseJsonResponse(response: String): List<Result> = try {
     json.decodeFromString(response)
@@ -595,7 +633,9 @@ val NOQA_COMMENT_PATTERN: Pattern = Pattern.compile(
     "# noqa(?::[\\s]?(?<codes>([A-Z]+[0-9]+(?:[,\\s]+)?)+))?.*",
     Pattern.CASE_INSENSITIVE
 )
+
 data class NoqaCodes(val codes: List<String>?, val noqaStartOffset: Int, val noqaEndOffset: Int)
+
 fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
     val commentText = comment.text ?: return null
     val noqaOffset = commentText.lowercase().indexOf("# noqa")
@@ -605,8 +645,9 @@ fun extractNoqaCodes(comment: PsiComment): NoqaCodes? {
     if (!matcher.find()) {
         return NoqaCodes(null, noqaStartOffset, noqaStartOffset + "# noqa".length)
     }
-    val codes = matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
-    return NoqaCodes(codes, noqaStartOffset,noqaStartOffset + matcher.end())
+    val codes =
+        matcher.group("codes")?.split("[,\\s]+".toRegex())?.filter { it.isNotEmpty() }?.distinct() ?: emptyList()
+    return NoqaCodes(codes, noqaStartOffset, noqaStartOffset + matcher.end())
 }
 
 const val PY_PROJECT_TOML: String = "pyproject.toml"
@@ -615,3 +656,4 @@ const val RUFF_TOML_SUFFIX: String = ".ruff.toml"
 private val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
 val VirtualFile.isRuffConfig: Boolean
     get() = name in RUFF_CONFIG || name.endsWith(RUFF_TOML_SUFFIX)
+val Project.configService: RuffConfigService get() = RuffConfigService.getInstance(this)

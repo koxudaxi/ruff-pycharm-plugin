@@ -3,11 +3,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
-import com.intellij.platform.lsp.api.customization.LspCompletionSupport
+import com.intellij.platform.lsp.api.customization.*
 import com.koxudaxi.ruff.*
+import com.koxudaxi.ruff.lsp.intellij.supports.*
+import com.koxudaxi.ruff.lsp.useCodeActionFeature
+import com.koxudaxi.ruff.lsp.useDiagnosticFeature
+import com.koxudaxi.ruff.lsp.useFormattingFeature
+import com.koxudaxi.ruff.lsp.useHoverFeature
 import kotlinx.serialization.Serializable
 import java.io.File
-
 
 
 @Suppress("UnstableApiUsage")
@@ -17,14 +21,13 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         file: VirtualFile,
         serverStarter: LspServerSupportProvider.LspServerStarter
     ) {
-        val ruffConfigService = RuffConfigService.getInstance(project)
+        val ruffConfigService = project.configService
         if (!ruffConfigService.enableLsp) return
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         if (!ruffConfigService.useIntellijLspClient) return
         if (!isInspectionEnabled(project)) return
-        if (file.extension != "py") return
+        if (!file.isApplicableTo) return
         val ruffCacheService = RuffCacheService.getInstance(project)
-        if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
             ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
                 getRuffExecutable(project, ruffConfigService, false, ruffCacheService)?.let {
@@ -71,9 +74,19 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
 
+    override val lspHoverSupport: Boolean = project.useHoverFeature
+    override val lspCodeActionsSupport: LspCodeActionsSupport? =
+        if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
+    override val lspFormattingSupport: LspFormattingSupport? =
+        if (project.useFormattingFeature) RuffLspFormattingSupport(project) else null
+    override val lspCommandsSupport: LspCommandsSupport = LspCommandsSupport()
+    override val lspDiagnosticsSupport: LspDiagnosticsSupport? =
+        if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else null
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
+
+
 }
 
 @Suppress("UnstableApiUsage")
@@ -85,6 +98,7 @@ private class RuffServerServerDescriptor(project: Project, executable: File, ruf
         return getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: GeneralCommandLine()
     }
 }
+
 @Serializable
 data class Settings(
     val args: List<String>
