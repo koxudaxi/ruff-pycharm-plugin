@@ -1,10 +1,18 @@
 package com.koxudaxi.ruff
 
+import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 @Service(Service.Level.PROJECT)
 class RuffCacheService(val project: Project) {
+    private val lock = ReentrantLock()
+
     private var version: RuffVersion? = null
     private var hasFormatter: Boolean? = null
     private var hasOutputFormat: Boolean? = null
@@ -14,49 +22,94 @@ class RuffCacheService(val project: Project) {
     private var projectRuffExecutablePath: String? = null
     private var projectRuffLspExecutablePath: String? = null
 
-    fun getVersion(): RuffVersion? {
-        return version
-    }
+    private val versionFutureRef = AtomicReference<CompletableFuture<RuffVersion?>>()
+
     private inline fun setVersionFromCommand(crossinline action: () -> Unit) =
         executeOnPooledThread {
-            val ruffVersion = runRuff(project, listOf("--version"), true)
-                ?.let { getOrPutVersionFromVersionCache(it) }
-            setVersion(ruffVersion)
-            action()
+            val fetchedVersion = fetchVersionFromCommand()
+            setVersion(fetchedVersion)
+            if (fetchedVersion != null) {
+                action()
+            } else {
+                RuffLoggingService.log(project, "Failed to fetch Ruff version, skipping post-version actions")
+            }
         }
-
 
     private fun getOrPutVersionFromVersionCache(version: String): RuffVersion? {
         return ruffVersionCache.getOrPut(version) {
-            val versionList =
-                version.trimEnd().split(" ").lastOrNull()?.split(".")?.map { it.toIntOrNull() ?: 0 } ?: return null
-            val ruffVersion = when {
-                versionList.size == 1 -> RuffVersion(versionList[0])
-                versionList.size == 2 -> RuffVersion(versionList[0], versionList[1])
-                versionList.size >= 3 -> RuffVersion(versionList[0], versionList[1], versionList[2])
-                else -> null
-            } ?: return null
-            ruffVersionCache[version] = ruffVersion
-            ruffVersion
+            try {
+                val versionList =
+                    version.trimEnd().split(" ").lastOrNull()?.split(".")?.map { it.toIntOrNull() ?: 0 } ?: return null
+                when {
+                    versionList.size == 1 -> RuffVersion(versionList[0])
+                    versionList.size == 2 -> RuffVersion(versionList[0], versionList[1])
+                    versionList.size >= 3 -> RuffVersion(versionList[0], versionList[1], versionList[2])
+                    else -> null
+                }
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 
-    @Synchronized
-    private fun setVersion(version: RuffVersion?) {
-        this.version = version
-        hasFormatter = version?.hasFormatter
-        hasOutputFormat = version?.hasOutputFormat
-        hasCheck = version?.hasCheck
-        hasLsp = version?.hasLsp
-        hasStableServer = version?.hasStableServer
+    private fun setVersion(newVersion: RuffVersion?) {
+        lock.withLock {
+            version = newVersion
+            hasFormatter = newVersion?.hasFormatter
+            hasOutputFormat = newVersion?.hasOutputFormat
+            hasCheck = newVersion?.hasCheck
+            hasLsp = newVersion?.hasLsp
+            hasStableServer = newVersion?.hasStableServer
+        }
     }
 
     internal fun clearVersion() {
         setVersion(null)
+        versionFutureRef.set(null)
     }
 
     internal inline fun setVersion(crossinline action: () -> Unit) {
-        return setVersionFromCommand(action)
+        setVersionFromCommand(action)
+    }
+
+    fun getOrPutVersion(): CompletableFuture<RuffVersion?> {
+        lock.withLock {
+            version?.let { return CompletableFuture.completedFuture(it) }
+            versionFutureRef.get()?.let { return it }
+        }
+
+        val existingFuture = versionFutureRef.get()
+        if (existingFuture != null) {
+            return existingFuture
+        }
+
+        val executor = Executor { runnable ->
+            getApplication().executeOnPooledThread(runnable)
+        }
+
+        val newFuture = CompletableFuture.supplyAsync({
+            val newVersion = fetchVersionFromCommand()
+            lock.withLock {
+                version = newVersion
+            }
+            newVersion
+        }, executor)
+
+        if (!versionFutureRef.compareAndSet(null, newFuture)) {
+            val currentFuture = versionFutureRef.get()
+            return currentFuture ?: newFuture
+        }
+
+        return newFuture
+    }
+
+    private fun fetchVersionFromCommand(): RuffVersion? {
+        return try {
+            runRuff(project, listOf("--version"), true)
+                ?.let { getOrPutVersionFromVersionCache(it) }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     internal fun hasFormatter(): Boolean {
@@ -83,22 +136,23 @@ class RuffCacheService(val project: Project) {
         return projectRuffExecutablePath
     }
 
-    @Synchronized
     internal fun setProjectRuffExecutablePath(path: String?) {
-        projectRuffExecutablePath = path
+        lock.withLock {
+            projectRuffExecutablePath = path
+        }
     }
 
     internal fun getProjectRuffLspExecutablePath(): String? {
         return projectRuffLspExecutablePath
     }
 
-    @Synchronized
     internal fun setProjectRuffLspExecutablePath(path: String?) {
-        projectRuffLspExecutablePath = path
+        lock.withLock {
+            projectRuffLspExecutablePath = path
+        }
     }
 
-    internal
-    companion object {
+    internal companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
 
         fun hasOutputFormat(project: Project): Boolean? = getInstance(project).hasOutputFormat()

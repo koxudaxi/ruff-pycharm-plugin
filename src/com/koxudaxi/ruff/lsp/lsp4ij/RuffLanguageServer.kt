@@ -27,7 +27,6 @@ class RuffLanguageServer(project: Project) : ProcessStreamConnectionProvider() {
         if (!isInspectionEnabled(project)) return null
 
         val ruffCacheService = RuffCacheService.getInstance(project)
-        if (ruffCacheService.getVersion() == null) return null
 
         val (ruffFile, args) = when {
                 ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {

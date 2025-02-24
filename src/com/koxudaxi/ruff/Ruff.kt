@@ -548,7 +548,7 @@ inline fun <reified T> runReadActionOnPooledThread(
 }
 
 
-inline fun executeOnPooledThread(crossinline action: () -> Unit) {
+inline fun executeOnPooledThread(crossinline action: () -> Unit) =
     ApplicationManager.getApplication().executeOnPooledThread {
         try {
             action.invoke()
@@ -556,7 +556,7 @@ inline fun executeOnPooledThread(crossinline action: () -> Unit) {
         } catch (_: ProcessNotCreatedException) {
         }
     }
-}
+
 
 fun parseJsonResponse(response: String): List<Result> = try {
     json.decodeFromString(response)

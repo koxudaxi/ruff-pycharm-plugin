@@ -29,7 +29,6 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
         if (!ruffConfigService.useLsp4ij) return false
         if (!isInspectionEnabled(project)) return false
         val ruffCacheService = RuffCacheService.getInstance(project)
-        if (ruffCacheService.getVersion() == null) return false
         if (ruffConfigService.useRuffServer && ruffCacheService.hasLsp() != true) return false
         if (ruffConfigService.useRuffLsp && getRuffExecutable(
                 project,

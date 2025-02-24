@@ -72,7 +72,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
             }
         }
         ruffConfigService.enableRuffLogging = configPanel.enableRuffLogging
-        val ruffConfigPathChanged = configPanel.ruffConfigPath != configPanel.ruffConfigPath
+        val ruffConfigPathChanged = ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath
         val useRuffLspChanged = ruffConfigService.useRuffLsp != configPanel.useRuffLsp
         val useRuffServerChanged = ruffConfigService.useRuffServer != configPanel.useRuffServer
         val lspClientChanged = (ruffConfigService.useIntellijLspClient != configPanel.useIntellijLspClient) ||
