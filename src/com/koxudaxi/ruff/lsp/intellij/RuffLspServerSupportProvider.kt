@@ -13,7 +13,6 @@ import kotlinx.serialization.Serializable
 import java.io.File
 
 
-
 @Suppress("UnstableApiUsage")
 class RuffLspServerSupportProvider : LspServerSupportProvider {
     override fun fileOpened(
@@ -26,7 +25,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) return
         if (!ruffConfigService.useIntellijLspClient) return
         if (!isInspectionEnabled(project)) return
-        if (file.extension != "py") return
+        if (!file.isApplicableTo) return
         val ruffCacheService = RuffCacheService.getInstance(project)
         if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
@@ -76,10 +75,13 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     abstract override fun createCommandLine(): GeneralCommandLine
 
     override val lspHoverSupport: Boolean = true
-    override val lspCodeActionsSupport: LspCodeActionsSupport? = if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
-    override val lspFormattingSupport: LspFormattingSupport? = if (project.useFormattingFeature) RuffLspFormattingSupport(project) else null
+    override val lspCodeActionsSupport: LspCodeActionsSupport? =
+        if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
+    override val lspFormattingSupport: LspFormattingSupport? =
+        if (project.useFormattingFeature) RuffLspFormattingSupport(project) else null
     override val lspCommandsSupport: LspCommandsSupport = LspCommandsSupport()
-    override val lspDiagnosticsSupport: LspDiagnosticsSupport? = if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else null
+    override val lspDiagnosticsSupport: LspDiagnosticsSupport? =
+        if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else null
 
     override val lspGoToDefinitionSupport: Boolean = false
     override val lspCompletionSupport: LspCompletionSupport? = null
@@ -96,6 +98,7 @@ private class RuffServerServerDescriptor(project: Project, executable: File, ruf
         return getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: GeneralCommandLine()
     }
 }
+
 @Serializable
 data class Settings(
     val args: List<String>

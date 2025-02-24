@@ -1,7 +1,6 @@
 package com.koxudaxi.ruff.lsp
 
 import com.intellij.openapi.project.Project
-import com.koxudaxi.ruff.RuffConfigService
 import com.koxudaxi.ruff.configService
 
 interface RuffLspClient {
@@ -24,3 +23,5 @@ val Project.useHoverFeature: Boolean
     get() =  this.configService.hoverFeature
 val Project.useDiagnosticFeature: Boolean
     get() =  this.configService.diagnosticFeature
+val Project.runRuffOnReformatCode: Boolean
+    get() =  this.configService.runRuffOnReformatCode
