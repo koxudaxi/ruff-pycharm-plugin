@@ -17,6 +17,7 @@ class RuffProjectInitializer : ProjectActivity {
         if (project.isDisposed) return
         DumbService.getInstance(project).smartInvokeLater {
             try {
+                RuffCacheService.getInstance(project).getOrPutVersion()
                 if (lspSupported) {
                     setUpPyProjectTomlLister(project)
                 }
