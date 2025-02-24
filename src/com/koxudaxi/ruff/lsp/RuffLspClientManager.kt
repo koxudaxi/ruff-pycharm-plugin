@@ -27,17 +27,23 @@ class RuffLspClientManager(project: Project) {
 
     fun setClient(clientType: ClientType, start: Boolean = true) {
         if (clients == null) return
+        if (clients[clientType] == null) return
+
         ApplicationManager.getApplication().invokeLater {
-            val newClient = clients[clientType] ?: error("Client for key $clientType not found")
             ApplicationManager.getApplication().runWriteAction {
+                val currentClient = clients[clientType] ?: return@runWriteAction
+
                 if (enabledClient?.getClientType() == clientType) {
+                    if (start) {
+                        enabledClient?.restart()
+                    }
                     return@runWriteAction
                 }
                 enabledClient?.stop()
                 if (start) {
-                    newClient.start()
+                    currentClient.start()
                 }
-                enabledClient = newClient
+                enabledClient = currentClient
             }
         }
     }

@@ -27,7 +27,6 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         if (!isInspectionEnabled(project)) return
         if (!file.isApplicableTo) return
         val ruffCacheService = RuffCacheService.getInstance(project)
-        if (ruffCacheService.getVersion() == null) return
         val descriptor = when {
             ruffConfigService.useRuffServer && ruffCacheService.hasLsp() == true -> {
                 getRuffExecutable(project, ruffConfigService, false, ruffCacheService)?.let {

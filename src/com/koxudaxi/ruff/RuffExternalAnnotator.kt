@@ -40,9 +40,6 @@ class RuffExternalAnnotator :
         val config = project.configService
         if (lspSupported && config.enableLsp) {
             return null
-            // May be too strict check
-//            if (config.useRuffLsp && config.ruffLspExecutablePath is String) return null
-//            if (config.useRuffServer && RuffCacheService.hasLsp(project) == true) return null
         }
         if (!file.isApplicableTo) return null
         val profile: InspectionProfile = InspectionProjectProfileManager.getInstance(project).currentProfile
@@ -60,14 +57,18 @@ class RuffExternalAnnotator :
 
     override fun doAnnotate(info: RuffExternalAnnotatorInfo?): RuffExternalAnnotatorResult? {
         if (info == null) return null
-        val response = runRuff(info.commandArgs) ?: return null
-        val result = parseJsonResponse(response)
-        return RuffExternalAnnotatorResult(
-            info.showRuleCode,
-            info.highlightDisplayLevel,
-            info.problemHighlightType,
-            result
-        )
+        try {
+            val response = runRuff(info.commandArgs) ?: return null
+            val result = parseJsonResponse(response)
+            return RuffExternalAnnotatorResult(
+                info.showRuleCode,
+                info.highlightDisplayLevel,
+                info.problemHighlightType,
+                result
+            )
+        } catch (e: Exception) {
+            return null
+        }
     }
 
     override fun apply(file: PsiFile, annotationResult: RuffExternalAnnotatorResult?, holder: AnnotationHolder) {
@@ -78,69 +79,88 @@ class RuffExternalAnnotator :
         val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
         val inspectionManager = InspectionManager.getInstance(file.project)
 
-        result.forEach {
-            val range = document.getStartEndRange(it.location, it.endLocation, -1)
-            if (range.startOffset == 0 && range.endOffset == 0) return@forEach
-            val psiElement = getPyElement(file, range) ?: return@forEach
-            val builder = holder.newAnnotation(
-                annotationResult.highlightDisplayLevel,
-                if (showRuleCode) "${it.code} ${it.message}" else it.message
-            ).needsUpdateOnTyping()
-            if (it.fix != null) {
-                RuffQuickFix.create(it.fix, document)?.let { quickFix ->
+        for (item in result) {
+            try {
+                val range = document.getStartEndRange(item.location, item.endLocation, -1)
+                if (range.startOffset < 0 || range.endOffset < 0 || range.startOffset > range.endOffset ||
+                    range.endOffset > document.textLength) {
+                    continue
+                }
+                val psiElement = getPyElement(file, range) ?: continue
+                val builder = holder.newAnnotation(
+                    annotationResult.highlightDisplayLevel,
+                    if (showRuleCode) "${item.code} ${item.message}" else item.message
+                ).needsUpdateOnTyping()
+
+                if (item.fix != null) {
+                    RuffQuickFix.create(item.fix, document)?.let { quickFix ->
+                        val problemDescriptor = inspectionManager.createProblemDescriptor(
+                            psiElement,
+                            item.message,
+                            quickFix,
+                            annotationResult.problemHighlightType,
+                            true
+                        )
+                        builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
+                    }
+                }
+
+                RuffSuppressQuickFix.create(item, document).let { quickFix ->
                     val problemDescriptor = inspectionManager.createProblemDescriptor(
                         psiElement,
-                        it.message,
+                        quickFix.familyName,
                         quickFix,
                         annotationResult.problemHighlightType,
                         true
                     )
                     builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
                 }
-            }
 
-            RuffSuppressQuickFix.create(it, document).let { quickFix ->
-                val problemDescriptor = inspectionManager.createProblemDescriptor(
-                    psiElement,
-                    quickFix.familyName,
-                    quickFix,
-                    annotationResult.problemHighlightType,
-                    true
-                )
-                builder.newLocalQuickFix(quickFix, problemDescriptor).registerFix()
+                builder.range(range)
+                if (range.startOffset == range.endOffset &&
+                    (range.endOffset == file.textLength ||
+                            (range.endOffset < file.textLength && file.text.substring(range.startOffset, range.endOffset + 1) == "\n"))) {
+                    builder.afterEndOfLine()
+                }
+                builder.create()
+            } catch (e: Exception) {
+                // Do nothing and continue with next item
             }
-            builder.range(range)
-            if (range.startOffset == range.endOffset && (range.endOffset == file.textLength || file.text.substring(range.startOffset, range.endOffset + 1) == "\n")) {
-                builder.afterEndOfLine()
-            }
-            builder.create()
         }
 
     }
 
     private fun isForFile(document: Document, result: Result, trimOriginalLength: Int, range: TextRange): Boolean {
         if (result.location.row == 1 && result.location.column == 1) {
-            val trimResultLength = range.substring(document.text).trimEnd().length
-            if (trimResultLength == trimOriginalLength) {
-                return true
+            try {
+                val trimResultLength = range.substring(document.text).trimEnd().length
+                if (trimResultLength == trimOriginalLength) {
+                    return true
+                }
+            } catch (e: Exception) {
+                return false
             }
         }
         return false
     }
 
     private fun getPyElement(psiFile: PsiFile, range: TextRange): PsiElement? {
-        val psiElement = PsiTreeUtil.findElementOfClassAtRange(
-        psiFile,
-        range.startOffset,
-        range.endOffset,
-        PsiElement::class.java
-        )
+        try {
+            val psiElement = PsiTreeUtil.findElementOfClassAtRange(
+                psiFile,
+                range.startOffset,
+                range.endOffset,
+                PsiElement::class.java
+            )
 
-        if (psiElement != null) return psiElement
-        if (range.startOffset == range.endOffset && range.endOffset == psiFile.textLength) {
-            return psiFile.findElementAt(range.endOffset - 1)
+            if (psiElement != null) return psiElement
+            if (range.startOffset == range.endOffset && range.endOffset == psiFile.textLength) {
+                return psiFile.findElementAt(range.endOffset - 1)
+            }
+            return psiFile.findElementAt(range.startOffset)
+        } catch (e: Exception) {
+            return null
         }
-        return psiFile.findElementAt(range.startOffset)
     }
 
     data class RuffExternalAnnotatorInfo(
