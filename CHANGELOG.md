@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- feat: add features to lsp [[#550](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/550)]
 - fix: fix skip outside project on save [[#553](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/553)]
 
 ## [0.0.43] - 2025-02-17
