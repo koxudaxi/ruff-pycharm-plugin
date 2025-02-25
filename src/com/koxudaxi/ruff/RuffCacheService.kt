@@ -159,7 +159,9 @@ class RuffCacheService(val project: Project) {
             projectRuffLspExecutablePath = path
         }
     }
-
+    fun getVersion(): RuffVersion? = lock.withLock {
+            return this.version
+        }
     internal companion object {
         fun hasFormatter(project: Project): Boolean = getInstance(project).hasFormatter()
 

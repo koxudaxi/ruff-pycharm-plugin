@@ -1,25 +1,29 @@
 package com.koxudaxi.ruff.lsp.lsp4ij
 
 import com.intellij.execution.ui.ConsoleViewContentType
-import com.koxudaxi.ruff.lsp.lsp4ij.features.*
 import com.intellij.openapi.project.Project
 import com.koxudaxi.ruff.*
+import com.koxudaxi.ruff.lsp.lsp4ij.features.*
 import com.redhat.devtools.lsp4ij.LanguageServerEnablementSupport
 import com.redhat.devtools.lsp4ij.LanguageServerFactory
+import com.redhat.devtools.lsp4ij.LanguageServerManager
 import com.redhat.devtools.lsp4ij.client.LanguageClientImpl
 import com.redhat.devtools.lsp4ij.client.features.*
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Suppress("UnstableApiUsage")
 class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablementSupport {
     private var enabled = true
+    private var logDisabled = AtomicBoolean(false)
+
+    private var lastDisableReason: String? = null
 
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
         return RuffLanguageServer(project)
 
     }
 
-    //If you need to provide client specific features
     override fun createLanguageClient(project: Project): LanguageClientImpl {
         return RuffLanguageClient(project)
     }
@@ -27,54 +31,46 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
     override fun isEnabled(project: Project): Boolean {
         try {
             if (!enabled) {
+                if (logDisabled.compareAndSet(false, true)) {
+                    RuffLoggingService.log(project, "LSP4IJ is explicitly disabled", ConsoleViewContentType.NORMAL_OUTPUT)
+                }
                 return false
             }
 
+            logDisabled.set(false)
+
             val ruffConfigService = project.configService
             if (!ruffConfigService.enableLsp) {
-                RuffLoggingService.log(project, "LSP not enabled in config", ConsoleViewContentType.NORMAL_OUTPUT)
+                setDisableReason(project, "LSP not enabled in config")
                 return false
             }
             if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) {
-                RuffLoggingService.log(
-                    project,
-                    "Neither Ruff LSP nor Server enabled",
-                    ConsoleViewContentType.NORMAL_OUTPUT
-                )
+                setDisableReason(project, "Neither Ruff LSP nor Server enabled")
                 return false
             }
             if (!ruffConfigService.useLsp4ij) {
-                RuffLoggingService.log(project, "LSP4IJ not enabled in config", ConsoleViewContentType.NORMAL_OUTPUT)
+                setDisableReason(project, "LSP4IJ not enabled in config")
                 return false
             }
             if (!isInspectionEnabled(project)) {
-                RuffLoggingService.log(project, "Ruff inspection not enabled", ConsoleViewContentType.NORMAL_OUTPUT)
+                setDisableReason(project, "Ruff inspection not enabled")
                 return false
             }
 
             val ruffCacheService = RuffCacheService.getInstance(project)
 
-            val version = ruffCacheService.getOrPutVersion().getNow(null)
+            val version = ruffCacheService.getVersion()
             if (version == null) {
-                RuffLoggingService.log(project, "Ruff version is not yet determined. Skipping LSP enable check.", ConsoleViewContentType.NORMAL_OUTPUT)
+                setDisableReason(project, "Ruff version is not yet determined. Skipping LSP enable check.")
                 return false
             }
 
-            // Additional checks
             if (ruffConfigService.useRuffServer && ruffCacheService.hasLsp() != true) {
                 if (ruffCacheService.hasLsp() == false) {
-                    RuffLoggingService.log(
-                        project,
-                        "Server mode enabled but Ruff version doesn't support LSP",
-                        ConsoleViewContentType.NORMAL_OUTPUT
-                    )
+                    setDisableReason(project, "Server mode enabled but Ruff version doesn't support LSP")
                     return false
                 } else {
-                    RuffLoggingService.log(
-                        project,
-                        "Server mode enabled but Ruff version is not yet determined. Skipping LSP enable check.",
-                        ConsoleViewContentType.NORMAL_OUTPUT
-                    )
+                    setDisableReason(project, "Server mode enabled but Ruff version is not yet determined. Skipping LSP enable check.")
                     return false
                 }
             }
@@ -86,32 +82,46 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
                 ruffCacheService
             )
             if (executable == null) {
-                RuffLoggingService.log(project, "Ruff executable not found", ConsoleViewContentType.NORMAL_OUTPUT)
+                setDisableReason(project, "Ruff executable not found")
                 return false
             }
 
+            lastDisableReason = null
             return true
         } catch (e: Exception) {
-            RuffLoggingService.log(
-                project,
-                "Error checking LSP enablement: ${e.message}",
-                ConsoleViewContentType.ERROR_OUTPUT
-            )
+            RuffLoggingService.log(project, "Error checking LSP enablement: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
             return false
         }
     }
 
-    override fun setEnabled(isEnabled: Boolean, project: Project) {
-        this.enabled = isEnabled
-        if (!isEnabled) {
-            RuffLoggingService.log(
-                project,
-                "Ruff LSP4IJ setEnabled(false) -- Doing nothing here, letting LSP4IJ handle stop.",
-                ConsoleViewContentType.NORMAL_OUTPUT
-            )
+    private fun setDisableReason(project: Project, reason: String) {
+        if (lastDisableReason != reason) {
+            RuffLoggingService.log(project, reason, ConsoleViewContentType.NORMAL_OUTPUT)
+            lastDisableReason = reason
         }
     }
 
+    override fun setEnabled(isEnabled: Boolean, project: Project) {
+        RuffLoggingService.log(project, "RuffLanguageServerFactory.setEnabled($isEnabled) called", ConsoleViewContentType.NORMAL_OUTPUT)
+
+        val oldEnabled = enabled
+        enabled = isEnabled
+
+        if (oldEnabled != isEnabled) {
+            logDisabled.set(false)
+        }
+
+        if (!isEnabled && oldEnabled) {
+            try {
+                val languageServerManager = LanguageServerManager.getInstance(project)
+                RuffLoggingService.log(project, "Forcibly stopping LSP4IJ server", ConsoleViewContentType.NORMAL_OUTPUT)
+                languageServerManager.stop(RuffLsp4IntellijClient.LANGUAGE_SERVER_ID,
+                    LanguageServerManager.StopOptions().setWillDisable(true))
+            } catch (e: Exception) {
+                RuffLoggingService.log(project, "Error stopping LSP4IJ server: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
+            }
+        }
+    }
 
     override fun createClientFeatures(): LSPClientFeatures {
         return LSPClientFeatures().setCodeActionFeature(RuffLSPCodeActionFeature())
