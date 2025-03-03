@@ -16,8 +16,7 @@
                          enabledByDefault="true" level="WARNING"
                          implementationClass="com.koxudaxi.ruff.RuffInspection"/>
         <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
-        <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatterFormat"/>
-        <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatterFix"/>
+        <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatter" order="first"/>
         <platform.backend.documentation.targetProvider
                 implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
         <actionOnSave id="RuffFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
