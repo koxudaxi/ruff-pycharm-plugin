@@ -20,7 +20,9 @@ class RuffLspClientManager(project: Project) {
             if (intellijLspClientSupported) ClientType.INTELLIJ to RuffIntellijLspClient(project) else null
         ).toMap().ifEmpty { null }
     }
-
+    fun getClient(clientType: ClientType): RuffLspClient? {
+        return clients?.get(clientType)
+    }
     @Volatile
     private var enabledClient: RuffLspClient? = null
 
