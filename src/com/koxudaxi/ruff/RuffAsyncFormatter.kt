@@ -6,6 +6,7 @@ import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.psi.PsiFile
+import java.io.FileNotFoundException
 
 
 class RuffAsyncFormatter : AsyncDocumentFormattingService() {
@@ -22,10 +23,13 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
 
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         return object : FormattingTask {
+            private fun noUpdate() {
+                request.onTextReady(null)
+            }
             private fun updateText(currentText: String, text: String?) {
                 when {
-                    text == null -> request.onTextReady(null)
-                    currentText == text -> request.onTextReady(null)
+                    text == null -> noUpdate()
+                    currentText == text -> noUpdate()
                     else -> request.onTextReady(text)
                 }
             }
@@ -40,7 +44,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                     }
                     val sourceFile = formattingContext.containingFile.sourceFile
                     val fixCommandArgs =
-                        generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS) ?: return@runCatching
+                        generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS, false) ?: return@runCatching
                     val currentText = ioFile.readText()
                     val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray())
                     if (fixCommandStdout == null) {
@@ -51,7 +55,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         updateText(currentText, fixCommandStdout)
                         return@runCatching
                     }
-                    val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS)
+                    val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS, false)
                     if (formatCommandArgs == null) {
                         updateText(currentText, fixCommandStdout)
                         return@runCatching
@@ -62,6 +66,9 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                 }.onFailure { exception ->
                     when (exception) {
                         is ProcessCanceledException -> { /* ignore */
+                        }
+                        is FileNotFoundException -> {
+                            noUpdate()
                         }
 
                         else -> {
