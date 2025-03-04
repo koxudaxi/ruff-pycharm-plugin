@@ -300,7 +300,7 @@ fun runCommand(
 ): String? = runCommand(
     commandArgs.executable,
     commandArgs.project,
-    if (stdin is ByteArray) stdin else commandArgs.stdin,
+    stdin ?: commandArgs.stdin,
     *commandArgs.args.toTypedArray()
 )
 
@@ -466,7 +466,7 @@ fun PsiFile.getSourceFile(textRange: TextRange? = null, reloadText: Boolean = fa
     SourceFile(this, textRange, reloadText)
 
 fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
-    generateCommandArgs(sourceFile, args)?.let { runRuff(it) }
+    generateCommandArgs(sourceFile, args, true)?.let { runRuff(it) }
 
 fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false): String? =
     generateCommandArgs(project, null, args, withoutConfig)?.let { runRuff(it) }
@@ -477,10 +477,10 @@ data class CommandArgs(
     val stdin: ByteArray?, val args: List<String>,
 )
 
-fun generateCommandArgs(sourceFile: SourceFile, args: List<String>): CommandArgs? =
+fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Boolean): CommandArgs? =
     generateCommandArgs(
         sourceFile.project,
-        sourceFile.asStdin,
+        if (setStdin) sourceFile.asStdin else null,
         args + getStdinFileNameArgs(sourceFile)
     )
 

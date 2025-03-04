@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- fix: fix format and fix action [[#559](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/559)]
 - fix: Improve error handling [[#554](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/554)]
 - feat: add features to lsp [[#550](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/550)]
 - fix: fix skip outside project on save [[#553](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/553)]

@@ -53,7 +53,7 @@ class RuffExternalAnnotator :
         val problemHighlightType = problemHighlightTypeLevels[level] ?: return null
         val showRuleCode = config.showRuleCode
         val noFixArgs = project.NO_FIX_ARGS ?: return null
-        val commandArgs = generateCommandArgs(file.sourceFile, noFixArgs) ?: return null
+        val commandArgs = generateCommandArgs(file.sourceFile, noFixArgs, true) ?: return null
         return RuffExternalAnnotatorInfo(file, showRuleCode, highlightDisplayLevel, problemHighlightType, commandArgs)
     }
 
