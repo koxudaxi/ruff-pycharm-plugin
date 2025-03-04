@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.44] - 2025-03-04
+
 - fix: Add support for partial formatting using --range option [[#562](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/562)]
 - fix: fix format and fix action [[#559](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/559)]
 - fix: Improve error handling [[#554](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/554)]
@@ -230,7 +233,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.43...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.44...HEAD
+[0.0.44]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.43...v0.0.44
 [0.0.43]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.42...v0.0.43
 [0.0.42]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.41...v0.0.42
 [0.0.41]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.40...v0.0.41
