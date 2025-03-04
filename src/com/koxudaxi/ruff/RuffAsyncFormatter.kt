@@ -9,7 +9,7 @@ import com.intellij.psi.PsiFile
 
 
 class RuffAsyncFormatter : AsyncDocumentFormattingService() {
-    private val FEATURES: Set<FormattingService.Feature> = setOf(FormattingService.Feature.FORMAT_FRAGMENTS)
+    private val FEATURES: Set<FormattingService.Feature> = setOf(FormattingService.Feature.AD_HOC_FORMATTING)
 
     override fun getFeatures(): Set<FormattingService.Feature> {
         return FEATURES
