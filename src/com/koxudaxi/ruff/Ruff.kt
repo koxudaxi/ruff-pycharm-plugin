@@ -90,6 +90,7 @@ val NO_FIX_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--format", "json")
 val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format", "json")
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
+val FORMAT_RANGE_ARGS = listOf("--range")
 val LSP_ARGS_BASE = listOf("server")
 val PREVIEW_ARGS = listOf("--preview")
 val Project.LSP_ARGS: List<String>
@@ -714,3 +715,35 @@ private val RUFF_CONFIG: List<String> = listOf(PY_PROJECT_TOML, RUFF_TOML)
 val VirtualFile.isRuffConfig: Boolean
     get() = name in RUFF_CONFIG || name.endsWith(RUFF_TOML_SUFFIX)
 val Project.configService: RuffConfigService get() = RuffConfigService.getInstance(this)
+
+
+/**
+ * Returns the 1-indexed line and column numbers for the given offset in the string.
+ *
+ * @param offset the character offset within the string.
+ * @return a Pair where the first component is the line number and the second is the column number.
+ */
+fun String.getLineAndColumn(offset: Int): Pair<Int, Int> {
+    // Count the number of newline characters before the offset to determine the line number.
+    val line = this.substring(0, offset).count { it == '\n' } + 1
+    // Determine the column number by finding the position of the last newline.
+    val lastNewline = this.lastIndexOf('\n', offset - 1)
+    val column = if (lastNewline == -1) offset + 1 else offset - lastNewline
+    return line to column
+}
+
+/**
+ * Converts the given TextRange into a formatted string "<start_line>:<start_column>-<end_line>:<end_column>"
+ * using the provided full text to calculate the line and column numbers.
+ *
+ * @param text the full text content from which the TextRange was obtained.
+ * @return a formatted string representing the range.
+ */
+fun TextRange.formatRange(text: String): String {
+    val (startLine, startColumn) = text.getLineAndColumn(startOffset)
+    val (endLine, endColumn) = text.getLineAndColumn(endOffset)
+    return "$startLine:$startColumn-$endLine:$endColumn"
+}
+
+
+fun TextRange.formatRangeArgs(text: String): List<String> = FORMAT_RANGE_ARGS + listOf(formatRange(text))
