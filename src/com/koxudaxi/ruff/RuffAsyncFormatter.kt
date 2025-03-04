@@ -23,9 +23,13 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
 
     override fun createFormattingTask(request: AsyncFormattingRequest): FormattingTask? {
         return object : FormattingTask {
+            @Volatile
+            private var cancelled = false
+
             private fun noUpdate() {
                 request.onTextReady(null)
             }
+
             private fun updateText(currentText: String, text: String?) {
                 when {
                     text == null -> noUpdate()
@@ -35,6 +39,10 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
             }
 
             override fun run() {
+                if (cancelled) {
+                    request.onTextReady(null)
+                    return
+                }
                 runCatching {
                     val formattingContext: FormattingContext = request.context
                     val ioFile = request.ioFile
@@ -46,6 +54,10 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                     val fixCommandArgs =
                         generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS, false) ?: return@runCatching
                     val currentText = ioFile.readText()
+                    if (cancelled) {
+                        noUpdate()
+                        return@runCatching
+                    }
                     val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray())
                     if (fixCommandStdout == null) {
                         request.onTextReady(null)
@@ -60,13 +72,22 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         updateText(currentText, fixCommandStdout)
                         return@runCatching
                     }
+                    if (cancelled) {
+                        noUpdate()
+                        return@runCatching
+                    }
                     val formatCommandStdout = runRuff(formatCommandArgs, fixCommandStdout.toByteArray())
+                    if (cancelled) {
+                        noUpdate()
+                        return@runCatching
+                    }
                     updateText(currentText, formatCommandStdout)
 
                 }.onFailure { exception ->
                     when (exception) {
                         is ProcessCanceledException -> { /* ignore */
                         }
+
                         is FileNotFoundException -> {
                             noUpdate()
                         }
@@ -79,6 +100,8 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
             }
 
             override fun cancel(): Boolean {
+                // Signal cancellation.
+                cancelled = true
                 return true
             }
 
