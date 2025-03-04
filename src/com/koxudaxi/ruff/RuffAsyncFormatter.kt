@@ -10,7 +10,7 @@ import java.io.FileNotFoundException
 
 
 class RuffAsyncFormatter : AsyncDocumentFormattingService() {
-    private val FEATURES: Set<FormattingService.Feature> = setOf(FormattingService.Feature.AD_HOC_FORMATTING)
+    private val FEATURES: Set<FormattingService.Feature> = setOf(FormattingService.Feature.FORMAT_FRAGMENTS)
 
     override fun getFeatures(): Set<FormattingService.Feature> {
         return FEATURES
@@ -51,13 +51,29 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         return@runCatching
                     }
                     val sourceFile = formattingContext.containingFile.sourceFile
-                    val fixCommandArgs =
-                        generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS, false) ?: return@runCatching
                     val currentText = ioFile.readText()
-                    if (cancelled) {
-                        noUpdate()
+
+                    // Check if a formatting range is specified.
+                    val formatRange = request.formattingRanges.firstOrNull()?.let { selectedRange ->
+                        if (selectedRange.endOffset >= currentText.length) null
+                        else selectedRange
+                    }
+
+                    if (formatRange != null) {
+                        // When a range is specified, only run the format command.
+                        val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS + formatRange.formatRangeArgs(currentText), false)
+                            ?: return@runCatching
+                        val formatCommandStdout = runRuff(formatCommandArgs, currentText.toByteArray())
+                        if (formatCommandStdout == null) {
+                            request.onTextReady(null)
+                            return@runCatching
+                        }
+                        updateText(currentText, formatCommandStdout)
                         return@runCatching
                     }
+
+                    val fixCommandArgs = generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS, false)
+                        ?: return@runCatching
                     val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray())
                     if (fixCommandStdout == null) {
                         request.onTextReady(null)
@@ -68,10 +84,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         return@runCatching
                     }
                     val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS, false)
-                    if (formatCommandArgs == null) {
-                        updateText(currentText, fixCommandStdout)
-                        return@runCatching
-                    }
+                        ?: return@runCatching
                     if (cancelled) {
                         noUpdate()
                         return@runCatching
@@ -85,22 +98,14 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
 
                 }.onFailure { exception ->
                     when (exception) {
-                        is ProcessCanceledException -> { /* ignore */
-                        }
-
-                        is FileNotFoundException -> {
-                            noUpdate()
-                        }
-
-                        else -> {
-                            request.onError("Ruff Error", exception.localizedMessage)
-                        }
+                        is ProcessCanceledException -> { /* ignore */ }
+                        is FileNotFoundException -> noUpdate()
+                        else -> request.onError("Ruff Error", exception.localizedMessage)
                     }
                 }
             }
 
             override fun cancel(): Boolean {
-                // Signal cancellation.
                 cancelled = true
                 return true
             }
