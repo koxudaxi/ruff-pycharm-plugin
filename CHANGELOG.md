@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- fix: Add support for partial formatting using --range option [[#562](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/562)]
 - fix: fix format and fix action [[#559](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/559)]
 - fix: Improve error handling [[#554](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/554)]
 - feat: add features to lsp [[#550](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/550)]
