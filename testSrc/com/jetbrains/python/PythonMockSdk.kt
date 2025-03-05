@@ -10,16 +10,15 @@ import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.containers.ContainerUtil
-import com.jetbrains.python.codeInsight.typing.PyTypeShed.findRootsForLanguageLevel
+import com.jetbrains.python.codeInsight.typing.PyTypeShed
 import com.jetbrains.python.codeInsight.userSkeletons.PyUserSkeletonsUtil
 import com.jetbrains.python.psi.LanguageLevel
+import com.jetbrains.python.sdk.PythonSdkType.MOCK_PY_MARKER_KEY
 import com.jetbrains.python.sdk.PythonSdkUtil
 import org.jdom.Element
 import org.jetbrains.annotations.NonNls
 import java.io.File
 import java.util.function.Consumer
-
-import com.jetbrains.python.sdk.PythonSdkType.MOCK_PY_MARKER_KEY
 
 /**
  * @author yole
@@ -88,7 +87,8 @@ object PythonMockSdk {
             localFS.refreshAndFindFileByIoFile(File(mockSdkPath, PythonSdkUtil.SKELETON_DIR_NAME))
         )
         ContainerUtil.addIfNotNull(result, PyUserSkeletonsUtil.getUserSkeletonsDirectory())
-        result.addAll(findRootsForLanguageLevel(level))
+        result.addAll(PyTypeShed.findAllRootsForLanguageLevel(level))
+
         return result
     }
 
