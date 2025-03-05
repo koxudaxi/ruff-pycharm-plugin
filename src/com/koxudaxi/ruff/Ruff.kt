@@ -666,8 +666,12 @@ fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     return fixResult
 }
 
-val PyExecutionException.failureReasonExitCode: Int? get() = (failureReason as? FailureReason.ExecutionFailed)?.output?.exitCode
-
+val PyExecutionException.failureReasonExitCode: Int get() {
+    return when (val failureReason = failureReason) {
+        is FailureReason.ExecutionFailed -> failureReason.output.exitCode
+        else -> -1
+    }
+}
 fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
     if (formatResult == null) return null
     if (formatResult.isNotBlank()) return formatResult
