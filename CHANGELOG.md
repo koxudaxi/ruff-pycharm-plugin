@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Support 251 EAP [[#567](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/567)]
 - feat: Use new python package management listener [[#566](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/566)]
 
 ## [0.0.45] - 2025-03-05
