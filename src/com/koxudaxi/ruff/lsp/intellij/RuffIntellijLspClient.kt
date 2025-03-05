@@ -11,7 +11,9 @@ import com.koxudaxi.ruff.lsp.RuffLspClient
 class RuffIntellijLspClient(val project: Project) : RuffLspClient {
     @Suppress("UnstableApiUsage")
     private val lspServerManager = if (intellijLspClientSupported) LspServerManager.getInstance(project) else null
-
+    fun getLspServerManager(): LspServerManager? {
+        return lspServerManager
+    }
     override fun start() {
         RuffLoggingService.log(project, "Starting IntelliJ LSP client...")
         restart()
@@ -33,5 +35,9 @@ class RuffIntellijLspClient(val project: Project) : RuffLspClient {
 
     override fun getClientType(): ClientType {
         return ClientType.INTELLIJ
+    }
+
+    override fun getLanguageServerManager(): Any? {
+        TODO("Not yet implemented")
     }
 }
