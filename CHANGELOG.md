@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.45] - 2025-03-05
+
 - fix: fix invalid ruff command option [[#564](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/564)]
 
 ## [0.0.44] - 2025-03-04
@@ -234,7 +237,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.44...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.45...HEAD
+[0.0.45]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.44...v0.0.45
 [0.0.44]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.43...v0.0.44
 [0.0.43]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.42...v0.0.43
 [0.0.42]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.41...v0.0.42
