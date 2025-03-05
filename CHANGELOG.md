@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- fix: fix invalid ruff command option [[#564](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/564)]
 
 ## [0.0.44] - 2025-03-04
 
