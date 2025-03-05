@@ -27,7 +27,7 @@
     </extensions>
     <projectListeners>
         <listener class="com.koxudaxi.ruff.RuffPackageManagerListener"
-                  topic="com.jetbrains.python.packaging.PyPackageManager$Listener"/>
+                  topic="com.jetbrains.python.packaging.common.PythonPackageManagementListener"/>
     </projectListeners>
     <actions>
         <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"

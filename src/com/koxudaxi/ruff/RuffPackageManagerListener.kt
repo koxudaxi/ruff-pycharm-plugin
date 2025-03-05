@@ -4,13 +4,14 @@ import RuffLspClientManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
-import com.jetbrains.python.packaging.PyPackageManager
+import com.jetbrains.python.packaging.common.PythonPackageManagementListener
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.lsp.ClientType
 
-class RuffPackageManagerListener(private val project: Project) : PyPackageManager.Listener {
+@Suppress("UnstableApiUsage")
+class RuffPackageManagerListener(private val project: Project): PythonPackageManagementListener {
 
-    override fun packagesRefreshed(sdk: Sdk) {
+    override fun packagesChanged(sdk: Sdk) {
         if (project.pythonSdk != sdk) return
         val ruffConfigService = project.configService
         val ruffCacheService = RuffCacheService.getInstance(project)
