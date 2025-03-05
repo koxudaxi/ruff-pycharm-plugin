@@ -88,7 +88,8 @@ class RuffApplyService(val project: Project) {
             val formatCommandArgs = generateCommandArgs(
                 sourceFile.project,
                 sourceByte,
-                FORMAT_ARGS
+                FORMAT_ARGS,
+                true
             ) ?: return
 
             if (projectRef.isDisposed) return

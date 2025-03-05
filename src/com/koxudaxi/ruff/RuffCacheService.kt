@@ -92,9 +92,7 @@ class RuffCacheService(val project: Project) {
             if (projectRef.isDisposed) return@supplyAsync null
             val newVersion = fetchVersionFromCommand()
             if (!projectRef.isDisposed) {
-                lock.withLock {
-                    version = newVersion
-                }
+                setVersion(newVersion)
             }
             newVersion
         }, executor)
