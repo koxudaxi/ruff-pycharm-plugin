@@ -31,7 +31,7 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
-import com.jetbrains.python.execution.FailureReason
+//import com.jetbrains.python.execution.FailureReason
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.packaging.PyExecutionException
@@ -666,12 +666,12 @@ fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     return fixResult
 }
 
-val PyExecutionException.failureReasonExitCode: Int get() {
-    return when (val failureReason = failureReason) {
-        is FailureReason.ExecutionFailed -> failureReason.output.exitCode
-        else -> -1
-    }
-}
+//val PyExecutionException.failureReasonExitCode: Int get() {
+//    return when (val failureReason = failureReason) {
+//        is FailureReason.ExecutionFailed -> failureReason.output.exitCode
+//        else -> -1
+//    }
+//}
 fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
     if (formatResult == null) return null
     if (formatResult.isNotBlank()) return formatResult
@@ -679,9 +679,12 @@ fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
     try {
         runRuff(sourceFile, FORMAT_CHECK_ARGS)
     } catch (e: PyExecutionException) {
-        if (e.failureReasonExitCode == 1) {
+        if (e.exitCode == 1) {
             return formatResult
         }
+    //        if (e.failureReasonExitCode == 1) {
+//            return formatResult
+//        }
     }
     return null
 }
