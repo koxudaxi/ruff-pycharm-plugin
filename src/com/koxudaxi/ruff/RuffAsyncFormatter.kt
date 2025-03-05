@@ -6,6 +6,7 @@ import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.psi.PsiFile
+import com.jetbrains.python.packaging.PyExecutionException
 import java.io.FileNotFoundException
 
 
@@ -83,6 +84,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                     when (exception) {
                         is ProcessCanceledException -> request.onTextReady(null)
                         is FileNotFoundException -> request.onTextReady(null)
+                        is PyExecutionException -> request.onTextReady(null)
                         else -> request.onError("Ruff Error", exception.localizedMessage)
                     }
                 }.onSuccess {
