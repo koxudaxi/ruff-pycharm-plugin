@@ -26,15 +26,11 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
             @Volatile
             private var cancelled = false
 
-            private fun noUpdate() {
-                request.onTextReady(null)
-            }
-
-            private fun updateText(currentText: String, text: String?) {
-                when {
-                    text == null -> noUpdate()
-                    currentText == text -> noUpdate()
-                    else -> request.onTextReady(text)
+            private fun assertResult(currentText: String, text: String?): String? {
+                return when {
+                    text == null -> null
+                    currentText == text -> null
+                    else -> text
                 }
             }
 
@@ -45,11 +41,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                 }
                 runCatching {
                     val formattingContext: FormattingContext = request.context
-                    val ioFile = request.ioFile
-                    if (ioFile == null) {
-                        request.onTextReady(null)
-                        return@runCatching
-                    }
+                    val ioFile = request.ioFile ?: return@runCatching null
                     val sourceFile = formattingContext.containingFile.sourceFile
                     val currentText = ioFile.readText()
 
@@ -61,47 +53,40 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
 
                     if (formatRange != null) {
                         // When a range is specified, only run the format command.
-                        val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS + formatRange.formatRangeArgs(currentText), false)
-                            ?: return@runCatching
-                        val formatCommandStdout = runRuff(formatCommandArgs, currentText.toByteArray())
-                        if (formatCommandStdout == null) {
-                            request.onTextReady(null)
-                            return@runCatching
-                        }
-                        updateText(currentText, formatCommandStdout)
-                        return@runCatching
+                        val formatCommandArgs = generateCommandArgs(
+                            sourceFile,
+                            FORMAT_ARGS + formatRange.formatRangeArgs(currentText),
+                            false
+                        )
+                            ?: return@runCatching null
+                        val formatCommandStdout = runRuff(formatCommandArgs, currentText.toByteArray()) ?: return@runCatching null
+                        return@runCatching assertResult(currentText, formatCommandStdout)
                     }
 
                     val fixCommandArgs = generateCommandArgs(sourceFile, formattingContext.project.FIX_ARGS, false)
-                        ?: return@runCatching
-                    val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray())
-                    if (fixCommandStdout == null) {
-                        request.onTextReady(null)
-                        return@runCatching
-                    }
+                        ?: return@runCatching null
+                    val fixCommandStdout = runRuff(fixCommandArgs, currentText.toByteArray()) ?: return@runCatching null
                     if (!RuffConfigService.getInstance(formattingContext.project).useRuffFormat) {
-                        updateText(currentText, fixCommandStdout)
-                        return@runCatching
+                        return@runCatching assertResult(currentText, fixCommandStdout)
                     }
                     val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS, false)
-                        ?: return@runCatching
+                        ?: return@runCatching null
                     if (cancelled) {
-                        noUpdate()
-                        return@runCatching
+                        return@runCatching null
                     }
                     val formatCommandStdout = runRuff(formatCommandArgs, fixCommandStdout.toByteArray())
                     if (cancelled) {
-                        noUpdate()
-                        return@runCatching
+                        return@runCatching null
                     }
-                    updateText(currentText, formatCommandStdout)
-
+                    assertResult(currentText, formatCommandStdout)
                 }.onFailure { exception ->
                     when (exception) {
-                        is ProcessCanceledException -> { /* ignore */ }
-                        is FileNotFoundException -> noUpdate()
+                        is ProcessCanceledException -> request.onTextReady(null)
+                        is FileNotFoundException -> request.onTextReady(null)
                         else -> request.onError("Ruff Error", exception.localizedMessage)
                     }
+                }.onSuccess {
+                    request.onTextReady(it)
                 }
             }
 

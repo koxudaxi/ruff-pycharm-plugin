@@ -470,7 +470,7 @@ fun runRuff(sourceFile: SourceFile, args: List<String>): String? =
     generateCommandArgs(sourceFile, args, true)?.let { runRuff(it) }
 
 fun runRuff(project: Project, args: List<String>, withoutConfig: Boolean = false): String? =
-    generateCommandArgs(project, null, args, withoutConfig)?.let { runRuff(it) }
+    generateCommandArgs(project, null, args, false, withoutConfig)?.let { runRuff(it) }
 
 
 data class CommandArgs(
@@ -482,13 +482,15 @@ fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Bo
     generateCommandArgs(
         sourceFile.project,
         if (setStdin) sourceFile.asStdin else null,
-        args + getStdinFileNameArgs(sourceFile)
+        args + getStdinFileNameArgs(sourceFile),
+        true
     )
 
 fun generateCommandArgs(
     project: Project,
     stdin: ByteArray?,
     args: List<String>,
+    addStdinOption: Boolean,
     withoutConfig: Boolean = false
 ): CommandArgs? {
     val ruffConfigService = project.configService
@@ -502,7 +504,7 @@ fun generateCommandArgs(
         executable,
         project,
         stdin,
-        (customConfigArgs ?: args) + if (stdin == null) listOf() else listOf("-")
+        (customConfigArgs ?: args) + if (stdin == null && !addStdinOption) listOf() else listOf("-")
     )
 }
 
@@ -545,7 +547,7 @@ inline fun <reified T> runRuffInBackground(
 inline fun <reified T> runRuffInBackground(
     project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
 ): ProgressIndicator? {
-    val commandArgs = generateCommandArgs(project, stdin, args) ?: return null
+    val commandArgs = generateCommandArgs(project, stdin, args, true) ?: return null
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
