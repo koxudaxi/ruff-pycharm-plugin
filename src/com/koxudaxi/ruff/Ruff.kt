@@ -92,8 +92,17 @@ val NO_FIX_OUTPUT_FORMAT_ARGS = ARGS_BASE + listOf("--no-fix", "--output-format"
 val FORMAT_ARGS = listOf("format", "--force-exclude", "--quiet")
 val FORMAT_CHECK_ARGS = FORMAT_ARGS + listOf("--check")
 val FORMAT_RANGE_ARGS = listOf("--range")
+val SELECT_ARGS = listOf("--select")
+val IMPORT_SORT_RULES = listOf("I")
+val REMOVE_UNUSED_IMPORTS_RULES = listOf("F401")
+val OPTIMIZE_IMPORTS_RULES = SELECT_ARGS + listOf((IMPORT_SORT_RULES + REMOVE_UNUSED_IMPORTS_RULES).joinToString(","))
 val LSP_ARGS_BASE = listOf("server")
 val PREVIEW_ARGS = listOf("--preview")
+val Project.OPTIMIZE_IMPORTS_ARGS: List<String>
+    get() = when {
+        RuffCacheService.hasCheck(this) == true -> CHECK + FIX_ARGS_BASE + OPTIMIZE_IMPORTS_RULES
+        else -> FIX_ARGS_BASE + OPTIMIZE_IMPORTS_RULES
+    }
 val Project.LSP_ARGS: List<String>
     get() = when {
         RuffCacheService.hasStableServer(this) == true -> LSP_ARGS_BASE
@@ -445,20 +454,22 @@ data class SourceFile(
 ) {
     val text: String? by lazy {
         val text = when (reloadText) {
-            true -> documentationManager.getDocument(psiFile)?.text
+            true -> currentText
             else -> psiFile.text
         } ?: return@lazy null
         if (textRange == null) return@lazy text
         if (textRange.endOffset <= text.length) textRange.substring(text)
         text.substring(textRange.startOffset, text.length)
     }
+    val currentText: String? get() = documentationManager.getDocument(psiFile)?.text
     private val documentationManager: PsiDocumentManager get() = PsiDocumentManager.getInstance(project)
     val project: Project get() = psiFile.project
     val virtualFile: VirtualFile? get() = psiFile.virtualFile
 
     val name: String get() = psiFile.name
-    val asStdin: ByteArray? get() = text?.toCharArray()?.toByteArrayAndClear()
-
+    val asStdin: ByteArray? get() = text?.let {convertToBytes(it) }
+    val asCurrentTextStdin: ByteArray? get() = currentText?.let {convertToBytes(it) }
+    private fun convertToBytes(text: String): ByteArray = text.toCharArray().toByteArrayAndClear()
     fun hasSameContentAsDocument(document: Document): Boolean = document.charsSequence.contentEquals(text)
 }
 
