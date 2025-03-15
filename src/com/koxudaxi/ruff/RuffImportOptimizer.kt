@@ -17,10 +17,7 @@ class RuffImportOptimizer : ImportOptimizer {
         return Runnable {
             val stdin = sourceFile.asCurrentTextStdin ?: return@Runnable
             runRuffInBackground(project, stdin, project.OPTIMIZE_IMPORTS_ARGS, "Optimize Imports with Ruff") {
-                val result = executeOnPooledThread(project, null as String?) {
-                    runRuff(sourceFile, optimizeImportsArgs)
-                }
-
+                result ->
                 if (result != null && result.isNotBlank()) {
                     ApplicationManager.getApplication().invokeLater {
                         CommandProcessor.getInstance().executeCommand(
