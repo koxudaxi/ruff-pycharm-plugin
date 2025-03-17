@@ -648,13 +648,27 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
     return projectBasePath.relativize(filePath).pathString
 }
 
-fun getStdinFileNameArgs(sourceFile: SourceFile) = sourceFile.virtualFile?.let {
-    getProjectRelativeFilePath(sourceFile.project, it)?.let { projectRelativeFilePath ->
-        listOf(
-            "--stdin-filename", projectRelativeFilePath
-        )
+fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
+    val virtualFile = sourceFile.virtualFile ?: return emptyList()
+    val pythonSdk = sourceFile.project.pythonSdk
+
+    if (pythonSdk?.isWsl == true) {
+        val wslTargetConfig =
+            (pythonSdk.sdkAdditionalData as? PyTargetAwareAdditionalData)
+                ?.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration
+        val wslDistribution = wslTargetConfig?.distribution
+        val wslPath = try {
+            wslDistribution?.getWslPath(virtualFile.toNioPath())
+        } catch (_: Exception) {
+            null
+        } ?: virtualFile.canonicalPath ?: return emptyList()
+        return listOf("--stdin-filename", wslPath)
     }
-} ?: listOf()
+
+    return getProjectRelativeFilePath(sourceFile.project, virtualFile)?.let { projectRelativeFilePath ->
+        listOf("--stdin-filename", projectRelativeFilePath)
+    } ?: emptyList()
+}
 
 fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset
