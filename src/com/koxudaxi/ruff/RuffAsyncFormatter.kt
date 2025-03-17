@@ -4,6 +4,7 @@ import com.intellij.formatting.FormattingContext
 import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService
+import com.intellij.lang.ImportOptimizer
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.packaging.PyExecutionException
@@ -11,7 +12,8 @@ import java.io.FileNotFoundException
 
 
 class RuffAsyncFormatter : AsyncDocumentFormattingService() {
-    private val FEATURES: Set<FormattingService.Feature> = setOf(FormattingService.Feature.FORMAT_FRAGMENTS)
+    private val FEATURES: Set<FormattingService.Feature> =
+        setOf(FormattingService.Feature.FORMAT_FRAGMENTS, FormattingService.Feature.OPTIMIZE_IMPORTS)
 
     override fun getFeatures(): Set<FormattingService.Feature> {
         return FEATURES
@@ -60,7 +62,8 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                             false
                         )
                             ?: return@runCatching null
-                        val formatCommandStdout = runRuff(formatCommandArgs, currentText.toByteArray()) ?: return@runCatching null
+                        val formatCommandStdout =
+                            runRuff(formatCommandArgs, currentText.toByteArray()) ?: return@runCatching null
                         return@runCatching assertResult(currentText, formatCommandStdout)
                     }
 
@@ -110,4 +113,14 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
     override fun getName(): String {
         return "Ruff Formatter"
     }
+
+    override fun getImportOptimizers(file: PsiFile): Set<ImportOptimizer?> {
+        val importOptimizer = RuffImportOptimizer()
+        return if (importOptimizer.supports(file)) {
+            setOf(importOptimizer)
+        } else {
+            emptySet()
+        }
+    }
+
 }
