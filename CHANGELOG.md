@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- fix: Fix Incorrect --stdin-filename Path Conversion for Ruff Under WSL [[#571](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/571)]
 - feat: Add Import Optimizer [[#570](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/570)]
 - Support 251 EAP [[#567](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/567)]
 - feat: Use new python package management listener [[#566](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/566)]
