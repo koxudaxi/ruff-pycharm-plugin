@@ -48,6 +48,7 @@ class RuffConfigPanel(project: Project) {
     private lateinit var formattingFeatureCheckBox: JCheckBox
     private lateinit var diagnosticFeatureCheckBox: JCheckBox
     private lateinit var hoverFeatureCheckBox: JCheckBox
+    private lateinit var useRuffImportOptimizerCheckBox: JCheckBox
 
 
 
@@ -80,6 +81,8 @@ class RuffConfigPanel(project: Project) {
         formattingFeatureCheckBox.isSelected = ruffConfigService.formattingFeature
         diagnosticFeatureCheckBox.isSelected = ruffConfigService.diagnosticFeature
         hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
+        useRuffImportOptimizerCheckBox.isSelected = ruffConfigService.useRuffImportOptimizer
+        useRuffImportOptimizerCheckBox.isEnabled = true
 
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
@@ -283,6 +286,8 @@ class RuffConfigPanel(project: Project) {
         get() = diagnosticFeatureCheckBox.isSelected
     val hoverFeature: Boolean
         get() = hoverFeatureCheckBox.isSelected
+    val useRuffImportOptimizer: Boolean
+        get() = useRuffImportOptimizerCheckBox.isSelected
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND = "Ruff executable not found"
         const val RUFF_LSP_EXECUTABLE_NOT_FOUND = "Ruff-lsp executable not found"

@@ -48,7 +48,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.codeActionFeature != configPanel.codeActionFeature ||
                 ruffConfigService.diagnosticFeature != configPanel.diagnosticFeature ||
                 ruffConfigService.formattingFeature != configPanel.formattingFeature ||
-                ruffConfigService.hoverFeature != configPanel.hoverFeature
+                ruffConfigService.hoverFeature != configPanel.hoverFeature ||
+                ruffConfigService.useRuffImportOptimizer != configPanel.useRuffImportOptimizer
 
 
     }
@@ -109,6 +110,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.diagnosticFeature = configPanel.diagnosticFeature
         ruffConfigService.formattingFeature = configPanel.formattingFeature
         ruffConfigService.hoverFeature = configPanel.hoverFeature
+
+        ruffConfigService.useRuffImportOptimizer = configPanel.useRuffImportOptimizer
 
         if (wasUsingLsp4ij != willUseLsp4ij) {
             RuffLoggingService.log(project, "LSP client type changed, shutting down previous client")
