@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- feat: Add opt-in setting for Ruff import optimizer [[#581](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/581)]
 
 ## [0.0.46] - 2025-03-20
 
