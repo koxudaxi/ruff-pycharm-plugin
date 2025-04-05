@@ -7,7 +7,10 @@ import com.intellij.psi.PsiFile
 import com.jetbrains.python.psi.PyUtil
 
 class RuffImportOptimizer : ImportOptimizer {
-    override fun supports(psiFile: PsiFile): Boolean = psiFile.isApplicableTo
+    override fun supports(psiFile: PsiFile): Boolean {
+        val config = psiFile.project.configService
+        return config.useRuffImportOptimizer && psiFile.isApplicableTo
+    }
 
     override fun processFile(psiFile: PsiFile): Runnable {
         val project = psiFile.project
@@ -16,8 +19,7 @@ class RuffImportOptimizer : ImportOptimizer {
 
         return Runnable {
             val stdin = sourceFile.asCurrentTextStdin ?: return@Runnable
-            runRuffInBackground(project, stdin, project.OPTIMIZE_IMPORTS_ARGS, "Optimize Imports with Ruff") {
-                result ->
+            runRuffInBackground(project, stdin, project.OPTIMIZE_IMPORTS_ARGS, "Optimize Imports with Ruff") { result ->
                 if (result != null && result.isNotBlank()) {
                     ApplicationManager.getApplication().invokeLater {
                         CommandProcessor.getInstance().executeCommand(
