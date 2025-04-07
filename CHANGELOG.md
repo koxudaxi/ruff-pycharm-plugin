@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.47] - 2025-04-07
+
 - feat: Add opt-in setting for Ruff import optimizer [[#581](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/581)]
 
 ## [0.0.46] - 2025-03-20
@@ -245,7 +248,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.46...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.47...HEAD
+[0.0.47]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.46...v0.0.47
 [0.0.46]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.45...v0.0.46
 [0.0.45]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.44...v0.0.45
 [0.0.44]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.43...v0.0.44
