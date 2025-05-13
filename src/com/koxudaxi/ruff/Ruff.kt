@@ -25,15 +25,12 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.eel.provider.asEelPath
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
-import com.jetbrains.python.errorProcessing.ExecError
-import com.jetbrains.python.errorProcessing.ExecErrorReason
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.sdk.*
@@ -380,9 +377,9 @@ fun getGeneralCommandLine(executable: File, project: Project?, vararg args: Stri
 }
 
 
-@Suppress("UnstableApiUsage")
-class RuffException(val execError: ExecError) : ExecutionException("Ruff error") {
-    val exitCode: Int? = (execError.errorReason as? ExecErrorReason.UnexpectedProcessTermination)?.exitCode
+class RuffException(val exitCode: Int, stdout: String, stderr: String) : ExecutionException(
+    "Ruff error: exit code $exitCode\nstdout: $stdout\nstderr: $stderr"
+) {
 
 }
 
@@ -445,15 +442,15 @@ fun runCommand(
                         throw UnexpectedNewArgumentException(NewArgument.FORMAT)
                     }
 
-                    else -> throw RuffException(
-                        ExecError(
-                            Path(executable.path).asEelPath(),
-                            args.toList().toTypedArray(),
-                            ExecErrorReason.UnexpectedProcessTermination(exitCode, stdout, stderr),
-                            null
-                        )
-                    )
-
+                    else -> throw RuffException(exitCode, stdout, stderr)
+//                    else -> throw RuffException(
+//                        ExecError(
+//                            Path(executable.path).asEelPath(),
+//                            args.toList().toTypedArray(),
+//                            ExecErrorReason.UnexpectedProcessTermination(exitCode, stdout, stderr),
+//                            null
+//                        )
+//                    )
                 }
             }
 
