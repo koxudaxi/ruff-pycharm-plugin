@@ -25,16 +25,17 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.eel.provider.asEelPath
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.jetbrains.python.PythonLanguage
-//import com.jetbrains.python.execution.FailureReason
+import com.jetbrains.python.errorProcessing.ExecError
+import com.jetbrains.python.errorProcessing.ExecErrorReason
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
-import com.jetbrains.python.packaging.PyExecutionException
 import com.jetbrains.python.sdk.*
 import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
@@ -43,11 +44,12 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.IOError
 import java.io.IOException
+import java.nio.file.Paths
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.regex.Pattern
-import java.nio.file.Paths
+import kotlin.io.path.Path
 import kotlin.io.path.pathString
 
 val RUFF_COMMAND = when {
@@ -377,6 +379,13 @@ fun getGeneralCommandLine(executable: File, project: Project?, vararg args: Stri
     }
 }
 
+
+@Suppress("UnstableApiUsage")
+class RuffException(val execError: ExecError) : ExecutionException("Ruff error") {
+    val exitCode: Int? = (execError.errorReason as? ExecErrorReason.UnexpectedProcessTermination)?.exitCode
+
+}
+
 fun runCommand(
     executable: File, project: Project?, stdin: ByteArray?, vararg args: String
 ): String? {
@@ -436,9 +445,15 @@ fun runCommand(
                         throw UnexpectedNewArgumentException(NewArgument.FORMAT)
                     }
 
-                    else -> throw PyExecutionException(
-                        "Error Running Ruff", executable.path, args.asList(), stdout, stderr, exitCode, emptyList()
+                    else -> throw RuffException(
+                        ExecError(
+                            Path(executable.path).asEelPath(),
+                            args.toList().toTypedArray(),
+                            ExecErrorReason.UnexpectedProcessTermination(exitCode, stdout, stderr),
+                            null
+                        )
                     )
+
                 }
             }
 
@@ -467,8 +482,8 @@ data class SourceFile(
     val virtualFile: VirtualFile? get() = psiFile.virtualFile
 
     val name: String get() = psiFile.name
-    val asStdin: ByteArray? get() = text?.let {convertToBytes(it) }
-    val asCurrentTextStdin: ByteArray? get() = currentText?.let {convertToBytes(it) }
+    val asStdin: ByteArray? get() = text?.let { convertToBytes(it) }
+    val asCurrentTextStdin: ByteArray? get() = currentText?.let { convertToBytes(it) }
     private fun convertToBytes(text: String): ByteArray = text.toCharArray().toByteArrayAndClear()
     fun hasSameContentAsDocument(document: Document): Boolean = document.charsSequence.contentEquals(text)
 }
@@ -586,7 +601,7 @@ inline fun <reified T> executeOnPooledThread(
         ApplicationManager.getApplication().executeOnPooledThread<T> {
             try {
                 action.invoke()
-            } catch (e: PyExecutionException) {
+            } catch (e: RuffException) {
                 defaultResult
             } catch (e: ProcessNotCreatedException) {
                 defaultResult
@@ -624,7 +639,7 @@ inline fun executeOnPooledThread(crossinline action: () -> Unit) =
     ApplicationManager.getApplication().executeOnPooledThread {
         try {
             action.invoke()
-        } catch (_: PyExecutionException) {
+        } catch (_: RuffException) {
         } catch (_: ProcessNotCreatedException) {
         }
     }
@@ -691,23 +706,17 @@ fun checkFixResult(sourceFile: SourceFile, fixResult: String?): String? {
     return fixResult
 }
 
-//val PyExecutionException.failureReasonExitCode: Int get() {
-//    return when (val failureReason = failureReason) {
-//        is FailureReason.ExecutionFailed -> failureReason.output.exitCode
-//        else -> -1
-//    }
-//}
 fun checkFormatResult(sourceFile: SourceFile, formatResult: String?): String? {
     if (formatResult == null) return null
     if (formatResult.isNotBlank()) return formatResult
 
     try {
         runRuff(sourceFile, FORMAT_CHECK_ARGS)
-    } catch (e: PyExecutionException) {
+    } catch (e: RuffException) {
         if (e.exitCode == 1) {
             return formatResult
         }
-    //        if (e.failureReasonExitCode == 1) {
+        //        if (e.failureReasonExitCode == 1) {
 //            return formatResult
 //        }
     }
