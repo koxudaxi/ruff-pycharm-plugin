@@ -84,6 +84,7 @@ class RuffConfigPanel(project: Project) {
         hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
         useRuffImportOptimizerCheckBox.isSelected = ruffConfigService.useRuffImportOptimizer
         useRuffImportOptimizerCheckBox.isEnabled = true
+        ruffConfigPathField.textField.isEnabled = !ruffConfigService.useClosestConfig
         useClosestConfigCheckbox.isSelected = ruffConfigService.useClosestConfig
 
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
@@ -167,7 +168,6 @@ class RuffConfigPanel(project: Project) {
         }
 
         useClosestConfigCheckbox.addActionListener {
-            println("Checkbox toggled: ${useClosestConfigCheckbox.isSelected}")
             val useClosest = useClosestConfigCheckbox.isSelected
             ruffConfigPathField.isEnabled = !useClosest
             ruffConfigPathField.textField.isEditable = !useClosest
