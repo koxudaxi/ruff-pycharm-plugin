@@ -87,7 +87,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                     when (exception) {
                         is ProcessCanceledException -> request.onTextReady(null)
                         is FileNotFoundException -> request.onTextReady(null)
-                        is PyExecutionException -> request.onTextReady(null)
+                        is RuffException -> request.onTextReady(null)
                         else -> request.onError("Ruff Error", exception.localizedMessage)
                     }
                 }.onSuccess {
