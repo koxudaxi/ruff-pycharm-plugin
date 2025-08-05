@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix plugin compatibility issues for 252 EAP with Python dependencies [[#609](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/609)]
 
 ## [0.0.48] - 2025-08-05
 
