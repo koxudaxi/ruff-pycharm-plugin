@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+- Fix plugin compatibility issues for 252 EAP with Python dependencies [[#609](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/609)]
+
+## [0.0.48] - 2025-08-05
+
 - Support 252 EAP [[#594](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/594)]
 
 ## [0.0.47] - 2025-04-07
@@ -249,7 +253,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.47...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.48...HEAD
+[0.0.48]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.47...v0.0.48
 [0.0.47]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.46...v0.0.47
 [0.0.46]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.45...v0.0.46
 [0.0.45]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.44...v0.0.45
