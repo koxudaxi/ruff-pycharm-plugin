@@ -42,3 +42,5 @@ hs_err_pid*
 /site
 /docs/changelog.md
 .qodana
+
+.intellijPlatform/localPlatformArtifacts/

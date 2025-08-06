@@ -502,12 +502,14 @@ data class CommandArgs(
     val stdin: ByteArray?, val args: List<String>,
 )
 
-fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Boolean): CommandArgs? =
+fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Boolean, configPath: String? = null): CommandArgs? =
     generateCommandArgs(
         sourceFile.project,
         if (setStdin) sourceFile.asStdin else null,
         args + getStdinFileNameArgs(sourceFile),
-        true
+        true,
+        false,
+        configPath
     )
 
 fun generateCommandArgs(
@@ -515,13 +517,14 @@ fun generateCommandArgs(
     stdin: ByteArray?,
     args: List<String>,
     addStdinOption: Boolean,
-    withoutConfig: Boolean = false
+    withoutConfig: Boolean = false,
+    configPath: String? = null
 ): CommandArgs? {
     val ruffConfigService = project.configService
     val ruffCacheService = RuffCacheService.getInstance(project)
     val executable =
         getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
-    val customConfigArgs = if (withoutConfig) null else ruffConfigService.ruffConfigPath?.let {
+    val customConfigArgs = if (withoutConfig) null else if(configPath != null) args + listOf(CONFIG_ARG, configPath) else ruffConfigService.ruffConfigPath?.let {
         args + listOf(CONFIG_ARG, it)
     }
     return CommandArgs(

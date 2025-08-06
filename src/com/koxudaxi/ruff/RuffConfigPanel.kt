@@ -33,6 +33,7 @@ class RuffConfigPanel(project: Project) {
 
     private lateinit var projectRuffLspLabel: JLabel
     private lateinit var projectRuffLspExecutablePathField: JBTextField
+    private lateinit var useClosestConfigCheckbox: JCheckBox
     private lateinit var ruffConfigPathField: TextFieldWithBrowseButton
     private lateinit var clearRuffConfigPathButton: JButton
     private lateinit var disableOnSaveOutsideOfProjectCheckBox: JCheckBox
@@ -83,6 +84,8 @@ class RuffConfigPanel(project: Project) {
         hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
         useRuffImportOptimizerCheckBox.isSelected = ruffConfigService.useRuffImportOptimizer
         useRuffImportOptimizerCheckBox.isEnabled = true
+        ruffConfigPathField.textField.isEnabled = !ruffConfigService.useClosestConfig
+        useClosestConfigCheckbox.isSelected = ruffConfigService.useClosestConfig
 
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
@@ -164,6 +167,12 @@ class RuffConfigPanel(project: Project) {
             }
         }
 
+        useClosestConfigCheckbox.addActionListener {
+            val useClosest = useClosestConfigCheckbox.isSelected
+            ruffConfigPathField.isEnabled = !useClosest
+            ruffConfigPathField.textField.isEditable = !useClosest
+            clearRuffConfigPathButton.isEnabled = !useClosest
+        }
         ruffConfigPathField.apply {
             addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
             textField.isEditable = false
@@ -173,6 +182,7 @@ class RuffConfigPanel(project: Project) {
             ruffConfigPathField.text = ""
         }
     }
+
 
     private fun updateLspClientCheckBoxes() {
         val useLspClient = useRuffLspRadioButton.isSelected || useRuffServerRadioButton.isSelected
@@ -288,6 +298,8 @@ class RuffConfigPanel(project: Project) {
         get() = hoverFeatureCheckBox.isSelected
     val useRuffImportOptimizer: Boolean
         get() = useRuffImportOptimizerCheckBox.isSelected
+    val useClosestConfig: Boolean
+        get() = useClosestConfigCheckbox.isSelected
     companion object {
         const val RUFF_EXECUTABLE_NOT_FOUND = "Ruff executable not found"
         const val RUFF_LSP_EXECUTABLE_NOT_FOUND = "Ruff-lsp executable not found"
