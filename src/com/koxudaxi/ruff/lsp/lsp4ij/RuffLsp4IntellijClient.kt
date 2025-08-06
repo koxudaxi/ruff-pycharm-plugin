@@ -16,6 +16,10 @@ class RuffLsp4IntellijClient(project: Project) : RuffLspClient {
             return status == ServerStatus.started || status == ServerStatus.starting
         }
 
+    override fun getLanguageServerManager(): LanguageServerManager? {
+        return languageServerManager
+    }
+
     override fun start() {
         if (languageServerManager == null) return
         if (!isRunning) {

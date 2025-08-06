@@ -8,6 +8,7 @@ interface RuffLspClient {
     fun stop()
     fun restart()
     fun getClientType(): ClientType
+    fun getLanguageServerManager(): Any?
 }
 
 
