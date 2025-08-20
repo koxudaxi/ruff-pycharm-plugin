@@ -659,7 +659,10 @@ fun VirtualFile.isInProjectDir(project: Project): Boolean =
 fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
     val projectBasePath = project.basePath?.let { Paths.get(it) } ?: return null
     val filePath = virtualFile.canonicalPath?.let { Paths.get(it) } ?: return null
-    if (!project.modules.any { module -> module.basePath?.let { filePath.startsWith(it) } == true }) return null
+    if (!project.modules.any {
+        module -> module.basePath?.let { filePath.startsWith(it) } == true
+                || module.rootManager.contentRoots.any { contentRoot -> filePath.startsWith(contentRoot.path) }
+    }) return null
     return projectBasePath.relativize(filePath).pathString
 }
 

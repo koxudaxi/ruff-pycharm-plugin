@@ -4,8 +4,9 @@
     <vendor email="koaxudai@gmail.com">Koudai Aono @koxudaxi</vendor>
 
     <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.python</depends>
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true">PythonCore</depends>
+    <depends optional="true">Pythonid</depends>
     <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
     <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
