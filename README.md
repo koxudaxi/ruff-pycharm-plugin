@@ -89,12 +89,6 @@ We are waiting for your contributions to `ruff-pycharm-plugin`!
       <p>Astral</p>
     </a>
   </td>
-  <td valign="top" align="center">
-    <a href="https://github.com/DataDog">
-      <img src="https://avatars.githubusercontent.com/u/365230?s=200&v=4" alt="Datadog, Inc. Logo" style="width: 100px;">
-      <p>Datadog, Inc.</p>
-    </a>
-  </td>
   </tr>
 </table>
 
