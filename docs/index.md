@@ -23,12 +23,6 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
       <p>Astral</p>
     </a>
   </td>
-  <td valign="top" align="center">
-    <a href="https://github.com/DataDog">
-      <img src="https://avatars.githubusercontent.com/u/365230?s=200&v=4" alt="Datadog, Inc. Logo" style="width: 100px;">
-      <p>Datadog, Inc.</p>
-    </a>
-  </td>
   </tr>
 </table>
 
