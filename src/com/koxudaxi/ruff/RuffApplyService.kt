@@ -11,6 +11,7 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import kotlin.io.path.Path
 
 
 @Service(Service.Level.PROJECT)
@@ -57,12 +58,22 @@ class RuffApplyService(val project: Project) {
         try {
             val projectRef = project
 
+            val configPath = if (projectRef.configService.useClosestConfig)
+                findClosestRuffConfig(sourceFile)
+            else
+                null
+
+            val fixArgs = if (configPath != null)
+                projectRef.FIX_ARGS + listOf("--config", configPath)
+            else
+                projectRef.FIX_ARGS
+
             val checkedFixed = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null
                 RuffLoggingService.log(projectRef, "Applying Ruff fix to ${sourceFile.name}")
 
                 try {
-                    val fixed = runRuff(sourceFile, projectRef.FIX_ARGS)
+                    val fixed = runRuff(sourceFile, fixArgs)
                     if (projectRef.isDisposed) return@runReadActionOnPooledThread null
                     checkFixResult(sourceFile, fixed)
                 } catch (e: Exception) {
@@ -89,7 +100,8 @@ class RuffApplyService(val project: Project) {
                 sourceFile.project,
                 sourceByte,
                 FORMAT_ARGS,
-                true
+                true,
+                configPath = configPath
             ) ?: return
 
             if (projectRef.isDisposed) return
@@ -123,4 +135,17 @@ class RuffApplyService(val project: Project) {
             return project.getService(RuffApplyService::class.java)
         }
     }
+}
+
+fun findClosestRuffConfig(sourceFile: SourceFile): String? {
+    val virtualFile = sourceFile.virtualFile ?: return null
+    val configFiles = listOf("pyproject.toml", "ruff.toml")
+    
+    return generateSequence(Path(virtualFile.path)) { it.parent }
+        .firstNotNullOfOrNull { dir ->
+            configFiles
+                .map { dir.resolve(it) }
+                .firstOrNull { it.toFile().exists() }
+                ?.toString()
+        }
 }
