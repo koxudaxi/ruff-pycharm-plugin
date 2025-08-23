@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Added option to use closest configuration file [[#602](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/602)]
 
 ## [0.0.49] - 2025-08-05
 
