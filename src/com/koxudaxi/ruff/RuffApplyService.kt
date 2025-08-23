@@ -138,20 +138,14 @@ class RuffApplyService(val project: Project) {
 }
 
 fun findClosestRuffConfig(sourceFile: SourceFile): String? {
-    val virtualFile = sourceFile.virtualFile
-    if (virtualFile == null) return null
-    var current = Path(virtualFile.path)
-
-
-    while (current != null) {
-        val pyproject = current.resolve("pyproject.toml")
-        val ruffToml = current.resolve("ruff.toml")
-        when {
-            pyproject.toFile().exists() -> return pyproject.toString()
-            ruffToml.toFile().exists() -> return ruffToml.toString()
+    val virtualFile = sourceFile.virtualFile ?: return null
+    val configFiles = listOf("pyproject.toml", "ruff.toml")
+    
+    return generateSequence(Path(virtualFile.path)) { it.parent }
+        .firstNotNullOfOrNull { dir ->
+            configFiles
+                .map { dir.resolve(it) }
+                .firstOrNull { it.toFile().exists() }
+                ?.toString()
         }
-        current = current.parent
-    }
-
-    return null
 }
