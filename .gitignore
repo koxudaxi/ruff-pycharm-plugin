@@ -44,3 +44,4 @@ hs_err_pid*
 .qodana
 
 .intellijPlatform/localPlatformArtifacts/
+.intellijPlatform/self-update.lock
