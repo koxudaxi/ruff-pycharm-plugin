@@ -391,14 +391,6 @@
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
       </hspacer>
-      <component id="9b2fc" class="javax.swing.JCheckBox" binding="useClosestConfigCheckbox">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Use configuration file closest to formatted file"/>
-        </properties>
-      </component>
     </children>
   </grid>
   <buttonGroups>

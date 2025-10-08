@@ -49,8 +49,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.diagnosticFeature != configPanel.diagnosticFeature ||
                 ruffConfigService.formattingFeature != configPanel.formattingFeature ||
                 ruffConfigService.hoverFeature != configPanel.hoverFeature ||
-                ruffConfigService.useRuffImportOptimizer != configPanel.useRuffImportOptimizer ||
-                ruffConfigService.useClosestConfig != configPanel.useClosestConfig
+                ruffConfigService.useRuffImportOptimizer != configPanel.useRuffImportOptimizer
 
 
     }
@@ -75,7 +74,6 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         ruffConfigService.globalRuffLspExecutablePath = configPanel.globalRuffLspExecutablePath
         ruffConfigService.disableOnSaveOutsideOfProject = configPanel.disableOnSaveOutsideOfProject
         ruffConfigService.useRuffFormat = configPanel.useRuffFormat
-        ruffConfigService.useClosestConfig = configPanel.useClosestConfig
 
         if (ruffConfigService.enableRuffLogging != configPanel.enableRuffLogging) {
             if (configPanel.enableRuffLogging) {
