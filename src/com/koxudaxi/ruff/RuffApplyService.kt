@@ -58,10 +58,7 @@ class RuffApplyService(val project: Project) {
         try {
             val projectRef = project
 
-            val configPath = if (projectRef.configService.useClosestConfig)
-                findClosestRuffConfig(sourceFile)
-            else
-                null
+            val configPath = projectRef.configService.ruffConfigPath
 
             val fixArgs = if (configPath != null)
                 projectRef.FIX_ARGS + listOf("--config", configPath)
@@ -135,17 +132,4 @@ class RuffApplyService(val project: Project) {
             return project.getService(RuffApplyService::class.java)
         }
     }
-}
-
-fun findClosestRuffConfig(sourceFile: SourceFile): String? {
-    val virtualFile = sourceFile.virtualFile ?: return null
-    val configFiles = listOf("pyproject.toml", "ruff.toml")
-    
-    return generateSequence(Path(virtualFile.path)) { it.parent }
-        .firstNotNullOfOrNull { dir ->
-            configFiles
-                .map { dir.resolve(it) }
-                .firstOrNull { it.toFile().exists() }
-                ?.toString()
-        }
 }
