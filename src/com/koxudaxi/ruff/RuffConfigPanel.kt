@@ -249,7 +249,7 @@ class RuffConfigPanel(project: Project) {
         }
 
     private fun getProjectRuffExecutablePath(project: Project, lsp: Boolean): String? {
-        return project.pythonSdk?.let { findRuffExecutableInSDK(it, lsp) }?.absolutePath
+        return project.preferredPythonSdk?.let { findRuffExecutableInSDK(it, lsp) }?.absolutePath
     }
 
     val runRuffOnSave: Boolean
