@@ -75,6 +75,19 @@ fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
 
 fun getRuffWlsCommand(lsp: Boolean) = if (lsp) WSL_RUFF_LSP_COMMAND else WSL_RUFF_COMMAND
 
+/**
+ * Returns a Python SDK to use for Ruff.
+ * In non-Python IDEs (e.g., CLion) users often configure interpreter per-module,
+ * so [Project.pythonSdk] can be null even though modules have Python SDKs.
+ * We fall back to the first module SDK when available.
+ */
+val Project.preferredPythonSdk: Sdk?
+    get() = try {
+        this.pythonSdk ?: this.modules.asSequence().mapNotNull { it.pythonSdk }.firstOrNull()
+    } catch (_: NoClassDefFoundError) {
+        null
+    }
+
 
 val SCRIPT_DIR = when {
     SystemInfo.isWindows -> "Scripts"
@@ -193,7 +206,7 @@ fun detectRuffExecutable(
     lsp: Boolean,
     ruffCacheService: RuffCacheService
 ): File? {
-    project.pythonSdk?.let {
+    project.preferredPythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
@@ -585,7 +598,7 @@ inline fun <reified T> runRuffInBackground(
             val result: String? = try {
                 runRuff(commandArgs)
             } catch (e: ExecutionException) {
-                showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
+                showSdkExecutionException(project.preferredPythonSdk, e, "Error Running Ruff")
                 null
             }
             callback(result)
@@ -672,7 +685,7 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
 
 fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
     val virtualFile = sourceFile.virtualFile ?: return emptyList()
-    val pythonSdk = sourceFile.project.pythonSdk
+    val pythonSdk = sourceFile.project.preferredPythonSdk
 
     if (pythonSdk?.isWsl == true) {
         val wslTargetConfig =
@@ -800,3 +813,20 @@ fun TextRange.formatRange(text: String): String {
 
 
 fun TextRange.formatRangeArgs(text: String): List<String> = FORMAT_RANGE_ARGS + listOf(formatRange(text))
+
+private const val NATIVE_RUFF_CONFIGURABLE_ID = "com.intellij.python.ruff.RuffConfigurable"
+
+/**
+ * Checks if native Ruff support is available in the IDE.
+ * Native Ruff support was added in PyCharm 2025.3 via the Python plugin's LSP Tools.
+ * This is detected by checking for the presence of the RuffConfigurable extension point.
+ */
+fun hasNativeRuffSupport(project: Project): Boolean {
+    return try {
+        com.intellij.openapi.options.Configurable.PROJECT_CONFIGURABLE
+            .getExtensions(project)
+            .any { it.id == NATIVE_RUFF_CONFIGURABLE_ID }
+    } catch (e: Exception) {
+        false
+    }
+}
