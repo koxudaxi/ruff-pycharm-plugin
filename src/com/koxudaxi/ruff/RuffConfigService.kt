@@ -29,6 +29,7 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var useRuffImportOptimizer: Boolean = false
     var useClosestConfig: Boolean = false
     var hoverFeature: Boolean = true
+    var nativeRuffSupportNotificationDismissed: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this

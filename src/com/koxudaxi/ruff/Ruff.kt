@@ -796,3 +796,20 @@ fun TextRange.formatRange(text: String): String {
 
 
 fun TextRange.formatRangeArgs(text: String): List<String> = FORMAT_RANGE_ARGS + listOf(formatRange(text))
+
+private const val NATIVE_RUFF_CONFIGURABLE_ID = "com.intellij.python.ruff.RuffConfigurable"
+
+/**
+ * Checks if native Ruff support is available in the IDE.
+ * Native Ruff support was added in PyCharm 2025.3 via the Python plugin's LSP Tools.
+ * This is detected by checking for the presence of the RuffConfigurable extension point.
+ */
+fun hasNativeRuffSupport(project: Project): Boolean {
+    return try {
+        com.intellij.openapi.options.Configurable.PROJECT_CONFIGURABLE
+            .getExtensions(project)
+            .any { it.id == NATIVE_RUFF_CONFIGURABLE_ID }
+    } catch (e: Exception) {
+        false
+    }
+}
