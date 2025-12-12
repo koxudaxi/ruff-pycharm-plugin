@@ -11,12 +11,18 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.util.concurrency.AppExecutorUtil
+import kotlin.io.path.Path
+import java.util.concurrent.ExecutorService
 
 
 @Service(Service.Level.PROJECT)
 class RuffApplyService(val project: Project) {
     private val undoManager by lazy { UndoManager.getInstance(project) }
     private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
+    private val applyExecutor: ExecutorService by lazy {
+        AppExecutorUtil.createBoundedApplicationPoolExecutor("RuffApplyService", 1)
+    }
 
     fun apply(psiFile: PsiFile, withFormat: Boolean) {
         if (project.isDisposed) return
@@ -52,6 +58,21 @@ class RuffApplyService(val project: Project) {
     val actionName = "Formatting with Ruff"
 
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
+        if (project.isDisposed) return
+        val app = com.intellij.openapi.application.ApplicationManager.getApplication()
+        if (app.isDispatchThread || app.isWriteAccessAllowed) {
+            val projectRef = project
+            applyExecutor.execute {
+                if (!projectRef.isDisposed) {
+                    applyInternal(document, sourceFile, withFormat)
+                }
+            }
+            return
+        }
+        applyInternal(document, sourceFile, withFormat)
+    }
+
+    private fun applyInternal(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
         if (project.isDisposed) return
 
         try {
@@ -128,4 +149,17 @@ class RuffApplyService(val project: Project) {
             return project.getService(RuffApplyService::class.java)
         }
     }
+}
+
+fun findClosestRuffConfig(sourceFile: SourceFile): String? {
+    val virtualFile = sourceFile.virtualFile ?: return null
+    val configFiles = listOf("pyproject.toml", "ruff.toml")
+    
+    return generateSequence(Path(virtualFile.path)) { it.parent }
+        .firstNotNullOfOrNull { dir ->
+            configFiles
+                .map { dir.resolve(it) }
+                .firstOrNull { it.toFile().exists() }
+                ?.toString()
+        }
 }
