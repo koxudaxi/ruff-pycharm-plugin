@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import kotlin.io.path.Path
 
 
 @Service(Service.Level.PROJECT)
@@ -60,10 +59,7 @@ class RuffApplyService(val project: Project) {
 
             val configPath = projectRef.configService.ruffConfigPath
 
-            val fixArgs = if (configPath != null)
-                projectRef.FIX_ARGS + listOf("--config", configPath)
-            else
-                projectRef.FIX_ARGS
+            val fixArgs = projectRef.FIX_ARGS
 
             val checkedFixed = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null
