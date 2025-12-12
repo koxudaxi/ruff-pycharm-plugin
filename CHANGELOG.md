@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.51] - 2025-12-12
+
 - Added option to use closest configuration file [[#602](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/602)]
 - Fix duplicate --config option issue [[#631](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/631)]
 - Fix freeze on save by executing apply in a background thread [[#647](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/647)]
@@ -264,7 +267,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.49...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.51...HEAD
+[0.0.51]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.49...v0.0.51
 [0.0.49]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.48...v0.0.49
 [0.0.48]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.47...v0.0.48
 [0.0.47]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.46...v0.0.47
