@@ -27,7 +27,6 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var diagnosticFeature: Boolean = true
     var formattingFeature: Boolean = true
     var useRuffImportOptimizer: Boolean = false
-    var useClosestConfig: Boolean = false
     var hoverFeature: Boolean = true
     var nativeRuffSupportNotificationDismissed: Boolean = false
 

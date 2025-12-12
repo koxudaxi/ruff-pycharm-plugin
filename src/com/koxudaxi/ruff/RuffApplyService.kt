@@ -78,15 +78,9 @@ class RuffApplyService(val project: Project) {
         try {
             val projectRef = project
 
-            val configPath = if (projectRef.configService.useClosestConfig)
-                findClosestRuffConfig(sourceFile)
-            else
-                null
+            val configPath = projectRef.configService.ruffConfigPath
 
-            val fixArgs = if (configPath != null)
-                projectRef.FIX_ARGS + listOf("--config", configPath)
-            else
-                projectRef.FIX_ARGS
+            val fixArgs = projectRef.FIX_ARGS
 
             val checkedFixed = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null
