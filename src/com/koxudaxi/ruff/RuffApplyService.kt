@@ -11,13 +11,18 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.util.concurrency.AppExecutorUtil
 import kotlin.io.path.Path
+import java.util.concurrent.ExecutorService
 
 
 @Service(Service.Level.PROJECT)
 class RuffApplyService(val project: Project) {
     private val undoManager by lazy { UndoManager.getInstance(project) }
     private val psiDocumentManager by lazy { PsiDocumentManager.getInstance(project) }
+    private val applyExecutor: ExecutorService by lazy {
+        AppExecutorUtil.createBoundedApplicationPoolExecutor("RuffApplyService", 1)
+    }
 
     fun apply(psiFile: PsiFile, withFormat: Boolean) {
         if (project.isDisposed) return
@@ -54,19 +59,28 @@ class RuffApplyService(val project: Project) {
 
     fun apply(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
         if (project.isDisposed) return
+        val app = com.intellij.openapi.application.ApplicationManager.getApplication()
+        if (app.isDispatchThread || app.isWriteAccessAllowed) {
+            val projectRef = project
+            applyExecutor.execute {
+                if (!projectRef.isDisposed) {
+                    applyInternal(document, sourceFile, withFormat)
+                }
+            }
+            return
+        }
+        applyInternal(document, sourceFile, withFormat)
+    }
+
+    private fun applyInternal(document: Document, sourceFile: SourceFile, withFormat: Boolean) {
+        if (project.isDisposed) return
 
         try {
             val projectRef = project
 
-            val configPath = if (projectRef.configService.useClosestConfig)
-                findClosestRuffConfig(sourceFile)
-            else
-                null
+            val configPath = projectRef.configService.ruffConfigPath
 
-            val fixArgs = if (configPath != null)
-                projectRef.FIX_ARGS + listOf("--config", configPath)
-            else
-                projectRef.FIX_ARGS
+            val fixArgs = projectRef.FIX_ARGS
 
             val checkedFixed = runReadActionOnPooledThread(projectRef,null) {
                 if (projectRef.isDisposed) return@runReadActionOnPooledThread null

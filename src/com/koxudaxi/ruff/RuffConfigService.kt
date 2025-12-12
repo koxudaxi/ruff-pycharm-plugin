@@ -20,15 +20,15 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var useIntellijLspClient: Boolean = intellijLspClientSupported
     var useLsp4ij: Boolean = !useIntellijLspClient
     var useRuffServer: Boolean = false
-    var useRuffFormat: Boolean = false
+    var useRuffFormat: Boolean = true
     var enableLsp: Boolean = true
     var enableRuffLogging: Boolean = false
     var codeActionFeature: Boolean = true
     var diagnosticFeature: Boolean = true
     var formattingFeature: Boolean = true
     var useRuffImportOptimizer: Boolean = false
-    var useClosestConfig: Boolean = false
     var hoverFeature: Boolean = true
+    var nativeRuffSupportNotificationDismissed: Boolean = false
 
     override fun getState(): RuffConfigService {
         return this

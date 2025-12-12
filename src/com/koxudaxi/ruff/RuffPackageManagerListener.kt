@@ -3,6 +3,7 @@ package com.koxudaxi.ruff
 import RuffLspClientManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
 import com.jetbrains.python.packaging.common.PythonPackageManagementListener
 import com.jetbrains.python.sdk.pythonSdk
@@ -12,7 +13,8 @@ import com.koxudaxi.ruff.lsp.ClientType
 class RuffPackageManagerListener(private val project: Project): PythonPackageManagementListener {
 
     override fun packagesChanged(sdk: Sdk) {
-        if (project.pythonSdk != sdk) return
+        val preferredSdk = project.preferredPythonSdk
+        if (preferredSdk != sdk && project.modules.none { it.pythonSdk == sdk }) return
         val ruffConfigService = project.configService
         val ruffCacheService = RuffCacheService.getInstance(project)
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
