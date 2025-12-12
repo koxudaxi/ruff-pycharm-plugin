@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 - Added option to use closest configuration file [[#602](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/602)]
+- Fix duplicate --config option issue [[#631](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/631)]
+- Fix freeze on save by executing apply in a background thread [[#647](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/647)]
+- Improve Python language lookup in Ruff integration [[#648](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/648)]
+- Enable Ruff format by default [[#646](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/646)]
+- Enhance Python SDK detection for Ruff in CLion [[#645](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/645)]
+- Add notification for native Ruff support in PyCharm 2025.3 [[#644](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/644)]
+- Bump IDE compatibility to support 2025.3 [[#642](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/642)]
 
 ## [0.0.49] - 2025-08-05
 
