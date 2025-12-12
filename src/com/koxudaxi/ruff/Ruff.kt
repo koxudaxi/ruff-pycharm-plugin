@@ -647,8 +647,10 @@ inline fun <reified T> executeOnPooledThread(
 inline fun <reified T> runReadActionOnPooledThread(
     project: Project,
     defaultResult: T, timeoutSeconds: Long = 30, crossinline action: () -> T
-): T = ApplicationManager.getApplication().runReadAction<T> {
-    executeOnPooledThread(project, defaultResult, timeoutSeconds, action)
+): T = executeOnPooledThread(project, defaultResult, timeoutSeconds) {
+    ApplicationManager.getApplication().runReadAction<T> {
+        action.invoke()
+    }
 }
 
 
