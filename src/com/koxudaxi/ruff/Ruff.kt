@@ -12,6 +12,7 @@ import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.wsl.WSLCommandLineOptions
 import com.intellij.execution.wsl.WslPath
 import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
+import com.intellij.lang.Language
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
@@ -30,7 +31,6 @@ import com.intellij.profile.codeInspection.ProjectInspectionProfileManager
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
-import com.jetbrains.python.PythonLanguage
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.sdk.*
@@ -66,6 +66,10 @@ const val CONFIG_ARG = "--config"
 val SUPPORTED_FILE_EXTENSIONS = listOf("py", "pyi")
 
 val ruffVersionCache: ConcurrentHashMap<String, RuffVersion> = ConcurrentHashMap()
+
+internal val pythonLanguageOrNull: Language? by lazy {
+    Language.findLanguageByID("Python")
+}
 
 fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
 
@@ -264,7 +268,7 @@ fun findGlobalRuffExecutable(lsp: Boolean): File? =
 val PsiFile.isApplicableTo: Boolean
     get() = when {
         InjectedLanguageManager.getInstance(project).isInjectedFragment(this) -> false
-        else -> language.isKindOf(PythonLanguage.getInstance())
+        else -> pythonLanguageOrNull?.let { language.isKindOf(it) } ?: false
     }
 val VirtualFile.isApplicableTo: Boolean
     get() = this.extension in SUPPORTED_FILE_EXTENSIONS
