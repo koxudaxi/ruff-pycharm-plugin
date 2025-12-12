@@ -71,6 +71,19 @@ fun getRuffCommand(lsp: Boolean) = if (lsp) RUFF_LSP_COMMAND else RUFF_COMMAND
 
 fun getRuffWlsCommand(lsp: Boolean) = if (lsp) WSL_RUFF_LSP_COMMAND else WSL_RUFF_COMMAND
 
+/**
+ * Returns a Python SDK to use for Ruff.
+ * In non-Python IDEs (e.g., CLion) users often configure interpreter per-module,
+ * so [Project.pythonSdk] can be null even though modules have Python SDKs.
+ * We fall back to the first module SDK when available.
+ */
+val Project.preferredPythonSdk: Sdk?
+    get() = try {
+        this.pythonSdk ?: this.modules.asSequence().mapNotNull { it.pythonSdk }.firstOrNull()
+    } catch (_: NoClassDefFoundError) {
+        null
+    }
+
 
 val SCRIPT_DIR = when {
     SystemInfo.isWindows -> "Scripts"
@@ -189,7 +202,7 @@ fun detectRuffExecutable(
     lsp: Boolean,
     ruffCacheService: RuffCacheService
 ): File? {
-    project.pythonSdk?.let {
+    project.preferredPythonSdk?.let {
         findRuffExecutableInSDK(it, lsp)
     }.let {
         when {
@@ -581,7 +594,7 @@ inline fun <reified T> runRuffInBackground(
             val result: String? = try {
                 runRuff(commandArgs)
             } catch (e: ExecutionException) {
-                showSdkExecutionException(project.pythonSdk, e, "Error Running Ruff")
+                showSdkExecutionException(project.preferredPythonSdk, e, "Error Running Ruff")
                 null
             }
             callback(result)
@@ -668,7 +681,7 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
 
 fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
     val virtualFile = sourceFile.virtualFile ?: return emptyList()
-    val pythonSdk = sourceFile.project.pythonSdk
+    val pythonSdk = sourceFile.project.preferredPythonSdk
 
     if (pythonSdk?.isWsl == true) {
         val wslTargetConfig =
