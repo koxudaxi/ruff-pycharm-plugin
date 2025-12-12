@@ -1,5 +1,9 @@
 package com.koxudaxi.ruff
 
+import com.intellij.ide.BrowserUtil
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -13,12 +17,17 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.koxudaxi.ruff.lsp.ClientType
 
 class RuffProjectInitializer : ProjectActivity {
+    companion object {
+        private const val NOTIFICATION_GROUP_ID = "Ruff Notification Group"
+        private const val LSP_TOOLS_DOC_URL = "https://www.jetbrains.com/help/pycharm/lsp-tools.html"
+    }
 
     override suspend fun execute(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) return
         if (project.isDisposed) return
 
         DumbService.getInstance(project).smartInvokeLater {
+            checkAndNotifyNativeRuffSupport(project)
             try {
                 if (project.isDisposed) return@smartInvokeLater
 
@@ -88,5 +97,35 @@ class RuffProjectInitializer : ProjectActivity {
             },
             {}
         )
+    }
+
+    private fun checkAndNotifyNativeRuffSupport(project: Project) {
+        if (project.isDisposed) return
+
+        val ruffConfigService = project.configService
+        if (ruffConfigService.nativeRuffSupportNotificationDismissed) return
+
+        if (!hasNativeRuffSupport(project)) return
+
+        val notificationGroup = NotificationGroupManager.getInstance()
+            .getNotificationGroup(NOTIFICATION_GROUP_ID) ?: return
+
+        val notification = notificationGroup.createNotification(
+            "Native Ruff Support Available",
+            "Your IDE now has built-in Ruff support. " +
+                "You can uninstall this plugin and use the native Ruff integration instead.",
+            NotificationType.INFORMATION
+        )
+
+        notification.addAction(NotificationAction.createSimple("Learn More") {
+            BrowserUtil.browse(LSP_TOOLS_DOC_URL)
+        })
+
+        notification.addAction(NotificationAction.createSimple("Don't Show Again") {
+            ruffConfigService.nativeRuffSupportNotificationDismissed = true
+            notification.expire()
+        })
+
+        notification.notify(project)
     }
 }
