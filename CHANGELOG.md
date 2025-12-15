@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.52] - 2025-12-15
+
 - Fix: add --stdin-filename to format command for config auto-discovery [[#651](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/651)]
 
 ## [0.0.51] - 2025-12-12
@@ -269,7 +271,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.51...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.52...HEAD
+[0.0.52]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.51...v0.0.52
 [0.0.51]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.49...v0.0.51
 [0.0.49]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.48...v0.0.49
 [0.0.48]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.47...v0.0.48
