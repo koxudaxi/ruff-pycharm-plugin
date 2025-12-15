@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Fix: add --stdin-filename to format command for config auto-discovery [[#651](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/651)]
+
 ## [0.0.51] - 2025-12-12
 
 - Added option to use closest configuration file [[#602](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/602)]
