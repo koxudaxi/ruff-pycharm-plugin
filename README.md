@@ -6,6 +6,14 @@
 
 A [`ruff`](https://github.com/charliermarsh/ruff) integration [plugin](https://plugins.jetbrains.com/plugin/20574-ruff) for [JetBrains PyCharm](https://www.jetbrains.com/pycharm/).
 
+## PyCharm 2025.3 and newer
+
+PyCharm 2025.3+ includes native Ruff support.
+If you are on PyCharm 2025.3 or newer, prefer the built-in Ruff integration:
+https://www.jetbrains.com/help/pycharm/lsp-tools.html
+
+This plugin is mainly useful for older PyCharm versions and JetBrains IDEs that do not include native Ruff support.
+
 See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more details.
 
 <!-- Plugin description -->
@@ -91,4 +99,3 @@ We are waiting for your contributions to `ruff-pycharm-plugin`!
   </td>
   </tr>
 </table>
-
