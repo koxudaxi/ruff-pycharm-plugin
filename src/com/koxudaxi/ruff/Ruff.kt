@@ -184,6 +184,9 @@ val intellijLspClientSupported: Boolean
         } catch (e: NoClassDefFoundError) {
             intellijLspClientSupportedValue = false
             false
+        } catch (e: Exception) {
+            intellijLspClientSupportedValue = false
+            false
         }
     }
 
@@ -719,6 +722,9 @@ fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
         listOf("--stdin-filename", projectRelativeFilePath)
     } ?: emptyList()
 }
+
+fun buildFormatArgs(extraArgs: List<String> = emptyList(), stdinFileNameArgs: List<String> = emptyList()): List<String> =
+    FORMAT_ARGS + extraArgs + stdinFileNameArgs
 
 fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset

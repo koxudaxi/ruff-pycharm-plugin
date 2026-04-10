@@ -58,7 +58,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                         // When a range is specified, only run the format command.
                         val formatCommandArgs = generateCommandArgs(
                             sourceFile,
-                            FORMAT_ARGS + formatRange.formatRangeArgs(currentText),
+                            buildFormatArgs(formatRange.formatRangeArgs(currentText)),
                             false
                         )
                             ?: return@runCatching null
@@ -73,7 +73,7 @@ class RuffAsyncFormatter : AsyncDocumentFormattingService() {
                     if (!RuffConfigService.getInstance(formattingContext.project).useRuffFormat) {
                         return@runCatching assertResult(currentText, fixCommandStdout)
                     }
-                    val formatCommandArgs = generateCommandArgs(sourceFile, FORMAT_ARGS, false)
+                    val formatCommandArgs = generateCommandArgs(sourceFile, buildFormatArgs(), false)
                         ?: return@runCatching null
                     if (cancelled) {
                         return@runCatching null
