@@ -14,6 +14,8 @@ import com.intellij.execution.wsl.WslPath
 import com.intellij.execution.wsl.target.WslTargetEnvironmentConfiguration
 import com.intellij.lang.Language
 import com.intellij.lang.injection.InjectedLanguageManager
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.progress.ProgressIndicator
@@ -22,6 +24,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.text.StringUtil
@@ -577,8 +580,8 @@ fun runRuff(commandArgs: CommandArgs, stdin: ByteArray? = null): String? {
 }
 
 
-inline fun <reified T> runRuffInBackground(
-    sourceFile: SourceFile, args: List<String>, crossinline callback: (String?) -> T
+fun <T> runRuffInBackground(
+    sourceFile: SourceFile, args: List<String>, callback: (String?) -> T
 ): ProgressIndicator? =
     runRuffInBackground(
         sourceFile.project,
@@ -588,8 +591,8 @@ inline fun <reified T> runRuffInBackground(
         callback
     )
 
-inline fun <reified T> runRuffInBackground(
-    project: Project, stdin: ByteArray?, args: List<String>, description: String, crossinline callback: (String?) -> T
+fun <T> runRuffInBackground(
+    project: Project, stdin: ByteArray?, args: List<String>, description: String, callback: (String?) -> T
 ): ProgressIndicator? {
     val commandArgs = generateCommandArgs(project, stdin, args, true) ?: return null
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
@@ -598,7 +601,7 @@ inline fun <reified T> runRuffInBackground(
             val result: String? = try {
                 runRuff(commandArgs)
             } catch (e: ExecutionException) {
-                showSdkExecutionException(project.preferredPythonSdk, e, "Error Running Ruff")
+                showRuffExecutionException(project, e, "Error Running Ruff")
                 null
             }
             callback(result)
@@ -608,6 +611,14 @@ inline fun <reified T> runRuffInBackground(
         it.run(task)
         return it.progressIndicator
     }
+}
+
+fun showRuffExecutionException(project: Project, e: ExecutionException, title: String) {
+    RuffLoggingService.log(project, "$title: ${e.message}", ConsoleViewContentType.ERROR_OUTPUT)
+    NotificationGroupManager.getInstance()
+        .getNotificationGroup("Ruff Notification Group")
+        ?.createNotification(title, e.message ?: title, NotificationType.ERROR)
+        ?.notify(project)
 }
 
 inline fun <reified T> executeOnPooledThread(
@@ -678,10 +689,10 @@ fun VirtualFile.isInProjectDir(project: Project): Boolean =
 fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): String? {
     val projectBasePath = project.basePath?.let { Paths.get(it) } ?: return null
     val filePath = virtualFile.canonicalPath?.let { Paths.get(it) } ?: return null
-    if (!project.modules.any {
-        module -> module.basePath?.let { filePath.startsWith(it) } == true
-                || module.rootManager.contentRoots.any { contentRoot -> filePath.startsWith(contentRoot.path) }
-    }) return null
+    if (!project.modules.any { module ->
+            ModuleRootManager.getInstance(module).contentRoots.any { contentRoot -> filePath.startsWith(contentRoot.path) }
+        }
+    ) return null
     return projectBasePath.relativize(filePath).pathString
 }
 
