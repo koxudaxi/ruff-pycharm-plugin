@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Support 2026.1 [[#666](https://github.com/koxudaxi/ruff-pycharm-plugin/issues/666)]
+- Support 2026.1 [[#671](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/671)]
 
 ## [0.0.52] - 2025-12-15
 
