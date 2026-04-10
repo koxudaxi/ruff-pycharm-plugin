@@ -1,6 +1,7 @@
 package com.koxudaxi.ruff
 
 import com.intellij.ide.BrowserUtil
+import com.intellij.ide.util.PropertiesComponent
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -20,6 +21,8 @@ class RuffProjectInitializer : ProjectActivity {
     companion object {
         private const val NOTIFICATION_GROUP_ID = "Ruff Notification Group"
         private const val LSP_TOOLS_DOC_URL = "https://www.jetbrains.com/help/pycharm/lsp-tools.html"
+        private const val NATIVE_RUFF_SUPPORT_NOTIFICATION_DISMISSED_KEY =
+            "com.koxudaxi.ruff.nativeRuffSupportNotificationDismissed"
     }
 
     override suspend fun execute(project: Project) {
@@ -102,8 +105,8 @@ class RuffProjectInitializer : ProjectActivity {
     private fun checkAndNotifyNativeRuffSupport(project: Project) {
         if (project.isDisposed) return
 
-        val ruffConfigService = project.configService
-        if (ruffConfigService.nativeRuffSupportNotificationDismissed) return
+        val properties = PropertiesComponent.getInstance()
+        if (properties.getBoolean(NATIVE_RUFF_SUPPORT_NOTIFICATION_DISMISSED_KEY, false)) return
 
         if (!hasNativeRuffSupport(project)) return
 
@@ -122,7 +125,7 @@ class RuffProjectInitializer : ProjectActivity {
         })
 
         notification.addAction(NotificationAction.createSimple("Don't Show Again") {
-            ruffConfigService.nativeRuffSupportNotificationDismissed = true
+            properties.setValue(NATIVE_RUFF_SUPPORT_NOTIFICATION_DISMISSED_KEY, true, false)
             notification.expire()
         })
 

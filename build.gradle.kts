@@ -34,11 +34,12 @@ dependencies {
     compileOnly(libs.kotlinxSerialization)
     testImplementation(kotlin("test"))
     intellijPlatform {
-        val type = properties("platformType")
         val version = properties("platformVersion")
         val bundledPlugins =
             properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        create(type, version, useInstaller = false)
+        pycharmProfessional(version) {
+            useInstaller.set(false)
+        }
         bundledPlugins(bundledPlugins)
         val lsp4ij = libs.plugins.lsp4ij.get()
         plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
@@ -50,12 +51,10 @@ dependencies {
     }
 }
 
-// Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.
+// Set the JVM language level used to build the project.
 kotlin {
     jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-        @Suppress("UnstableApiUsage")
-        vendor = JvmVendorSpec.JETBRAINS
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -67,7 +66,6 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
             untilBuild = properties("pluginUntilBuild")
-
         }
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
@@ -132,6 +130,10 @@ kover {
 tasks {
     wrapper {
         gradleVersion = properties("gradleVersion").get()
+    }
+
+    test {
+        failOnNoDiscoveredTests = false
     }
 }
 

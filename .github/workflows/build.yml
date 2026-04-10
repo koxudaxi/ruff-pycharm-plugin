@@ -48,8 +48,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       - name: Cache
         uses: actions/cache@v4
@@ -64,7 +64,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-home-cache-cleanup: true
-          gradle-version: 8.6
 
       # Set environment variables
       - name: Export Properties
@@ -135,8 +134,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       # Setup Gradle
       - name: Setup Gradle
@@ -188,8 +187,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       # Run Qodana inspections
       - name: Qodana - Code Inspection
@@ -219,8 +218,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
       # Setup Gradle
       - name: Setup Gradle
@@ -266,8 +265,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: zulu
-          java-version: 17
+          distribution: jetbrains
+          java-version: 21
 
       # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts
