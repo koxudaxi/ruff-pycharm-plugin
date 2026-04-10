@@ -37,8 +37,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
                 ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
-                ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffExecutablePath ||
-                ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffLspExecutablePath ||
+                ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffExecutablePath?.takeIf { File(it).exists() } ||
+                ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffLspExecutablePath?.takeIf { File(it).exists() } ||
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
