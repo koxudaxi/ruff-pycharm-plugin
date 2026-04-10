@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Fix native Ruff support notification dismissal to persist per machine [[#667](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/667)]
+
 ## [0.0.52] - 2025-12-15
 
 - Fix: add --stdin-filename to format command for config auto-discovery [[#651](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/651)]
