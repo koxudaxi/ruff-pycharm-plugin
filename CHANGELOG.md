@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Fix Ruff server startup for local WSL projects on Windows
+- Fix Ruff server startup for local WSL projects on Windows [[#669](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/669)]
 
 ## [0.0.52] - 2025-12-15
 
