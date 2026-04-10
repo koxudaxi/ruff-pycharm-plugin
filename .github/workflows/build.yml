@@ -48,8 +48,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: jetbrains
-          java-version: 21.0.10+1163.110
+          distribution: temurin
+          java-version: 21
 
       - name: Cache
         uses: actions/cache@v4
@@ -134,8 +134,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: jetbrains
-          java-version: 21.0.10+1163.110
+          distribution: temurin
+          java-version: 21
 
       # Setup Gradle
       - name: Setup Gradle
@@ -187,8 +187,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: jetbrains
-          java-version: 21.0.10+1163.110
+          distribution: temurin
+          java-version: 21
 
       # Run Qodana inspections
       - name: Qodana - Code Inspection
@@ -218,8 +218,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: jetbrains
-          java-version: 21.0.10+1163.110
+          distribution: temurin
+          java-version: 21
 
       # Setup Gradle
       - name: Setup Gradle
