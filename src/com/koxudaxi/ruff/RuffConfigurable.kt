@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.koxudaxi.ruff.lsp.ClientType
 import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
+import java.io.File
 import javax.swing.JComponent
 
 
@@ -26,7 +27,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         return configPanel.configPanel
     }
 
-    override fun reset() {}
+    override fun reset() {
+        configPanel.reset(project.configService)
+    }
 
     override fun isModified(): Boolean {
         val ruffConfigService: RuffConfigService = project.configService
@@ -34,8 +37,8 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
                 ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
                 ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
-                ruffConfigService.globalRuffExecutablePath != configPanel.globalRuffExecutablePath ||
-                ruffConfigService.globalRuffLspExecutablePath != configPanel.globalRuffLspExecutablePath ||
+                ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffExecutablePath ||
+                ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() } != configPanel.globalRuffLspExecutablePath ||
                 ruffConfigService.ruffConfigPath != configPanel.ruffConfigPath ||
                 ruffConfigService.disableOnSaveOutsideOfProject != configPanel.disableOnSaveOutsideOfProject ||
                 ruffConfigService.useRuffLsp != configPanel.useRuffLsp ||
