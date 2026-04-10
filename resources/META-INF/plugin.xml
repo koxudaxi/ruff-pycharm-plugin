@@ -8,8 +8,8 @@
     <depends optional="true">PythonCore</depends>
     <depends optional="true">Pythonid</depends>
     <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
-    <depends optional="true" config-file="only-ultimate.xml">com.intellij.modules.ultimate</depends>
     <extensions defaultExtensionNs="com.intellij">
+        <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
         <notificationGroup id="Ruff Notification Group" displayType="STICKY_BALLOON"/>
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>

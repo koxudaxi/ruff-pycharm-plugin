@@ -36,7 +36,7 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
 - [x] Detect `ruff` executable in WSL
 - [x] Support Ruff LSP feature
   - LSP Client
-    - [x] [Intellij LSP integration](https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/) for PyCharm Pro/IDEA Ultimate
+    - [x] [JetBrains LSP integration](https://platform.jetbrains.com/t/update-on-lsp-and-template-language-apis-in-pycharm/1453) for unified PyCharm, including free mode
     - [x] [LSP4IJ by RedHat](https://github.com/redhat-developer/lsp4ij) (Requires installation of the [LSP4IJ plugin](https://plugins.jetbrains.com/plugin/23257-lsp4ij))
   - LSP Server
     - [x] `ruff-lsp` integration
@@ -44,8 +44,11 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
   - [x] Live Config Reload: Automatically updates from `pyproject.toml` and `ruff.toml` without restarting
 - [x] Support `ruff format` for ruff version `0.0.289` or later [Experimental]
 
-### Support `ruff-lsp` for only PyCharm Pro/IDEA Ultimate
-You can enable it in `Preferences/Settings` -> `Tools` -> `Ruff` -> `Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate`
+### JetBrains LSP client support
+In unified PyCharm builds, including free mode, you can enable the JetBrains LSP client in `Preferences/Settings` -> `Tools` -> `Ruff`.
+
+PyCharm made the LSP client APIs available without a paid subscription starting with 2025.1:
+https://platform.jetbrains.com/t/update-on-lsp-and-template-language-apis-in-pycharm/1453
 
 The lsp integration applies only below features:
 - Errors/warnings highlighting ([textDocument/publishDiagnostics](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics))
