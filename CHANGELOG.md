@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Support formatting Python stub files
+- Support formatting Python stub files [[#672](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/672)]
 
 ## [0.0.52] - 2025-12-15
 
