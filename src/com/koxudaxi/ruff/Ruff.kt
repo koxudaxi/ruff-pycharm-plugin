@@ -707,6 +707,9 @@ fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
     } ?: emptyList()
 }
 
+fun buildFormatArgs(extraArgs: List<String> = emptyList(), stdinFileNameArgs: List<String> = emptyList()): List<String> =
+    FORMAT_ARGS + extraArgs + stdinFileNameArgs
+
 fun Document.getStartEndRange(startLocation: Location, endLocation: Location, offset: Int): TextRange {
     val start = getLineStartOffset(startLocation.row - 1) + startLocation.column + offset
     val lastLine = endLocation.row - 1

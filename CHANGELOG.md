@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Fix: centralize Ruff format arguments to preserve `--stdin-filename` handling
+
 ## [0.0.52] - 2025-12-15
 
 - Fix: add --stdin-filename to format command for config auto-discovery [[#651](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/651)]
