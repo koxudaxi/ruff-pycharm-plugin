@@ -71,7 +71,7 @@ private class RuffLspServerDescriptor(project: Project, executable: File, ruffCo
 abstract class RuffLspServerDescriptorBase(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
     ProjectWideLspServerDescriptor(project, "Ruff") {
 
-    override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
+    override fun isSupportedFile(file: VirtualFile) = file.isApplicableTo
     abstract override fun createCommandLine(): GeneralCommandLine
 
     override val lspHoverSupport: Boolean = project.useHoverFeature
