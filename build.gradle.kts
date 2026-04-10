@@ -37,7 +37,7 @@ dependencies {
         val version = properties("platformVersion")
         val bundledPlugins =
             properties("platformBundledPlugins").map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
-        pycharmProfessional(version) {
+        pycharm(version) {
             useInstaller.set(false)
         }
         bundledPlugins(bundledPlugins)
