@@ -181,9 +181,6 @@ val intellijLspClientSupported: Boolean
         } catch (e: NoClassDefFoundError) {
             intellijLspClientSupportedValue = false
             false
-        } catch (e: Exception) {
-            intellijLspClientSupportedValue = false
-            false
         }
     }
 
