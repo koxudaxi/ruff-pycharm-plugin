@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Fix: centralize Ruff format arguments to preserve `--stdin-filename` handling
+- Fix: centralize Ruff format arguments to preserve `--stdin-filename` handling [[#668](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/668)]
 
 ## [0.0.52] - 2025-12-15
 
