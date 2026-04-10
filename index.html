@@ -317,9 +317,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#support-ruff-lsp-for-only-pycharm-proidea-ultimate" class="md-nav__link">
+  <a href="#jetbrains-lsp-client-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Support ruff-lsp for only PyCharm Pro/IDEA Ultimate
+      JetBrains LSP client support
     </span>
   </a>
   
@@ -513,9 +513,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#support-ruff-lsp-for-only-pycharm-proidea-ultimate" class="md-nav__link">
+  <a href="#jetbrains-lsp-client-support" class="md-nav__link">
     <span class="md-ellipsis">
-      Support ruff-lsp for only PyCharm Pro/IDEA Ultimate
+      JetBrains LSP client support
     </span>
   </a>
   
@@ -637,7 +637,7 @@
 <li>[x] Detect <code>ruff</code> executable in WSL</li>
 <li>[x] Support Ruff LSP feature</li>
 <li>LSP Client<ul>
-<li>[x] <a href="https://blog.jetbrains.com/platform/2023/07/lsp-for-plugin-developers/">Intellij LSP integration</a> for PyCharm Pro/IDEA Ultimate</li>
+<li>[x] <a href="https://platform.jetbrains.com/t/update-on-lsp-and-template-language-apis-in-pycharm/1453">JetBrains LSP integration</a> for unified PyCharm, including free mode</li>
 <li>[x] <a href="https://github.com/redhat-developer/lsp4ij">LSP4IJ by RedHat</a> (Requires installation of the <a href="https://plugins.jetbrains.com/plugin/23257-lsp4ij">LSP4IJ plugin</a>)</li>
 </ul>
 </li>
@@ -649,8 +649,10 @@
 <li>[x] Live Config Reload: Automatically updates from <code>pyproject.toml</code> and <code>ruff.toml</code> without restarting</li>
 <li>[x] Support <code>ruff format</code> for ruff version <code>0.0.289</code> or later [Experimental]</li>
 </ul>
-<h3 id="support-ruff-lsp-for-only-pycharm-proidea-ultimate">Support <code>ruff-lsp</code> for only PyCharm Pro/IDEA Ultimate<a class="headerlink" href="#support-ruff-lsp-for-only-pycharm-proidea-ultimate" title="Permanent link">🔗</a></h3>
-<p>You can enable it in <code>Preferences/Settings</code> -&gt; <code>Tools</code> -&gt; <code>Ruff</code> -&gt; <code>Use ruff-lsp (Experimental) for PyCharm Pro/IDEA Ultimate</code></p>
+<h3 id="jetbrains-lsp-client-support">JetBrains LSP client support<a class="headerlink" href="#jetbrains-lsp-client-support" title="Permanent link">🔗</a></h3>
+<p>In unified PyCharm builds, including free mode, you can enable the JetBrains LSP client in <code>Preferences/Settings</code> -&gt; <code>Tools</code> -&gt; <code>Ruff</code>.</p>
+<p>PyCharm made the LSP client APIs available without a paid subscription starting with 2025.1:
+https://platform.jetbrains.com/t/update-on-lsp-and-template-language-apis-in-pycharm/1453</p>
 <p>The lsp integration applies only below features:
 - Errors/warnings highlighting (<a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_publishDiagnostics">textDocument/publishDiagnostics</a>)
 - Quick-fixes for these errors/warnings (<a href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_codeAction">textDocument/codeAction</a></p>
