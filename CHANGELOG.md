@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Make "Run ruff when the python file is saved" a global setting
+- Make "Run ruff when the python file is saved" a global setting [[#670](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/670)]
 
 ## [0.0.52] - 2025-12-15
 
