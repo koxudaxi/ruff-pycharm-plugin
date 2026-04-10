@@ -1,5 +1,6 @@
 package com.koxudaxi.ruff
 
+import RuffLspServerSupportProvider
 import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
@@ -176,9 +177,10 @@ val intellijLspClientSupported: Boolean
         }
         return try {
             @Suppress("UnstableApiUsage")
-            LspServerSupportProvider
-            intellijLspClientSupportedValue = true
-            true
+            val supported = LspServerSupportProvider.Companion.EP_NAME
+                .findFirstAssignableExtension(RuffLspServerSupportProvider::class.java) != null
+            intellijLspClientSupportedValue = supported
+            supported
         } catch (e: NoClassDefFoundError) {
             intellijLspClientSupportedValue = false
             false
