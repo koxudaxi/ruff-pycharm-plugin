@@ -2,7 +2,12 @@
 
 ## [Unreleased]
 
+- Fix: centralize Ruff format arguments to preserve `--stdin-filename` handling [[#668](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/668)]
+- Fix native Ruff support notification dismissal to persist per machine [[#667](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/667)]
+- Support 2026.1 [[#671](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/671)]
 - Support formatting Python stub files [[#672](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/672)]
+- Check IntelliJ LSP provider registration before enabling native client [[#675](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/675)]
+- Enable JetBrains LSP client support in unified PyCharm free mode [[#676](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/676)]
 
 ## [0.0.52] - 2025-12-15
 

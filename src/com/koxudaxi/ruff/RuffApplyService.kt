@@ -113,7 +113,7 @@ class RuffApplyService(val project: Project) {
             val formatCommandArgs = generateCommandArgs(
                 sourceFile.project,
                 sourceByte,
-                FORMAT_ARGS + getStdinFileNameArgs(sourceFile),
+                buildFormatArgs(stdinFileNameArgs = getStdinFileNameArgs(sourceFile)),
                 true,
                 configPath = configPath
             ) ?: return

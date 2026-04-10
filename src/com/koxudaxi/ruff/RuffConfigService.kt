@@ -28,8 +28,6 @@ class RuffConfigService : PersistentStateComponent<RuffConfigService> {
     var formattingFeature: Boolean = true
     var useRuffImportOptimizer: Boolean = false
     var hoverFeature: Boolean = true
-    var nativeRuffSupportNotificationDismissed: Boolean = false
-
     override fun getState(): RuffConfigService {
         return this
     }
