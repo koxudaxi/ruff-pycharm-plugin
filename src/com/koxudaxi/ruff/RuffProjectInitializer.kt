@@ -102,8 +102,8 @@ class RuffProjectInitializer : ProjectActivity {
     private fun checkAndNotifyNativeRuffSupport(project: Project) {
         if (project.isDisposed) return
 
-        val ruffConfigService = project.configService
-        if (ruffConfigService.nativeRuffSupportNotificationDismissed) return
+        val applicationSettings = RuffApplicationSettings.getInstance()
+        if (applicationSettings.nativeRuffSupportNotificationDismissed) return
 
         if (!hasNativeRuffSupport(project)) return
 
@@ -122,7 +122,7 @@ class RuffProjectInitializer : ProjectActivity {
         })
 
         notification.addAction(NotificationAction.createSimple("Don't Show Again") {
-            ruffConfigService.nativeRuffSupportNotificationDismissed = true
+            applicationSettings.nativeRuffSupportNotificationDismissed = true
             notification.expire()
         })
 
