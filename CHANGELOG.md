@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Fix Ruff settings showing spurious changes and clarify that format-on-save is project-scoped [[#673](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/673)]
+- Fix Ruff settings showing spurious changes and clarify that format-on-save is project-scoped [[#674](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/674)]
 
 ## [0.0.52] - 2025-12-15
 
