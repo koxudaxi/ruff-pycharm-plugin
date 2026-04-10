@@ -5,11 +5,11 @@ ini4j = "0.5.4"
 kotlinxSerialization = "1.7.3"
 
 # plugins
-kotlin = "2.1.0"
+kotlin = "2.3.20"
 changelog = "2.2.1"
-gradleIntelliJPlugin = "2.3.0"
-qodana = "2024.3.4"
-kover = "0.9.1"
+gradleIntelliJPlugin = "2.14.0"
+qodana = "2025.3.2"
+kover = "0.9.7"
 lsp4ij = "0.11.0"
 
 [libraries]
