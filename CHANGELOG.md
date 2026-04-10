@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Fix native Ruff support notification dismissal to persist per machine [[#667](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/667)]
 - Support 2026.1 [[#671](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/671)]
 
 ## [0.0.52] - 2025-12-15
