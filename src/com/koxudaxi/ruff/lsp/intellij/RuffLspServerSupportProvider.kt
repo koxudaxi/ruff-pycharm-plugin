@@ -1,5 +1,6 @@
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.lsp.api.LspServerSupportProvider
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
@@ -11,6 +12,7 @@ import com.koxudaxi.ruff.lsp.useDiagnosticFeature
 import com.koxudaxi.ruff.lsp.useFormattingFeature
 import com.koxudaxi.ruff.lsp.useHoverFeature
 import kotlinx.serialization.Serializable
+import org.eclipse.lsp4j.InitializeParams
 import java.io.File
 
 
@@ -73,6 +75,26 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 
     override fun isSupportedFile(file: VirtualFile) = file.extension == "py"
     abstract override fun createCommandLine(): GeneralCommandLine
+
+    override fun getFileUri(file: VirtualFile): String =
+        if (SystemInfo.isWindows) {
+            buildWslFileUri(file.path) ?: super.getFileUri(file)
+        } else {
+            super.getFileUri(file)
+        }
+
+    override fun findFileByUri(fileUri: String): VirtualFile? =
+        if (SystemInfo.isWindows) {
+            buildWslUncPath(fileUri)?.let { findLocalFileByPath(it) } ?: super.findFileByUri(fileUri)
+        } else {
+            super.findFileByUri(fileUri)
+        }
+
+    override fun createInitializeParams(): InitializeParams =
+        super.createInitializeParams().apply {
+            if (!SystemInfo.isWindows) return@apply
+            rootPath = rootPath?.let { toWindowsWslUncPath(it) } ?: rootPath
+        }
 
     override val lspHoverSupport: Boolean = project.useHoverFeature
     override val lspCodeActionsSupport: LspCodeActionsSupport? =
