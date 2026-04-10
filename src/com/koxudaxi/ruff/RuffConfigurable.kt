@@ -29,8 +29,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
     override fun reset() {}
 
     override fun isModified(): Boolean {
+        val ruffApplicationConfigService = RuffApplicationConfigService.getInstance()
         val ruffConfigService: RuffConfigService = project.configService
-        return ruffConfigService.runRuffOnSave != configPanel.runRuffOnSave ||
+        return ruffApplicationConfigService.runRuffOnSave != configPanel.runRuffOnSave ||
                 ruffConfigService.runRuffOnReformatCode != configPanel.runRuffOnReformatCode ||
                 ruffConfigService.showRuleCode != configPanel.showRuleCode ||
                 ruffConfigService.alwaysUseGlobalRuff != configPanel.alwaysUseGlobalRuff ||
@@ -55,6 +56,7 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
     }
 
     override fun apply() {
+        val ruffApplicationConfigService = RuffApplicationConfigService.getInstance()
         val ruffConfigService: RuffConfigService = project.configService
         val ruffCacheService: RuffCacheService = RuffCacheService.getInstance(project)
         val ruffLspClientManager = RuffLspClientManager.getInstance(project)
@@ -66,7 +68,9 @@ class RuffConfigurable internal constructor(val project: Project) : Configurable
         val wasUsingRuffLsp = ruffConfigService.useRuffLsp
         val wasUsingRuffServer = ruffConfigService.useRuffServer
 
-        ruffConfigService.runRuffOnSave = configPanel.runRuffOnSave
+        ruffApplicationConfigService.shouldMigrateRunRuffOnSave = false
+        ruffApplicationConfigService.runRuffOnSave = configPanel.runRuffOnSave
+        ruffConfigService.runRuffOnSave = false
         ruffConfigService.runRuffOnReformatCode = configPanel.runRuffOnReformatCode
         ruffConfigService.showRuleCode = configPanel.showRuleCode
         ruffConfigService.alwaysUseGlobalRuff = configPanel.alwaysUseGlobalRuff

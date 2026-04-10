@@ -54,8 +54,10 @@ class RuffConfigPanel(project: Project) {
 
     init {
         val ruffConfigService = getInstance(project)
+        val ruffApplicationConfigService = RuffApplicationConfigService.getInstance()
+        ruffApplicationConfigService.migrateRunRuffOnSave(ruffConfigService)
         val ruffCacheService = RuffCacheService.getInstance(project)
-        runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
+        runRuffOnSaveCheckBox.isSelected = ruffApplicationConfigService.runRuffOnSave
         runRuffOnSaveCheckBox.isEnabled = true
         runRuffOnReformatCodeCheckBox.isSelected = ruffConfigService.runRuffOnReformatCode
         runRuffOnReformatCodeCheckBox.isEnabled = true
@@ -63,7 +65,7 @@ class RuffConfigPanel(project: Project) {
         showRuleCodeCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
-        disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
+        disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffApplicationConfigService.runRuffOnSave
         useRuffLspRadioButton.isSelected = ruffConfigService.useRuffLsp
         useRuffLspRadioButton.isEnabled = lspSupported
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported

@@ -7,7 +7,7 @@ import com.intellij.psi.PsiDocumentManager
 
 class RuffActionOnSave : ActionOnSave() {
     override fun isEnabledForProject(project: Project): Boolean {
-        return project.configService.runRuffOnSave
+        return RuffApplicationConfigService.getInstance().runRuffOnSave
     }
     override fun processDocuments(project: Project, documents: Array<Document>) {
         val ruffApplyService = RuffApplyService.getInstance(project)

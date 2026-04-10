@@ -25,6 +25,7 @@ class RuffProjectInitializer : ProjectActivity {
     override suspend fun execute(project: Project) {
         if (ApplicationManager.getApplication().isUnitTestMode) return
         if (project.isDisposed) return
+        RuffApplicationConfigService.getInstance().migrateRunRuffOnSave(project.configService)
 
         DumbService.getInstance(project).smartInvokeLater {
             checkAndNotifyNativeRuffSupport(project)
