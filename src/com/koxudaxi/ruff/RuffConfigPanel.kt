@@ -55,33 +55,15 @@ class RuffConfigPanel(project: Project) {
     init {
         val ruffConfigService = getInstance(project)
         val ruffCacheService = RuffCacheService.getInstance(project)
-        runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
         runRuffOnSaveCheckBox.isEnabled = true
-        runRuffOnReformatCodeCheckBox.isSelected = ruffConfigService.runRuffOnReformatCode
         runRuffOnReformatCodeCheckBox.isEnabled = true
-        showRuleCodeCheckBox.isSelected = ruffConfigService.showRuleCode
         showRuleCodeCheckBox.isEnabled = true
         alwaysUseGlobalRuffCheckBox.isEnabled = true
-        alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
-        disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
-        useRuffLspRadioButton.isSelected = ruffConfigService.useRuffLsp
         useRuffLspRadioButton.isEnabled = lspSupported
         useIntellijLspClientRadioButton.isEnabled = intellijLspClientSupported
-        useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
-        useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
         useRuffFormatCheckBox.isEnabled = true
-        useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
         useRuffServerRadioButton.isEnabled = lspSupported
-        useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer || !ruffConfigService.useRuffLsp
-        disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
         enableLspCheckBox.isEnabled = lspSupported
-        enableLspCheckBox.isSelected = ruffConfigService.enableLsp
-        enableRuffLoggingCheckBox.isSelected = ruffConfigService.enableRuffLogging
-        codeActionFeatureCheckBox.isSelected = ruffConfigService.codeActionFeature
-        formattingFeatureCheckBox.isSelected = ruffConfigService.formattingFeature
-        diagnosticFeatureCheckBox.isSelected = ruffConfigService.diagnosticFeature
-        hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
-        useRuffImportOptimizerCheckBox.isSelected = ruffConfigService.useRuffImportOptimizer
         useRuffImportOptimizerCheckBox.isEnabled = true
 
 
@@ -98,25 +80,11 @@ class RuffConfigPanel(project: Project) {
 
         globalRuffExecutablePathField.apply {
             addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
-            if (textField is JBTextField) {
-                when (val globalRuffExecutablePath =
-                    ruffConfigService.globalRuffExecutablePath?.takeIf { File(it).exists() }) {
-                    is String -> textField.text = globalRuffExecutablePath
-                    else -> setAutodetectedRuff()
-                }
-            }
             textField.isEditable = false
         }
 
         globalRuffLspExecutablePathField.apply {
             addBrowseFolderListener(null, FileChooserDescriptorFactory.createSingleFileDescriptor())
-            if (textField is JBTextField) {
-                when (val globalRuffLspExecutablePath =
-                    ruffConfigService.globalRuffLspExecutablePath?.takeIf { File(it).exists() }) {
-                    is String -> textField.text = globalRuffLspExecutablePath
-                    else -> setAutodetectedRuffLsp()
-                }
-            }
             textField.isEditable = false
         }
 
@@ -142,7 +110,6 @@ class RuffConfigPanel(project: Project) {
         enableLspCheckBox.addActionListener {
             updateLspFields()
         }
-        updateLspFields()
         alwaysUseGlobalRuffCheckBox.addActionListener { updateProjectExecutableFields() }
         when (val projectRuffExecutablePath =
             ruffCacheService.getProjectRuffExecutablePath()?.takeIf { File(it).exists() }
@@ -176,6 +143,44 @@ class RuffConfigPanel(project: Project) {
         clearRuffConfigPathButton.addActionListener {
             ruffConfigPathField.text = ""
         }
+        reset(ruffConfigService)
+    }
+
+    fun reset(ruffConfigService: RuffConfigService) {
+        runRuffOnSaveCheckBox.isSelected = ruffConfigService.runRuffOnSave
+        runRuffOnReformatCodeCheckBox.isSelected = ruffConfigService.runRuffOnReformatCode
+        showRuleCodeCheckBox.isSelected = ruffConfigService.showRuleCode
+        alwaysUseGlobalRuffCheckBox.isSelected = ruffConfigService.alwaysUseGlobalRuff
+        disableOnSaveOutsideOfProjectCheckBox.isSelected = ruffConfigService.disableOnSaveOutsideOfProject
+        disableOnSaveOutsideOfProjectCheckBox.isEnabled = ruffConfigService.runRuffOnSave
+        useRuffLspRadioButton.isSelected = ruffConfigService.useRuffLsp
+        useIntellijLspClientRadioButton.isSelected = ruffConfigService.useIntellijLspClient
+        useLsp4ijRadioButton.isSelected = ruffConfigService.useLsp4ij
+        useRuffFormatCheckBox.isSelected = ruffConfigService.useRuffFormat
+        useRuffServerRadioButton.isSelected = ruffConfigService.useRuffServer || !ruffConfigService.useRuffLsp
+        enableLspCheckBox.isSelected = ruffConfigService.enableLsp
+        enableRuffLoggingCheckBox.isSelected = ruffConfigService.enableRuffLogging
+        codeActionFeatureCheckBox.isSelected = ruffConfigService.codeActionFeature
+        formattingFeatureCheckBox.isSelected = ruffConfigService.formattingFeature
+        diagnosticFeatureCheckBox.isSelected = ruffConfigService.diagnosticFeature
+        hoverFeatureCheckBox.isSelected = ruffConfigService.hoverFeature
+        useRuffImportOptimizerCheckBox.isSelected = ruffConfigService.useRuffImportOptimizer
+        updateExecutableField(
+            globalRuffExecutablePathField,
+            ruffConfigService.globalRuffExecutablePath,
+            findGlobalRuffExecutable(false)?.absolutePath,
+            RUFF_EXECUTABLE_NOT_FOUND
+        )
+        updateExecutableField(
+            globalRuffLspExecutablePathField,
+            ruffConfigService.globalRuffLspExecutablePath,
+            findGlobalRuffExecutable(true)?.absolutePath,
+            RUFF_LSP_EXECUTABLE_NOT_FOUND
+        )
+        ruffConfigPathField.text = ruffConfigService.ruffConfigPath ?: ""
+        updateLspFields()
+        updateLspExecutableFields()
+        updateProjectExecutableFields()
     }
 
 
@@ -247,6 +252,22 @@ class RuffConfigPanel(project: Project) {
                 globalRuffLspExecutablePathField.emptyText.text = RUFF_LSP_EXECUTABLE_NOT_FOUND
             }
         }
+
+    private fun updateExecutableField(
+        field: TextFieldWithBrowseButton,
+        configuredPath: String?,
+        autodetectedPath: String?,
+        notFoundText: String
+    ) {
+        field.text = ""
+        val textField = field.textField
+        if (textField is JBTextField) {
+            when (val existingPath = configuredPath?.takeIf { File(it).exists() }) {
+                is String -> textField.text = existingPath
+                else -> textField.emptyText.text = autodetectedPath ?: notFoundText
+            }
+        }
+    }
 
     private fun getProjectRuffExecutablePath(project: Project, lsp: Boolean): String? {
         return project.preferredPythonSdk?.let { findRuffExecutableInSDK(it, lsp) }?.absolutePath
