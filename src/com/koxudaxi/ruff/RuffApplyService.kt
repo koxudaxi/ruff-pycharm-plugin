@@ -109,13 +109,16 @@ class RuffApplyService(val project: Project) {
                 checkedFixed is String && checkedFixed.isNotEmpty() -> checkedFixed.toCharArray().toByteArrayAndClear()
                 else -> sourceFile.asStdin
             } ?: return
+            val ruffCacheService = RuffCacheService.getInstance(projectRef)
+            val executable = getRuffExecutable(projectRef, projectRef.configService, false, ruffCacheService) ?: return
 
             val formatCommandArgs = generateCommandArgs(
                 sourceFile.project,
                 sourceByte,
-                buildFormatArgs(stdinFileNameArgs = getStdinFileNameArgs(sourceFile)),
+                buildFormatArgs(stdinFileNameArgs = getStdinFileNameArgs(sourceFile, executable)),
                 true,
-                configPath = configPath
+                configPath = configPath,
+                executable = executable
             ) ?: return
 
             if (projectRef.isDisposed) return

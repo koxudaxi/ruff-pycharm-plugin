@@ -527,15 +527,21 @@ data class CommandArgs(
     val stdin: ByteArray?, val args: List<String>,
 )
 
-fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Boolean, configPath: String? = null): CommandArgs? =
-    generateCommandArgs(
-        sourceFile.project,
+fun generateCommandArgs(sourceFile: SourceFile, args: List<String>, setStdin: Boolean, configPath: String? = null): CommandArgs? {
+    val project = sourceFile.project
+    val ruffConfigService = project.configService
+    val ruffCacheService = RuffCacheService.getInstance(project)
+    val executable = getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
+    return generateCommandArgs(
+        project,
         if (setStdin) sourceFile.asStdin else null,
-        args + getStdinFileNameArgs(sourceFile),
+        args + getStdinFileNameArgs(sourceFile, executable),
         true,
         false,
-        configPath
+        configPath,
+        executable
     )
+}
 
 fun generateCommandArgs(
     project: Project,
@@ -543,17 +549,18 @@ fun generateCommandArgs(
     args: List<String>,
     addStdinOption: Boolean,
     withoutConfig: Boolean = false,
-    configPath: String? = null
+    configPath: String? = null,
+    executable: File? = null
 ): CommandArgs? {
     val ruffConfigService = project.configService
     val ruffCacheService = RuffCacheService.getInstance(project)
-    val executable =
-        getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
+    val resolvedExecutable =
+        executable ?: getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
     val customConfigArgs = if (withoutConfig) null else if(configPath != null) args + listOf(CONFIG_ARG, configPath) else ruffConfigService.ruffConfigPath?.let {
         args + listOf(CONFIG_ARG, it)
     }
     return CommandArgs(
-        executable,
+        resolvedExecutable,
         project,
         stdin,
         (customConfigArgs ?: args) + if (stdin == null && !addStdinOption) listOf() else listOf("-")
@@ -588,18 +595,29 @@ fun runRuff(commandArgs: CommandArgs, stdin: ByteArray? = null): String? {
 fun <T> runRuffInBackground(
     sourceFile: SourceFile, args: List<String>, callback: (String?) -> T
 ): ProgressIndicator? =
-    runRuffInBackground(
-        sourceFile.project,
-        sourceFile.asStdin,
-        args + getStdinFileNameArgs(sourceFile),
-        "running ruff ${sourceFile.name}",
-        callback
-    )
+    sourceFile.project.let { project ->
+        val ruffConfigService = project.configService
+        val ruffCacheService = RuffCacheService.getInstance(project)
+        val executable = getRuffExecutable(project, ruffConfigService, false, ruffCacheService) ?: return null
+        runRuffInBackground(
+            project,
+            sourceFile.asStdin,
+            args + getStdinFileNameArgs(sourceFile, executable),
+            "running ruff ${sourceFile.name}",
+            executable = executable,
+            callback = callback
+        )
+    }
 
 fun <T> runRuffInBackground(
-    project: Project, stdin: ByteArray?, args: List<String>, description: String, callback: (String?) -> T
+    project: Project,
+    stdin: ByteArray?,
+    args: List<String>,
+    description: String,
+    executable: File? = null,
+    callback: (String?) -> T
 ): ProgressIndicator? {
-    val commandArgs = generateCommandArgs(project, stdin, args, true) ?: return null
+    val commandArgs = generateCommandArgs(project, stdin, args, true, executable = executable) ?: return null
     val task = object : Task.Backgroundable(project, StringUtil.toTitleCase(description), true) {
         override fun run(indicator: ProgressIndicator) {
             indicator.text = "$description..."
@@ -701,25 +719,41 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
     return projectBasePath.relativize(filePath).pathString
 }
 
-fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
+internal fun resolveStdinFileName(
+    filePath: String,
+    projectRelativeFilePath: String?,
+    executableRunsInWsl: Boolean,
+    wslPath: String?
+): String? {
+    if (executableRunsInWsl) {
+        return wslPath ?: filePath
+    }
+    return toWindowsWslUncPath(filePath) ?: projectRelativeFilePath
+}
+
+fun getStdinFileNameArgs(sourceFile: SourceFile, executable: File): List<String> {
     val virtualFile = sourceFile.virtualFile ?: return emptyList()
     val pythonSdk = sourceFile.project.preferredPythonSdk
+    val filePath = virtualFile.canonicalPath ?: virtualFile.path
+    val projectRelativeFilePath = getProjectRelativeFilePath(sourceFile.project, virtualFile)
+    val executableRunsInWsl = WslPath.isWslUncPath(executable.path)
 
-    if (pythonSdk?.isWsl == true) {
+    val wslPath = if (pythonSdk?.isWsl == true && executableRunsInWsl) {
         val wslTargetConfig =
             (pythonSdk.sdkAdditionalData as? PyTargetAwareAdditionalData)
                 ?.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration
         val wslDistribution = wslTargetConfig?.distribution
-        val wslPath = try {
+        try {
             wslDistribution?.getWslPath(virtualFile.toNioPath())
         } catch (_: Exception) {
             null
-        } ?: virtualFile.canonicalPath ?: return emptyList()
-        return listOf("--stdin-filename", wslPath)
+        }
+    } else {
+        null
     }
 
-    return getProjectRelativeFilePath(sourceFile.project, virtualFile)?.let { projectRelativeFilePath ->
-        listOf("--stdin-filename", projectRelativeFilePath)
+    return resolveStdinFileName(filePath, projectRelativeFilePath, executableRunsInWsl, wslPath)?.let { stdinFileName ->
+        listOf("--stdin-filename", stdinFileName)
     } ?: emptyList()
 }
 
