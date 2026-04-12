@@ -2,7 +2,10 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.lsp.api.Lsp4jClient
 import com.intellij.platform.lsp.api.LspServerSupportProvider
+import com.intellij.platform.lsp.api.LspServerListener
+import com.intellij.platform.lsp.api.LspServerNotificationsHandler
 import com.intellij.platform.lsp.api.ProjectWideLspServerDescriptor
 import com.intellij.platform.lsp.api.customization.*
 import com.koxudaxi.ruff.*
@@ -12,7 +15,10 @@ import com.koxudaxi.ruff.lsp.useDiagnosticFeature
 import com.koxudaxi.ruff.lsp.useFormattingFeature
 import com.koxudaxi.ruff.lsp.useHoverFeature
 import kotlinx.serialization.Serializable
+import org.eclipse.lsp4j.InitializeResult
 import org.eclipse.lsp4j.InitializeParams
+import org.eclipse.lsp4j.MessageParams
+import org.eclipse.lsp4j.PublishDiagnosticsParams
 import java.io.File
 
 
@@ -51,7 +57,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         } ?: return
         RuffLoggingService.log(
             project,
-            "Ensuring IntelliJ LSP server: mode=${descriptor.logName}, executable=${descriptor.executable.path}, diagnostics=${project.useDiagnosticFeature}"
+            "Ensuring IntelliJ LSP server: mode=${descriptor.logName}, executable=${descriptor.executable.path}, diagnostics=${project.useDiagnosticFeature}, formatting=${project.useFormattingFeature}, hover=${project.useHoverFeature}, codeActions=${project.useCodeActionFeature}"
         )
         serverStarter.ensureServerStarted(descriptor)
     }
@@ -77,6 +83,27 @@ internal fun formatInitializeParamsLog(params: InitializeParams): String {
 
 internal fun formatLspCommandLineLog(name: String, commandLine: GeneralCommandLine): String =
     "$name command: ${commandLine.commandLineString}"
+
+internal fun formatInitializeResultLog(result: InitializeResult): String {
+    val capabilities = result.capabilities
+    val diagnosticProvider = capabilities.diagnosticProvider != null
+    val syncKind = capabilities.textDocumentSync?.left ?: capabilities.textDocumentSync?.right?.change
+    val hoverProvider = capabilities.hoverProvider?.left ?: capabilities.hoverProvider
+    val codeActionProvider = capabilities.codeActionProvider?.left ?: capabilities.codeActionProvider
+    val documentFormattingProvider =
+        capabilities.documentFormattingProvider?.left ?: capabilities.documentFormattingProvider
+    val documentRangeFormattingProvider =
+        capabilities.documentRangeFormattingProvider?.left ?: capabilities.documentRangeFormattingProvider
+    return "LSP initialize result: diagnosticProvider=$diagnosticProvider, textDocumentSync=$syncKind, hoverProvider=$hoverProvider, codeActionProvider=$codeActionProvider, documentFormattingProvider=$documentFormattingProvider, documentRangeFormattingProvider=$documentRangeFormattingProvider"
+}
+
+internal fun formatPublishDiagnosticsLog(params: PublishDiagnosticsParams): String =
+    "LSP publish diagnostics: uri=${params.uri}, count=${params.diagnostics?.size ?: 0}, version=${params.version}"
+
+internal fun formatServerMessageLog(prefix: String, params: MessageParams): String =
+    "$prefix: type=${params.type}, message=${params.message}"
+
+private fun shouldLogWindowsLspDetails(): Boolean = SystemInfo.isWindows
 
 @Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
@@ -140,6 +167,38 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
         return params
     }
 
+    override fun createLsp4jClient(serverNotificationsHandler: LspServerNotificationsHandler): Lsp4jClient {
+        if (!SystemInfo.isWindows) {
+            return super.createLsp4jClient(serverNotificationsHandler)
+        }
+        return Lsp4jClient(
+            LoggingLspServerNotificationsHandler(
+                project,
+                serverNotificationsHandler
+            )
+        )
+    }
+
+    override val lspServerListener: LspServerListener
+        get() {
+            if (!SystemInfo.isWindows) {
+                return super.lspServerListener ?: object : LspServerListener {}
+            }
+            return object : LspServerListener {
+            override fun serverInitialized(params: InitializeResult) {
+                if (shouldLogWindowsLspDetails()) {
+                    RuffLoggingService.log(project, formatInitializeResultLog(params))
+                }
+            }
+
+            override fun serverStopped(unexpected: Boolean) {
+                if (shouldLogWindowsLspDetails()) {
+                    RuffLoggingService.log(project, "LSP server stopped: unexpected=$unexpected")
+                }
+            }
+        }
+        }
+
     override val lspHoverSupport: Boolean = project.useHoverFeature
     override val lspCodeActionsSupport: LspCodeActionsSupport? =
         if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
@@ -178,3 +237,36 @@ data class Settings(
 data class InitOptions(
     val settings: Settings
 )
+
+private class LoggingLspServerNotificationsHandler(
+    private val project: Project,
+    private val delegate: LspServerNotificationsHandler
+) : LspServerNotificationsHandler by delegate {
+    override fun publishDiagnostics(params: PublishDiagnosticsParams) {
+        if (shouldLogWindowsLspDetails()) {
+            RuffLoggingService.log(project, formatPublishDiagnosticsLog(params))
+        }
+        delegate.publishDiagnostics(params)
+    }
+
+    override fun logMessage(params: MessageParams) {
+        if (shouldLogWindowsLspDetails()) {
+            RuffLoggingService.log(project, formatServerMessageLog("LSP log message", params))
+        }
+        delegate.logMessage(params)
+    }
+
+    override fun showMessage(params: MessageParams) {
+        if (shouldLogWindowsLspDetails()) {
+            RuffLoggingService.log(project, formatServerMessageLog("LSP show message", params))
+        }
+        delegate.showMessage(params)
+    }
+
+    override fun refreshDiagnostics() =
+        delegate.refreshDiagnostics().also {
+            if (shouldLogWindowsLspDetails()) {
+                RuffLoggingService.log(project, "LSP requested diagnostic refresh")
+            }
+        }
+}
