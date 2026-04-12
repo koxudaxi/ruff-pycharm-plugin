@@ -726,7 +726,7 @@ internal fun resolveStdinFileName(
     wslPath: String?
 ): String? {
     if (executableRunsInWsl) {
-        return wslPath ?: filePath
+        return wslPath ?: projectRelativeFilePath ?: filePath
     }
     return toWindowsWslUncPath(filePath) ?: projectRelativeFilePath
 }

@@ -18,6 +18,19 @@ class RuffStdinFilenameArgsTest {
     }
 
     @Test
+    fun `falls back to project relative path when WSL path resolution fails`() {
+        assertEquals(
+            "main.py",
+            resolveStdinFileName(
+                "//wsl.localhost/Ubuntu/home/test/project/main.py",
+                "main.py",
+                true,
+                null
+            )
+        )
+    }
+
+    @Test
     fun `uses UNC path when windows Ruff handles a local WSL project`() {
         assertEquals(
             """\\wsl.localhost\Ubuntu\home\test\project\main.py""",
