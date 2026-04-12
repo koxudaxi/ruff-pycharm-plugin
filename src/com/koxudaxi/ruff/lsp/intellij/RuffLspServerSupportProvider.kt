@@ -53,6 +53,24 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
     }
 }
 
+internal fun resolveWslLspFileUri(path: String, fallbackUri: String): String =
+    buildWslFileUri(path) ?: fallbackUri
+
+internal fun resolveWslLspLocalPath(fileUri: String): String? =
+    buildWslUncPath(fileUri)
+
+internal fun normalizeWslInitializeParams(params: InitializeParams): InitializeParams =
+    params.apply {
+        rootPath = rootPath?.let { toWindowsWslUncPath(it) } ?: rootPath
+    }
+
+internal fun formatInitializeParamsLog(params: InitializeParams): String {
+    val workspaceFolders = params.workspaceFolders
+        ?.joinToString(prefix = "[", postfix = "]") { "{name=${it.name}, uri=${it.uri}}" }
+        ?: "[]"
+    return "LSP initialize params: rootUri=${params.rootUri}, rootPath=${params.rootPath}, workspaceFolders=$workspaceFolders"
+}
+
 @Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
@@ -76,25 +94,39 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
     override fun isSupportedFile(file: VirtualFile) = file.isApplicableTo
     abstract override fun createCommandLine(): GeneralCommandLine
 
-    override fun getFileUri(file: VirtualFile): String =
-        if (SystemInfo.isWindows) {
-            buildWslFileUri(file.path) ?: super.getFileUri(file)
-        } else {
-            super.getFileUri(file)
+    override fun getFileUri(file: VirtualFile): String {
+        val fallbackUri = super.getFileUri(file)
+        if (!SystemInfo.isWindows) {
+            return fallbackUri
         }
+        val resolvedUri = resolveWslLspFileUri(file.path, fallbackUri)
+        if (resolvedUri != fallbackUri) {
+            RuffLoggingService.log(project, "LSP file URI: ${file.path} -> $resolvedUri")
+        }
+        return resolvedUri
+    }
 
-    override fun findFileByUri(fileUri: String): VirtualFile? =
-        if (SystemInfo.isWindows) {
-            buildWslUncPath(fileUri)?.let { findLocalFileByPath(it) } ?: super.findFileByUri(fileUri)
-        } else {
-            super.findFileByUri(fileUri)
+    override fun findFileByUri(fileUri: String): VirtualFile? {
+        if (!SystemInfo.isWindows) {
+            return super.findFileByUri(fileUri)
         }
+        val resolvedPath = resolveWslLspLocalPath(fileUri)
+        if (resolvedPath != null) {
+            RuffLoggingService.log(project, "LSP resolve URI: $fileUri -> $resolvedPath")
+            return findLocalFileByPath(resolvedPath)
+        }
+        return super.findFileByUri(fileUri)
+    }
 
-    override fun createInitializeParams(): InitializeParams =
-        super.createInitializeParams().apply {
-            if (!SystemInfo.isWindows) return@apply
-            rootPath = rootPath?.let { toWindowsWslUncPath(it) } ?: rootPath
+    override fun createInitializeParams(): InitializeParams {
+        val params = super.createInitializeParams()
+        if (!SystemInfo.isWindows) {
+            return params
         }
+        normalizeWslInitializeParams(params)
+        RuffLoggingService.log(project, formatInitializeParamsLog(params))
+        return params
+    }
 
     override val lspHoverSupport: Boolean = project.useHoverFeature
     override val lspCodeActionsSupport: LspCodeActionsSupport? =
