@@ -57,7 +57,7 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
         } ?: return
         RuffLoggingService.log(
             project,
-            "Ensuring IntelliJ LSP server: mode=${descriptor.logName}, executable=${descriptor.executable.path}, diagnostics=${project.useDiagnosticFeature}, formatting=${project.useFormattingFeature}, hover=${project.useHoverFeature}, codeActions=${project.useCodeActionFeature}"
+            "Ensuring IntelliJ LSP server: mode=${descriptor.logName}, executable=${descriptor.executable.path}, diagnostics=${project.useDiagnosticFeature}, formatting=${project.useFormattingFeature}, hover=${project.useHoverFeature}, codeActions=${project.useCodeActionFeature}, diagnosticsCustomizer=${descriptor.lspCustomization.diagnosticsCustomizer::class.simpleName}"
         )
         serverStarter.ensureServerStarted(descriptor)
     }
@@ -106,6 +106,46 @@ internal fun formatServerMessageLog(prefix: String, params: MessageParams): Stri
 private fun shouldLogWindowsLspDetails(): Boolean = SystemInfo.isWindows
 
 @Suppress("UnstableApiUsage")
+internal fun createRuffLspCustomization(project: Project): LspCustomization =
+    object : LspCustomization() {
+        override val goToDefinitionCustomizer: LspGoToDefinitionCustomizer =
+            LspGoToDefinitionDisabled
+
+        override val goToTypeDefinitionCustomizer: LspGoToTypeDefinitionCustomizer =
+            LspGoToTypeDefinitionDisabled
+
+        override val hoverCustomizer: LspHoverCustomizer =
+            if (project.useHoverFeature) LspHoverSupport() else LspHoverDisabled
+
+        override val completionCustomizer: LspCompletionCustomizer =
+            LspCompletionDisabled
+
+        override val semanticTokensCustomizer: LspSemanticTokensCustomizer =
+            LspSemanticTokensDisabled
+
+        override val diagnosticsCustomizer: LspDiagnosticsCustomizer =
+            if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else LspDiagnosticsDisabled
+
+        override val codeActionsCustomizer: LspCodeActionsCustomizer =
+            if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else LspCodeActionsDisabled
+
+        override val commandsCustomizer: LspCommandsCustomizer =
+            LspCommandsSupport()
+
+        override val formattingCustomizer: LspFormattingCustomizer =
+            if (project.useFormattingFeature) RuffLspFormattingSupport(project) else LspFormattingDisabled
+
+        override val findReferencesCustomizer: LspFindReferencesCustomizer =
+            LspFindReferencesDisabled
+
+        override val documentColorCustomizer: LspDocumentColorCustomizer =
+            LspDocumentColorDisabled
+
+        override val documentLinkCustomizer: LspDocumentLinkCustomizer =
+            LspDocumentLinkDisabled
+    }
+
+@Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
     override val logName: String = "IntelliJ Ruff LSP"
@@ -129,6 +169,9 @@ private class RuffLspServerDescriptor(project: Project, executable: File, ruffCo
 abstract class RuffLspServerDescriptorBase(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
     ProjectWideLspServerDescriptor(project, "Ruff") {
     abstract val logName: String
+    private val ruffLspCustomization: LspCustomization by lazy(LazyThreadSafetyMode.NONE) {
+        createRuffLspCustomization(project)
+    }
 
     override fun isSupportedFile(file: VirtualFile) = file.isApplicableTo
     abstract override fun createCommandLine(): GeneralCommandLine
@@ -199,17 +242,8 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
         }
         }
 
-    override val lspHoverSupport: Boolean = project.useHoverFeature
-    override val lspCodeActionsSupport: LspCodeActionsSupport? =
-        if (project.useCodeActionFeature) RuffLspCodeActionsSupport(project) else null
-    override val lspFormattingSupport: LspFormattingSupport? =
-        if (project.useFormattingFeature) RuffLspFormattingSupport(project) else null
-    override val lspCommandsSupport: LspCommandsSupport = LspCommandsSupport()
-    override val lspDiagnosticsSupport: LspDiagnosticsSupport? =
-        if (project.useDiagnosticFeature) RuffLspDiagnosticsSupport(project) else null
-
-    override val lspGoToDefinitionSupport: Boolean = false
-    override val lspCompletionSupport: LspCompletionSupport? = null
+    override val lspCustomization: LspCustomization
+        get() = ruffLspCustomization
 
 
 }

@@ -4,6 +4,7 @@ import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.koxudaxi.ruff.RuffConfigService
 import com.koxudaxi.ruff.lsp.intellij.supports.RuffLspDiagnosticsSupport
+import com.intellij.platform.lsp.api.customization.LspDiagnosticsDisabled
 import kotlin.io.path.createTempFile
 import org.eclipse.lsp4j.DiagnosticRegistrationOptions
 import org.eclipse.lsp4j.InitializeParams
@@ -118,8 +119,15 @@ class RuffLspServerSupportProviderTest : BasePlatformTestCase() {
             descriptor.getFileUri(file)
         )
 
-        val diagnosticsSupport = descriptor.lspDiagnosticsSupport as RuffLspDiagnosticsSupport
+        val diagnosticsSupport = descriptor.lspCustomization.diagnosticsCustomizer as RuffLspDiagnosticsSupport
         assertTrue(diagnosticsSupport.shouldAskServerForDiagnostics(file))
+    }
+
+    fun testCreatesRuffLspCustomizationForBuiltInClient() {
+        val diagnosticsCustomizer = createRuffLspCustomization(project).diagnosticsCustomizer
+
+        assertTrue(diagnosticsCustomizer is RuffLspDiagnosticsSupport)
+        assertFalse(diagnosticsCustomizer is LspDiagnosticsDisabled)
     }
 
     private class TestRuffLspServerDescriptor(
