@@ -161,6 +161,37 @@ jobs:
       #   with:
       #     files: ${{ github.workspace }}/build/reports/kover/report.xml
 
+  testWindowsWslPaths:
+    name: Test WSL paths on Windows
+    needs: [ build ]
+    runs-on: windows-latest
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-home-cache-cleanup: true
+
+      - name: Run WSL path tests
+        shell: cmd
+        run: gradlew.bat test --tests "*RuffStdinFilenameArgsTest" --tests "*RuffWslUriSupportTest" --tests "*RuffLspServerSupportProviderTest"
+
+      - name: Collect Tests Result
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-result-windows-wsl-paths
+          path: ${{ github.workspace }}/build/reports/tests
+
   # Run Qodana inspections and provide report
   inspectCode:
     name: Inspect code
@@ -251,7 +282,7 @@ jobs:
   releaseDraft:
     name: Release draft
     if: github.event_name != 'pull_request'
-    needs: [ build, test, inspectCode, verify ]
+    needs: [ build, test, testWindowsWslPaths, inspectCode, verify ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
