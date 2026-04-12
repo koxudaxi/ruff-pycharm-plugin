@@ -49,6 +49,10 @@ class RuffLspServerSupportProvider : LspServerSupportProvider {
                 )
             }
         } ?: return
+        RuffLoggingService.log(
+            project,
+            "Ensuring IntelliJ LSP server: mode=${descriptor.logName}, executable=${descriptor.executable.path}, diagnostics=${project.useDiagnosticFeature}"
+        )
         serverStarter.ensureServerStarted(descriptor)
     }
 }
@@ -71,17 +75,24 @@ internal fun formatInitializeParamsLog(params: InitializeParams): String {
     return "LSP initialize params: rootUri=${params.rootUri}, rootPath=${params.rootPath}, workspaceFolders=$workspaceFolders"
 }
 
+internal fun formatLspCommandLineLog(name: String, commandLine: GeneralCommandLine): String =
+    "$name command: ${commandLine.commandLineString}"
+
 @Suppress("UnstableApiUsage")
 private class RuffLspServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
+    override val logName: String = "IntelliJ Ruff LSP"
     private fun createBaseCommandLine(): GeneralCommandLine? =
         getGeneralCommandLine(executable, project)
 
     override fun createCommandLine(): GeneralCommandLine {
         val commandLine = createBaseCommandLine() ?: return GeneralCommandLine()
         if (ruffConfig.useRuffFormat) {
-            return commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
+            val formattedCommandLine = commandLine.withEnvironment("RUFF_EXPERIMENTAL_FORMATTER", "1")
+            RuffLoggingService.log(project, formatLspCommandLineLog(logName, formattedCommandLine))
+            return formattedCommandLine
         }
+        RuffLoggingService.log(project, formatLspCommandLineLog(logName, commandLine))
         return commandLine
     }
 }
@@ -90,6 +101,7 @@ private class RuffLspServerDescriptor(project: Project, executable: File, ruffCo
 @Suppress("UnstableApiUsage")
 abstract class RuffLspServerDescriptorBase(project: Project, val executable: File, val ruffConfig: RuffConfigService) :
     ProjectWideLspServerDescriptor(project, "Ruff") {
+    abstract val logName: String
 
     override fun isSupportedFile(file: VirtualFile) = file.isApplicableTo
     abstract override fun createCommandLine(): GeneralCommandLine
@@ -146,10 +158,13 @@ abstract class RuffLspServerDescriptorBase(project: Project, val executable: Fil
 @Suppress("UnstableApiUsage")
 private class RuffServerServerDescriptor(project: Project, executable: File, ruffConfig: RuffConfigService) :
     RuffLspServerDescriptorBase(project, executable, ruffConfig) {
+    override val logName: String = "IntelliJ Ruff server"
 
     override fun createCommandLine(): GeneralCommandLine {
         val args = project.LSP_ARGS + (getConfigArgs(ruffConfig) ?: listOf())
-        return getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: GeneralCommandLine()
+        val commandLine = getGeneralCommandLine(executable, project, *args.toTypedArray()) ?: return GeneralCommandLine()
+        RuffLoggingService.log(project, formatLspCommandLineLog(logName, commandLine))
+        return commandLine
     }
 }
 

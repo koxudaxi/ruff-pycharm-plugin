@@ -69,6 +69,7 @@ class RuffLspServerSupportProviderTest : BasePlatformTestCase() {
         executable: java.io.File,
         ruffConfig: RuffConfigService
     ) : RuffLspServerDescriptorBase(project, executable, ruffConfig) {
+        override val logName: String = "test"
         override fun createCommandLine(): GeneralCommandLine = GeneralCommandLine()
     }
 }
