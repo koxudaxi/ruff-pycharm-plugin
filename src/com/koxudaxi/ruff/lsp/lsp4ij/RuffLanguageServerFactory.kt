@@ -32,19 +32,12 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
 
             val ruffConfigService = project.configService
             if (!ruffConfigService.enableLsp) {
-                RuffLoggingService.log(project, "LSP not enabled in config", ConsoleViewContentType.NORMAL_OUTPUT)
                 return false
             }
             if (!ruffConfigService.useRuffLsp && !ruffConfigService.useRuffServer) {
-                RuffLoggingService.log(
-                    project,
-                    "Neither Ruff LSP nor Server enabled",
-                    ConsoleViewContentType.NORMAL_OUTPUT
-                )
                 return false
             }
             if (!ruffConfigService.useLsp4ij) {
-                RuffLoggingService.log(project, "LSP4IJ not enabled in config", ConsoleViewContentType.NORMAL_OUTPUT)
                 return false
             }
             if (!isInspectionEnabled(project)) {
