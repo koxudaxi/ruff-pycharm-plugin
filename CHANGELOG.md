@@ -4,6 +4,7 @@
 
 ## [0.0.53] - 2026-04-13
 
+- Remove internal Python package management API usage for Marketplace approval
 - Fix Ruff settings showing spurious changes and clarify that format-on-save is project-scoped [[#674](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/674)]
 - Fix: centralize Ruff format arguments to preserve `--stdin-filename` handling [[#668](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/668)]
 - Fix native Ruff support notification dismissal to persist per machine [[#667](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/667)]

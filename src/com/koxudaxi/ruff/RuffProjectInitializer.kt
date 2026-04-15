@@ -29,6 +29,8 @@ class RuffProjectInitializer : ProjectActivity {
         if (ApplicationManager.getApplication().isUnitTestMode) return
         if (project.isDisposed) return
 
+        subscribeToPackageManagerChanges(project)
+
         DumbService.getInstance(project).smartInvokeLater {
             checkAndNotifyNativeRuffSupport(project)
             try {
