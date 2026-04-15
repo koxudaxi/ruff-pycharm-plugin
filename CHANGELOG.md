@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Remove internal Python package management API usage required for Marketplace approval
+
 ## [0.0.53] - 2026-04-13
 
 - Fix Ruff settings showing spurious changes and clarify that format-on-save is project-scoped [[#674](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/674)]
