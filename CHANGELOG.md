@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Remove internal Python package management API usage required for Marketplace approval
+- Prepare 0.0.54 Marketplace resubmission of the 0.0.53 changes by removing internal Python package management API usage [[#679](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/679)]
 
 ## [0.0.53] - 2026-04-13
 
