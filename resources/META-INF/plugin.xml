@@ -28,10 +28,6 @@
                     anchor="bottom"
                     secondary="true" />
     </extensions>
-    <projectListeners>
-        <listener class="com.koxudaxi.ruff.RuffPackageManagerListener"
-                  topic="com.jetbrains.python.packaging.common.PythonPackageManagementListener"/>
-    </projectListeners>
     <actions>
         <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"
                 description="Run ruff with fix option">

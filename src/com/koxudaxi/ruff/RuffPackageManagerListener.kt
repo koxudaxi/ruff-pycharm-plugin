@@ -5,39 +5,53 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
-import com.jetbrains.python.packaging.common.PythonPackageManagementListener
+import com.jetbrains.python.packaging.PyPackageManager
 import com.jetbrains.python.sdk.pythonSdk
 import com.koxudaxi.ruff.lsp.ClientType
 
-@Suppress("UnstableApiUsage")
-class RuffPackageManagerListener(private val project: Project): PythonPackageManagementListener {
+@Suppress("DEPRECATION")
+internal fun subscribeToPackageManagerChanges(project: Project) {
+    // Deliberately use the deprecated PACKAGE_MANAGER_TOPIC because the newer
+    // PythonPackageManagementListener path triggers Marketplace internal API checks.
+    // JetBrains appears to be migrating package management toward PythonPackageManagerService,
+    // but there is no documented public replacement for this listener yet.
+    // TODO: Track IJPL-160696 and migrate when an official public replacement is available.
+    ApplicationManager.getApplication().messageBus.connect(project).subscribe(
+        PyPackageManager.PACKAGE_MANAGER_TOPIC,
+        object : PyPackageManager.Listener {
+            override fun packagesRefreshed(sdk: Sdk) {
+                refreshRuffExecutableFromSdk(project, sdk)
+            }
+        }
+    )
+}
 
-    override fun packagesChanged(sdk: Sdk) {
-        val preferredSdk = project.preferredPythonSdk
-        if (preferredSdk != sdk && project.modules.none { it.pythonSdk == sdk }) return
-        val ruffConfigService = project.configService
-        val ruffCacheService = RuffCacheService.getInstance(project)
-        val ruffLspClientManager = RuffLspClientManager.getInstance(project)
-        ruffCacheService.setProjectRuffExecutablePath(findRuffExecutableInSDK(sdk, false)?.absolutePath)
-        ruffCacheService.setProjectRuffLspExecutablePath(findRuffExecutableInSDK(sdk, true)?.absolutePath)
-        ruffCacheService.setVersion {
-            if (!lspSupported || !ruffConfigService.enableLsp) return@setVersion
-            ApplicationManager.getApplication().invokeLater {
-                ApplicationManager.getApplication().runWriteAction {
-                    when {
-                        ruffLspClientManager.hasClient() -> ruffLspClientManager.restart()
-                        else -> {
-                            val clientType = when {
-                                ruffConfigService.useLsp4ij -> ClientType.LSP4IJ
-                                else -> ClientType.INTELLIJ
-                            }
-                            ruffLspClientManager.setClient(clientType)
+internal fun refreshRuffExecutableFromSdk(project: Project, sdk: Sdk) {
+    if (project.isDisposed) return
+    val preferredSdk = project.preferredPythonSdk
+    if (preferredSdk != sdk && project.modules.none { it.pythonSdk == sdk }) return
+
+    val ruffConfigService = project.configService
+    val ruffCacheService = RuffCacheService.getInstance(project)
+    val ruffLspClientManager = RuffLspClientManager.getInstance(project)
+    ruffCacheService.setProjectRuffExecutablePath(findRuffExecutableInSDK(sdk, false)?.absolutePath)
+    ruffCacheService.setProjectRuffLspExecutablePath(findRuffExecutableInSDK(sdk, true)?.absolutePath)
+    ruffCacheService.setVersion {
+        if (!lspSupported || !ruffConfigService.enableLsp) return@setVersion
+        ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
+            ApplicationManager.getApplication().runWriteAction {
+                when {
+                    ruffLspClientManager.hasClient() -> ruffLspClientManager.restart()
+                    else -> {
+                        val clientType = when {
+                            ruffConfigService.useLsp4ij -> ClientType.LSP4IJ
+                            else -> ClientType.INTELLIJ
                         }
+                        ruffLspClientManager.setClient(clientType)
                     }
-
                 }
             }
-
         }
     }
 }
