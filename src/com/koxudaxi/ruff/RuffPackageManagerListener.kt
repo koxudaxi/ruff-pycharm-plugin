@@ -22,6 +22,7 @@ internal fun subscribeToPackageManagerChanges(project: Project) {
 }
 
 internal fun refreshRuffExecutableFromSdk(project: Project, sdk: Sdk) {
+    if (project.isDisposed) return
     val preferredSdk = project.preferredPythonSdk
     if (preferredSdk != sdk && project.modules.none { it.pythonSdk == sdk }) return
 
@@ -33,6 +34,7 @@ internal fun refreshRuffExecutableFromSdk(project: Project, sdk: Sdk) {
     ruffCacheService.setVersion {
         if (!lspSupported || !ruffConfigService.enableLsp) return@setVersion
         ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
             ApplicationManager.getApplication().runWriteAction {
                 when {
                     ruffLspClientManager.hasClient() -> ruffLspClientManager.restart()
