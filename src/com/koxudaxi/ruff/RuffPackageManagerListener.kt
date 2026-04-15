@@ -11,6 +11,11 @@ import com.koxudaxi.ruff.lsp.ClientType
 
 @Suppress("DEPRECATION")
 internal fun subscribeToPackageManagerChanges(project: Project) {
+    // Deliberately use the deprecated PACKAGE_MANAGER_TOPIC because the newer
+    // PythonPackageManagementListener path triggers Marketplace internal API checks.
+    // JetBrains appears to be migrating package management toward PythonPackageManagerService,
+    // but there is no documented public replacement for this listener yet.
+    // TODO: Track IJPL-160696 and migrate when an official public replacement is available.
     ApplicationManager.getApplication().messageBus.connect(project).subscribe(
         PyPackageManager.PACKAGE_MANAGER_TOPIC,
         object : PyPackageManager.Listener {
