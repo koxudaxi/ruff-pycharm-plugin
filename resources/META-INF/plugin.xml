@@ -5,32 +5,6 @@
 
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.platform</depends>
-    <depends optional="true">PythonCore</depends>
-    <depends optional="true">Pythonid</depends>
+    <depends optional="true" config-file="python-core.xml">PythonCore</depends>
     <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
-    <extensions defaultExtensionNs="com.intellij">
-        <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
-        <notificationGroup id="Ruff Notification Group" displayType="STICKY_BALLOON"/>
-        <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
-        <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>
-        <localInspection language="Python" shortName="RuffInspection" suppressId="Ruff"
-                         displayName="Ruff inspection"
-                         enabledByDefault="true" level="WARNING"
-                         implementationClass="com.koxudaxi.ruff.RuffInspection"/>
-        <externalAnnotator language="Python" implementationClass="com.koxudaxi.ruff.RuffExternalAnnotator"/>
-        <formattingService implementation="com.koxudaxi.ruff.RuffAsyncFormatter" order="first"/>
-        <lang.importOptimizer language="Python" implementationClass="com.koxudaxi.ruff.RuffImportOptimizer" order="first"/>
-        <platform.backend.documentation.targetProvider
-                implementation="com.koxudaxi.ruff.RuffNoqaDocumentationTargetProvider"/>
-        <actionOnSave id="RuffFormatterActionOnSave" implementation="com.koxudaxi.ruff.RuffActionOnSave" order="last"/>
-        <toolWindow factoryClass="com.koxudaxi.ruff.RuffLoggingToolWindowFactory"
-                    id="Ruff Logging"
-                    anchor="bottom"
-                    secondary="true" />
-    </extensions>
-    <actions>
-        <action id="ExecuteRuff" class="com.koxudaxi.ruff.RuffRun" text="Run Ruff"
-                description="Run ruff with fix option">
-        </action>
-    </actions>
 </idea-plugin>

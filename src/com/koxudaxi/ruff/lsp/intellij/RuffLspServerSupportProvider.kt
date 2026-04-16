@@ -1,3 +1,5 @@
+package com.koxudaxi.ruff.lsp.intellij
+
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile

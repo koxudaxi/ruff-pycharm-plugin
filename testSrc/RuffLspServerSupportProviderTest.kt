@@ -1,6 +1,7 @@
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.koxudaxi.ruff.RuffConfigService
+import com.koxudaxi.ruff.lsp.intellij.RuffLspServerDescriptorBase
 import kotlin.io.path.createTempFile
 
 class RuffLspServerSupportProviderTest : BasePlatformTestCase() {

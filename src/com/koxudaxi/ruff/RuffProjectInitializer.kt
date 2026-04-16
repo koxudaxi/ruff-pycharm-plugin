@@ -29,7 +29,12 @@ class RuffProjectInitializer : ProjectActivity {
         if (ApplicationManager.getApplication().isUnitTestMode) return
         if (project.isDisposed) return
 
-        subscribeToPackageManagerChanges(project)
+        if (hasPyPackageManagerApi()) {
+            subscribeToPackageManagerChanges(project)
+        } else {
+            project.preferredPythonSdk?.let { refreshRuffExecutableFromSdk(project, it) }
+            RuffLoggingService.log(project, "PyPackageManager API is unavailable; skipping package manager subscription")
+        }
 
         DumbService.getInstance(project).smartInvokeLater {
             checkAndNotifyNativeRuffSupport(project)
@@ -65,6 +70,16 @@ class RuffProjectInitializer : ProjectActivity {
             }
         }
     }
+
+    private fun hasPyPackageManagerApi(): Boolean =
+        try {
+            Class.forName("com.jetbrains.python.packaging.PyPackageManager", false, javaClass.classLoader)
+            true
+        } catch (_: ClassNotFoundException) {
+            false
+        } catch (_: NoClassDefFoundError) {
+            false
+        }
 
     private fun setUpPyProjectTomlLister(project: Project) {
         VirtualFileManager.getInstance().addAsyncFileListener(

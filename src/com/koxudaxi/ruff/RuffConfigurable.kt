@@ -1,11 +1,11 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.koxudaxi.ruff.lsp.ClientType
+import com.koxudaxi.ruff.lsp.intellij.RuffLspServerSupportProvider
 import com.koxudaxi.ruff.lsp.lsp4ij.RuffLsp4IntellijClient
 import java.io.File
 import javax.swing.JComponent

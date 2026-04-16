@@ -1,6 +1,5 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
 import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
@@ -38,7 +37,7 @@ import com.intellij.psi.PsiFile
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.sdk.*
-import com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor
+import com.koxudaxi.ruff.lsp.intellij.RuffLspServerSupportProvider
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -240,6 +239,16 @@ fun detectRuffExecutable(
 
 val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
 
+private fun Sdk.isCondaSdk(): Boolean =
+    homePath?.let(::findCondaMetaPath) != null
+
+private fun findCondaMetaPath(sdkPath: String): File? {
+    val homeDirectory = File(sdkPath)
+    val parentDirectory = homeDirectory.parentFile ?: return null
+    val condaParent = if (SystemInfo.isWindows) parentDirectory else parentDirectory.parentFile ?: return null
+    return File(condaParent, "conda-meta").takeIf { it.isDirectory }
+}
+
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
         sdk.wslIsSupported && sdk.isWsl -> {
@@ -251,7 +260,7 @@ fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
             File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp))
         }
 
-        (sdk.sdkAdditionalData as? PythonSdkAdditionalData)?.flavor is CondaEnvSdkFlavor ->
+        sdk.isCondaSdk() ->
             when {
                 SystemInfo.isWindows -> sdk.homeDirectory?.parent // {python_dir}/python.exe
                 else -> sdk.homeDirectory?.parent?.parent // {python_dir}/bin/python
