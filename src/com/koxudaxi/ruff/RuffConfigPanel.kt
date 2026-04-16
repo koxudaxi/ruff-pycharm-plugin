@@ -1,9 +1,7 @@
 package com.koxudaxi.ruff
 
-
-import com.intellij.ide.plugins.PluginManagerConfigurable
+import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.ui.emptyText
@@ -69,9 +67,7 @@ class RuffConfigPanel(project: Project) {
 
         lsp4ijLinkLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
-                ShowSettingsUtil.getInstance().showSettingsDialog(
-                    project, PluginManagerConfigurable::class.java,
-                    { c -> c.openMarketplaceTab("com.redhat.devtools.lsp4ij") })
+                BrowserUtil.browse("https://plugins.jetbrains.com/plugin/23257-lsp4ij")
             }
         })
         runRuffOnSaveCheckBox.addActionListener {

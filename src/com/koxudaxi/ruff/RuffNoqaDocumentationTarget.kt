@@ -1,6 +1,5 @@
 package com.koxudaxi.ruff
 
-import com.intellij.codeInsight.navigation.targetPresentation
 import com.intellij.markdown.utils.doc.DocMarkdownToHtmlConverter
 import com.intellij.model.Pointer
 import com.intellij.openapi.application.ApplicationManager
@@ -16,7 +15,9 @@ import com.intellij.psi.util.startOffset
 class RuffNoqaDocumentationTarget(private val psiComment: PsiComment, private val originalElement: PsiComment?, private val offset: Int): DocumentationTarget {
     @Suppress("UnstableApiUsage")
     override fun computePresentation(): TargetPresentation {
-        return targetPresentation(psiComment)
+        return TargetPresentation.builder(psiComment.text)
+            .icon(psiComment.getIcon(0))
+            .presentation()
     }
 
     private val replaceHtmlTags = listOf(
@@ -62,4 +63,5 @@ class RuffNoqaDocumentationTarget(private val psiComment: PsiComment, private va
         val startPart = psiComment.text.substring(0, targetOffset).takeLastWhile { it.isLetterOrDigit() }
         val endPart = psiComment.text.substring(targetOffset).takeWhile { it.isLetterOrDigit() }
         return startPart + endPart
-    }}
+    }
+}
