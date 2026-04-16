@@ -240,8 +240,7 @@ fun detectRuffExecutable(
 val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
 
 private fun Sdk.isCondaSdk(): Boolean =
-    (sdkAdditionalData as? PythonSdkAdditionalData)?.flavor?.javaClass?.name ==
-        "com.jetbrains.python.sdk.flavors.conda.CondaEnvSdkFlavor"
+    PythonSdkUtil.isConda(this)
 
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {
