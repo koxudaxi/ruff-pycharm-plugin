@@ -6,4 +6,5 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="python-core.xml">PythonCore</depends>
+    <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
 </idea-plugin>

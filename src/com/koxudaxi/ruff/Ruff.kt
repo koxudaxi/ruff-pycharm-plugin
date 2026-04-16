@@ -240,7 +240,14 @@ fun detectRuffExecutable(
 val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
 
 private fun Sdk.isCondaSdk(): Boolean =
-    PythonSdkUtil.isConda(this)
+    homePath?.let(::findCondaMetaPath) != null
+
+private fun findCondaMetaPath(sdkPath: String): File? {
+    val homeDirectory = File(sdkPath)
+    val parentDirectory = homeDirectory.parentFile ?: return null
+    val condaParent = if (SystemInfo.isWindows) parentDirectory else parentDirectory.parentFile ?: return null
+    return File(condaParent, "conda-meta").takeIf { it.isDirectory }
+}
 
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
     return when {

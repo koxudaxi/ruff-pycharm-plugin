@@ -1,4 +1,5 @@
 <idea-plugin>
+    <depends>PythonCore</depends>
     <depends>com.redhat.devtools.lsp4ij</depends>
     <extensions defaultExtensionNs="com.redhat.devtools.lsp4ij">
         <server id="ruffLanguageServer"

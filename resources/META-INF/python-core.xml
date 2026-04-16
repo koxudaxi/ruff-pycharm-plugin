@@ -1,5 +1,4 @@
 <idea-plugin>
-    <depends optional="true" config-file="only-lsp4ij.xml">com.redhat.devtools.lsp4ij</depends>
     <extensions defaultExtensionNs="com.intellij">
         <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
         <notificationGroup id="Ruff Notification Group" displayType="STICKY_BALLOON"/>
