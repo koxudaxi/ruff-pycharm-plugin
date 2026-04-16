@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Prepare 0.0.55 Marketplace resubmission of the 0.0.54 changes by loading Python integrations only when the Python plugin is available
+- Prepare 0.0.55 Marketplace resubmission of the 0.0.54 changes by loading Python integrations only when the Python plugin is available [[#681](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/681)]
 
 ## [0.0.54] - 2026-04-15
 
