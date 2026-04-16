@@ -1,6 +1,5 @@
 package com.koxudaxi.ruff
 
-import RuffLspServerSupportProvider
 import com.intellij.codeInspection.ex.InspectionToolRegistrar
 import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
@@ -38,6 +37,7 @@ import com.intellij.psi.PsiFile
 import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.sdk.*
+import com.koxudaxi.ruff.lsp.intellij.RuffLspServerSupportProvider
 import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json

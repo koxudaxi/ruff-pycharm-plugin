@@ -1,6 +1,4 @@
 package com.koxudaxi.ruff.lsp.intellij
-
-import RuffLspServerSupportProvider
 import com.intellij.openapi.project.Project
 import com.intellij.platform.lsp.api.LspServerManager
 import com.koxudaxi.ruff.RuffLoggingService
