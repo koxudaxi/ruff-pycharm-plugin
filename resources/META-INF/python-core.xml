@@ -1,6 +1,6 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <platform.lsp.serverSupportProvider implementation="RuffLspServerSupportProvider"/>
+        <platform.lsp.serverSupportProvider implementation="com.koxudaxi.ruff.lsp.intellij.RuffLspServerSupportProvider"/>
         <notificationGroup id="Ruff Notification Group" displayType="STICKY_BALLOON"/>
         <postStartupActivity implementation="com.koxudaxi.ruff.RuffProjectInitializer"/>
         <projectConfigurable groupId="tools" instance="com.koxudaxi.ruff.RuffConfigurable"/>

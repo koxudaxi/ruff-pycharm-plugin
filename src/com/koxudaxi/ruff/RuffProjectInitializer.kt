@@ -32,6 +32,7 @@ class RuffProjectInitializer : ProjectActivity {
         if (hasPyPackageManagerApi()) {
             subscribeToPackageManagerChanges(project)
         } else {
+            project.preferredPythonSdk?.let { refreshRuffExecutableFromSdk(project, it) }
             RuffLoggingService.log(project, "PyPackageManager API is unavailable; skipping package manager subscription")
         }
 
