@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.55] - 2026-04-16
+
 - Prepare 0.0.55 Marketplace resubmission of the 0.0.54 changes by loading Python integrations only when the Python plugin is available [[#681](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/681)]
 
 ## [0.0.54] - 2026-04-15
@@ -287,7 +289,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.54...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.55...HEAD
+[0.0.55]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.54...v0.0.55
 [0.0.54]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.53...v0.0.54
 [0.0.53]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.52...v0.0.53
 [0.0.52]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.51...v0.0.52
