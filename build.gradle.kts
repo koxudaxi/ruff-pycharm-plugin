@@ -43,6 +43,7 @@ dependencies {
         bundledPlugins(bundledPlugins)
         val lsp4ij = libs.plugins.lsp4ij.get()
         plugin("${lsp4ij.pluginId}:${lsp4ij.version.requiredVersion}")
+        jetbrainsRuntime()
 
         testFramework(TestFrameworkType.Bundled)
         testFramework(TestFrameworkType.Platform)
@@ -54,7 +55,7 @@ dependencies {
 // Set the JVM language level used to build the project.
 kotlin {
     jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -134,6 +135,9 @@ tasks {
 
     test {
         failOnNoDiscoveredTests = false
+        filter {
+            includeTestsMatching("*Test")
+        }
     }
 }
 
