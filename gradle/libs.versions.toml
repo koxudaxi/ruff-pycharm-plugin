@@ -5,12 +5,12 @@ ini4j = "0.5.4"
 kotlinxSerialization = "1.7.3"
 
 # plugins
-kotlin = "2.3.20"
+kotlin = "2.4.10"
 changelog = "2.2.1"
-gradleIntelliJPlugin = "2.14.0"
-qodana = "2025.3.2"
+gradleIntelliJPlugin = "2.18.1"
+qodana = "2026.1.3"
 kover = "0.9.7"
-lsp4ij = "0.11.0"
+lsp4ij = "0.20.1"
 
 [libraries]
 tuweni = { group = "org.apache.tuweni", name = "tuweni-toml", version.ref = "tuweni" }

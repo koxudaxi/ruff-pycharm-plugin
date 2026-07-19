@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project
 import com.koxudaxi.ruff.*
 import com.redhat.devtools.lsp4ij.LanguageServerEnablementSupport
 import com.redhat.devtools.lsp4ij.LanguageServerFactory
-import com.redhat.devtools.lsp4ij.client.LanguageClientImpl
 import com.redhat.devtools.lsp4ij.client.features.*
 import com.redhat.devtools.lsp4ij.server.StreamConnectionProvider
 
@@ -17,11 +16,6 @@ class RuffLanguageServerFactory : LanguageServerFactory, LanguageServerEnablemen
     override fun createConnectionProvider(project: Project): StreamConnectionProvider {
         return RuffLanguageServer(project)
 
-    }
-
-    //If you need to provide client specific features
-    override fun createLanguageClient(project: Project): LanguageClientImpl {
-        return RuffLanguageClient(project)
     }
 
     override fun isEnabled(project: Project): Boolean {

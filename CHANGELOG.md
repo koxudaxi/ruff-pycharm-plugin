@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Support 2026.2 [[#683](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/683)]
+
 ## [0.0.55] - 2026-04-16
 
 - Prepare 0.0.55 Marketplace resubmission of the 0.0.54 changes by loading Python integrations only when the Python plugin is available [[#681](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/681)]

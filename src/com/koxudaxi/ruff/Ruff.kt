@@ -8,6 +8,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessNotCreatedException
+import com.intellij.execution.target.TargetBasedSdkAdditionalData
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.execution.wsl.WSLCommandLineOptions
 import com.intellij.execution.wsl.WslPath
@@ -24,6 +25,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.projectRoots.Sdk
+import com.intellij.openapi.projectRoots.SdkAdditionalData
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.util.TextRange
@@ -38,7 +40,6 @@ import com.jetbrains.python.packaging.IndicatedProcessOutputListener
 import com.jetbrains.python.packaging.PyCondaPackageService
 import com.jetbrains.python.sdk.*
 import com.koxudaxi.ruff.lsp.intellij.RuffLspServerSupportProvider
-import com.jetbrains.python.target.PyTargetAwareAdditionalData
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -154,9 +155,7 @@ val Project.NO_FIX_ARGS: List<String>?
 private var wslSdkIsSupported: Boolean? = null
 val Sdk.wslIsSupported: Boolean
     get() {
-        if (wslSdkIsSupported is Boolean) {
-            return wslSdkIsSupported as Boolean
-        }
+        wslSdkIsSupported?.let { return it }
         return when {
             !SystemInfo.isWindows -> false
             else -> try {
@@ -237,7 +236,14 @@ fun detectRuffExecutable(
     }
 }
 
-val Sdk.isWsl: Boolean get() = (sdkAdditionalData as? PyTargetAwareAdditionalData)?.targetEnvironmentConfiguration is WslTargetEnvironmentConfiguration
+internal fun getWslConfiguration(additionalData: SdkAdditionalData?): WslTargetEnvironmentConfiguration? =
+    (additionalData as? TargetBasedSdkAdditionalData)
+        ?.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration
+
+private val Sdk.wslConfiguration: WslTargetEnvironmentConfiguration?
+    get() = getWslConfiguration(sdkAdditionalData)
+
+val Sdk.isWsl: Boolean get() = wslConfiguration != null
 
 private fun Sdk.isCondaSdk(): Boolean =
     homePath?.let(::findCondaMetaPath) != null
@@ -250,16 +256,15 @@ private fun findCondaMetaPath(sdkPath: String): File? {
 }
 
 fun findRuffExecutableInSDK(sdk: Sdk, lsp: Boolean): File? {
-    return when {
-        sdk.wslIsSupported && sdk.isWsl -> {
-            val additionalData = sdk.sdkAdditionalData as? PyTargetAwareAdditionalData ?: return null
-            val distribution =
-                (additionalData.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration)?.distribution
-                    ?: return null
+    if (sdk.wslIsSupported) {
+        sdk.wslConfiguration?.let { configuration ->
+            val distribution = configuration.distribution ?: return null
             val homeParent = sdk.homePath?.let { File(it) }?.parent ?: return null
-            File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp))
+            return File(distribution.getWindowsPath(homeParent), getRuffWlsCommand(lsp)).takeIf { it.exists() }
         }
+    }
 
+    return when {
         sdk.isCondaSdk() ->
             when {
                 SystemInfo.isWindows -> sdk.homeDirectory?.parent // {python_dir}/python.exe
@@ -713,17 +718,10 @@ fun getProjectRelativeFilePath(project: Project, virtualFile: VirtualFile): Stri
 fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
     val virtualFile = sourceFile.virtualFile ?: return emptyList()
     val pythonSdk = sourceFile.project.preferredPythonSdk
+    val wslConfiguration = pythonSdk?.wslConfiguration
 
-    if (pythonSdk?.isWsl == true) {
-        val wslTargetConfig =
-            (pythonSdk.sdkAdditionalData as? PyTargetAwareAdditionalData)
-                ?.targetEnvironmentConfiguration as? WslTargetEnvironmentConfiguration
-        val wslDistribution = wslTargetConfig?.distribution
-        val wslPath = try {
-            wslDistribution?.getWslPath(virtualFile.toNioPath())
-        } catch (_: Exception) {
-            null
-        } ?: virtualFile.canonicalPath ?: return emptyList()
+    if (wslConfiguration != null) {
+        val wslPath = getWslStdinPath(wslConfiguration, virtualFile) ?: return emptyList()
         return listOf("--stdin-filename", wslPath)
     }
 
@@ -731,6 +729,15 @@ fun getStdinFileNameArgs(sourceFile: SourceFile): List<String> {
         listOf("--stdin-filename", projectRelativeFilePath)
     } ?: emptyList()
 }
+
+internal fun getWslStdinPath(
+    configuration: WslTargetEnvironmentConfiguration,
+    virtualFile: VirtualFile
+): String? = (try {
+    configuration.distribution?.getWslPath(virtualFile.toNioPath())
+} catch (_: Exception) {
+    null
+}) ?: virtualFile.canonicalPath
 
 fun buildFormatArgs(extraArgs: List<String> = emptyList(), stdinFileNameArgs: List<String> = emptyList()): List<String> =
     FORMAT_ARGS + extraArgs + stdinFileNameArgs
