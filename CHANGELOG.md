@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.0.56] - 2026-07-19
+
 - Support 2026.2 [[#683](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/683)]
 
 ## [0.0.55] - 2026-04-16
@@ -291,7 +293,8 @@
 - Add --exit-zero option to argument [[#12](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/12)]
 - Fix textRange logic [[#13](https://github.com/koxudaxi/ruff-pycharm-plugin/pull/13)]
 
-[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.55...HEAD
+[Unreleased]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.56...HEAD
+[0.0.56]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.55...v0.0.56
 [0.0.55]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.54...v0.0.55
 [0.0.54]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.53...v0.0.54
 [0.0.53]: https://github.com/koxudaxi/ruff-pycharm-plugin/compare/v0.0.52...v0.0.53
