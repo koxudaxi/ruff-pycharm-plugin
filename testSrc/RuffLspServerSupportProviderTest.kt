@@ -28,6 +28,7 @@ class RuffLspServerSupportProviderTest : BasePlatformTestCase() {
         assertTrue(descriptor.isSupportedFile(stubFile))
     }
 
+    @Suppress("UnstableApiUsage")
     fun testRegistersLsp4ijServerForProject() {
         val definition = kotlin.test.assertNotNull(
             LanguageServersRegistry.getInstance()

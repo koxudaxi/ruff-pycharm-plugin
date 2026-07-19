@@ -28,7 +28,7 @@ class RuffCompatibilityTest : BasePlatformTestCase() {
             getWslStdinPath(WslTargetEnvironmentConfiguration(), file.virtualFile)
         )
         val failingDistribution = object : WSLDistribution("test") {
-            override fun getWslPath(path: Path): String? = throw IllegalStateException("unavailable")
+            override fun getWslPath(path: Path): String = throw IllegalStateException("unavailable")
         }
         assertEquals(
             canonicalPath,
