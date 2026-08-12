@@ -17,12 +17,6 @@ See [documentation](https://koxudaxi.github.io/ruff-pycharm-plugin/) for more de
       <p>JetBrains</p>
     </a>
     </td>
-  <td valign="top" align="center">
-    <a href="https://github.com/astral-sh">
-      <img src="https://avatars.githubusercontent.com/u/115962839?s=200&v=4" alt="Astral Logo" style="width: 100px;">
-      <p>Astral</p>
-    </a>
-  </td>
   </tr>
 </table>
 
