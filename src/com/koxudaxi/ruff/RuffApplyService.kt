@@ -1,6 +1,5 @@
 package com.koxudaxi.ruff
 
-import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.application.runWriteAction
@@ -106,7 +105,7 @@ class RuffApplyService(val project: Project) {
             }
 
             val sourceByte = when {
-                checkedFixed is String && checkedFixed.isNotEmpty() -> checkedFixed.toCharArray().toByteArrayAndClear()
+                checkedFixed is String && checkedFixed.isNotEmpty() -> checkedFixed.toByteArray()
                 else -> sourceFile.asStdin
             } ?: return
 
@@ -154,7 +153,7 @@ class RuffApplyService(val project: Project) {
 fun findClosestRuffConfig(sourceFile: SourceFile): String? {
     val virtualFile = sourceFile.virtualFile ?: return null
     val configFiles = listOf("pyproject.toml", "ruff.toml")
-    
+
     return generateSequence(Path(virtualFile.path)) { it.parent }
         .firstNotNullOfOrNull { dir ->
             configFiles

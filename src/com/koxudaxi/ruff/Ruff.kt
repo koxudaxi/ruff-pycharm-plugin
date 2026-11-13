@@ -1,7 +1,6 @@
 package com.koxudaxi.ruff
 
 import com.intellij.codeInspection.ex.InspectionToolRegistrar
-import com.intellij.credentialStore.toByteArrayAndClear
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.RunCanceledByUserException
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -520,7 +519,7 @@ data class SourceFile(
     val name: String get() = psiFile.name
     val asStdin: ByteArray? get() = text?.let { convertToBytes(it) }
     val asCurrentTextStdin: ByteArray? get() = currentText?.let { convertToBytes(it) }
-    private fun convertToBytes(text: String): ByteArray = text.toCharArray().toByteArrayAndClear()
+    private fun convertToBytes(text: String): ByteArray = text.toByteArray()
     fun hasSameContentAsDocument(document: Document): Boolean = document.charsSequence.contentEquals(text)
 }
 
