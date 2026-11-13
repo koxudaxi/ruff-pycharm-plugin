@@ -84,7 +84,7 @@ object PythonMockSdk {
         ContainerUtil.addIfNotNull(result, localFS.refreshAndFindFileByIoFile(File(mockSdkPath, "Lib")))
         ContainerUtil.addIfNotNull(
             result,
-            localFS.refreshAndFindFileByIoFile(File(mockSdkPath, PythonSdkUtil.SKELETON_DIR_NAME))
+            localFS.refreshAndFindFileByIoFile(File(mockSdkPath, "skeleton"))
         )
         result.addAll(PyTypeShed.findAllRootsForLanguageLevel(level))
 
